@@ -157,4 +157,18 @@ export const conversationsApi = {
     ),
 };
 
+// ─── Feedback API ────────────────────────────────────────────────────────────
+export const feedbackApi = {
+  submit: (body: {
+    rating: number;
+    category: string;
+    comment: string;
+    conversationId?: string;
+  }) =>
+    request<{ feedbackId: string }>('/feedback', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+};
+
 export { ApiError };

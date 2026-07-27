@@ -1,0 +1,99 @@
+version: '3.9'
+
+services:
+  # ─── Frontend (Qwik Dev Server) ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./docker/frontend
+      dockerfile: Dockerfile
+    container_name: aisss-frontend
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_COGNITO_REGION=${COGNITO_REGION:-us-east-1}
+      - VITE_COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+      - VITE_COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID}
+    depends_on:
+      - localstack
+    networks:
+      - aisss-network
+
+  # ─── Backend (Lambda via SAM Local) ──────────────────────────────────────
+  backend:
+    build:
+      context: ./docker/lambda
+      dockerfile: Dockerfile
+    container_name: aisss-backend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=development
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - DYNAMODB_ENDPOINT=http://localstack:4566
+      - COGNITO_ENDPOINT=http://localstack:4566
+      - SQS_ENDPOINT=http://localstack:4566
+      - SES_ENDPOINT=http://localstack:4566
+    depends_on:
+      - localstack
+    networks:
+      - aisss-network
+
+  # ─── LocalStack (AWS Services Emulation) ─────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: aisss-localstack
+    ports:
+      - '4566:4566'
+      - '4510-4559:4510-4559'
+    environment:
+      - SERVICES=dynamodb,cognito-idp,sqs,ses,s3,secretsmanager,ssm,iam,lambda
+      - DEBUG=0
+      - PERSISTENCE=1
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=${AWS_REGION:-us-east-1}
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - aisss-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── DynamoDB Admin UI ────────────────────────────────────────────────────
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: aisss-dynamodb-admin
+    ports:
+      - '8001:8001'
+    environment:
+      - DYNAMO_ENDPOINT=http://localstack:4566
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    depends_on:
+      - localstack
+    networks:
+      - aisss-network
+
+volumes:
+  localstack-data:
+    driver: local
+
+networks:
+  aisss-network:
+    driver: bridge

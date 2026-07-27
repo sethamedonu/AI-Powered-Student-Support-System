@@ -1,0 +1,53 @@
+{
+  "name": "ai-powered-student-support-system",
+  "version": "1.0.0",
+  "description": "AI-Powered Student Support System — A cloud-native conversational assistant for educational institutions built on AWS Serverless, Amazon Bedrock, and Qwik.",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:backend": "npm run test --workspace=backend",
+    "test": "npm run test:backend && npm run test:frontend",
+    "lint:frontend": "npm run lint --workspace=frontend",
+    "lint:backend": "npm run lint --workspace=backend",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "tf:init": "cd infrastructure/environments/dev && terraform init",
+    "tf:plan": "cd infrastructure/environments/dev && terraform plan",
+    "tf:apply": "cd infrastructure/environments/dev && terraform apply",
+    "tf:destroy": "cd infrastructure/environments/dev && terraform destroy",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "**/*.{tf,tfvars}": [
+      "terraform fmt"
+    ]
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

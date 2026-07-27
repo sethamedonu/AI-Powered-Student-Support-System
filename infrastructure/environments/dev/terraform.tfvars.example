@@ -1,0 +1,24 @@
+aws_region   = "us-east-1"
+environment  = "dev"
+app_name     = "aisss"
+domain       = "yourdomain.com"
+ses_from_email       = "noreply@yourdomain.com"
+alert_email          = "admin@yourdomain.com"
+github_repository    = "https://github.com/sethamedonu/AI-Powered-Student-Support-System"
+github_access_token  = "<your-github-pat>"
+bedrock_guardrail_id = ""
+
+cognito_callback_urls = [
+  "http://localhost:5173/auth/callback",
+  "https://dev.yourdomain.com/auth/callback"
+]
+
+cognito_logout_urls = [
+  "http://localhost:5173/auth/logout",
+  "https://dev.yourdomain.com/auth/logout"
+]
+
+cors_allowed_origins = [
+  "http://localhost:5173",
+  "https://dev.yourdomain.com"
+]

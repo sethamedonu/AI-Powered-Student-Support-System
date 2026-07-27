@@ -1,0 +1,156 @@
+name: CI — Lint, Test & Build
+
+on:
+  push:
+    branches: [main, dev, staging]
+  pull_request:
+    branches: [main, dev, staging]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # ─── Backend Lint & Test ────────────────────────────────────────────────────
+  backend:
+    name: Backend — Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Lint
+        run: npm run lint
+        working-directory: backend
+
+      - name: Type check
+        run: npm run typecheck
+        working-directory: backend
+
+      - name: Unit tests
+        run: npm run test:coverage
+        working-directory: backend
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+      - name: Build
+        run: npm run build
+        working-directory: backend
+
+  # ─── Frontend Lint & Test ───────────────────────────────────────────────────
+  frontend:
+    name: Frontend — Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Type check
+        run: npm run typecheck
+        working-directory: frontend
+
+      - name: Unit tests
+        run: npm run test
+        working-directory: frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: https://api.placeholder.com
+          VITE_COGNITO_REGION: us-east-1
+          VITE_COGNITO_USER_POOL_ID: placeholder
+          VITE_COGNITO_CLIENT_ID: placeholder
+
+  # ─── Terraform Validate ─────────────────────────────────────────────────────
+  terraform:
+    name: Terraform — Validate & Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.0'
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        working-directory: infrastructure
+
+      - name: Terraform Init (bootstrap)
+        run: terraform init -backend=false
+        working-directory: infrastructure/bootstrap
+
+      - name: Terraform Validate (bootstrap)
+        run: terraform validate
+        working-directory: infrastructure/bootstrap
+
+      - name: Terraform Init (dev)
+        run: terraform init -backend=false
+        working-directory: infrastructure/environments/dev
+
+      - name: Terraform Validate (dev)
+        run: terraform validate
+        working-directory: infrastructure/environments/dev
+
+  # ─── Security Scan ──────────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

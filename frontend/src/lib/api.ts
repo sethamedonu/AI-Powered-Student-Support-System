@@ -157,6 +157,39 @@ export const conversationsApi = {
     ),
 };
 
+// ─── Admin API ───────────────────────────────────────────────────────────────
+export const adminApi = {
+  getStats: () =>
+    request<{
+      totalUsers: number;
+      totalConversations: number;
+      totalMessages: number;
+      cacheHitRate: number;
+      avgLatencyMs: number;
+      activeToday: number;
+    }>('/admin/stats'),
+
+  listUsers: (limit = 20) =>
+    request<PaginatedResult<User>>(`/admin/users?limit=${limit}`),
+
+  listFeedback: (limit = 20) =>
+    request<PaginatedResult<{
+      feedbackId: string;
+      rating: number;
+      category: string;
+      comment: string;
+      createdAt: string;
+    }>>(`/admin/feedback?limit=${limit}`),
+
+  getAnalytics: (period: 'day' | 'week' | 'month' = 'week') =>
+    request<{
+      period: string;
+      metrics: { date: string; messages: number; cacheHits: number; aiCalls: number }[];
+      topCategories: { category: string; count: number }[];
+      modelUsage: { model: string; count: number }[];
+    }>(`/admin/analytics?period=${period}`),
+};
+
 // ─── Feedback API ────────────────────────────────────────────────────────────
 export const feedbackApi = {
   submit: (body: {

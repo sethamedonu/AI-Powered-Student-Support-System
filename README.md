@@ -285,14 +285,14 @@ Return response to student
 ## Milestones
 
 - [x] **Milestone 1** — Project setup, structure, Terraform base, GitHub Actions, Docker
-- [ ] **Milestone 2** — Backend core (clean architecture, middleware, error handling)
-- [ ] **Milestone 3** — Authentication (Cognito integration, JWT, RBAC)
-- [ ] **Milestone 4** — AI layer (provider interface, Bedrock, caching, SQS)
-- [ ] **Milestone 5** — Frontend (Qwik app, all pages, chat UI, dark mode)
-- [ ] **Milestone 6** — Admin dashboard & analytics
-- [ ] **Milestone 7** — Monitoring, alerts, observability
-- [ ] **Milestone 8** — Testing (Vitest, Playwright, Newman)
-- [ ] **Milestone 9** — Documentation & final polish
+- [x] **Milestone 2** — Backend core (clean architecture, middleware, error handling)
+- [x] **Milestone 3** — Authentication (Cognito integration, JWT, RBAC)
+- [x] **Milestone 4** — AI layer (provider interface, Bedrock, caching, SQS)
+- [x] **Milestone 5** — Frontend (Qwik app, all pages, chat UI, dark mode)
+- [x] **Milestone 6** — Admin dashboard & analytics
+- [x] **Milestone 7** — Monitoring, alerts, observability
+- [x] **Milestone 8** — Testing (Vitest, Playwright, Newman)
+- [x] **Milestone 9** — Documentation & final polish
 
 ---
 

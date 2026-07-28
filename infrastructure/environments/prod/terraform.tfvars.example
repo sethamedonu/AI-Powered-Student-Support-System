@@ -1,0 +1,14 @@
+aws_region         = "us-east-1"
+environment        = "prod"
+app_name           = "aisss"
+domain             = "yourdomain.com"
+ses_from_email     = "noreply@yourdomain.com"
+alert_email        = "admin@yourdomain.com"
+monthly_budget_usd = "500"
+github_repository  = "https://github.com/sethamedonu/AI-Powered-Student-Support-System"
+github_access_token  = "<your-github-pat>"
+bedrock_guardrail_id = "<your-guardrail-id>"
+
+cognito_callback_urls = ["https://yourdomain.com/auth/callback"]
+cognito_logout_urls   = ["https://yourdomain.com/auth/logout"]
+cors_allowed_origins  = ["https://yourdomain.com"]

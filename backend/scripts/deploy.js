@@ -21,8 +21,11 @@ const FUNCTIONS = [
   'conversations-delete',
   'feedback-submit',
   'analytics-get',
+  'admin-stats',
+  'admin-analytics',
   'admin-users-list',
   'admin-users-update',
+  'admin-feedback-list',
   'admin-knowledge-upsert',
 ];
 

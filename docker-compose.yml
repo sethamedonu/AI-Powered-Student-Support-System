@@ -1,11 +1,82 @@
 version: '3.9'
 
 services:
+  # ─── LocalStack (AWS Services Emulation) ─────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: aisss-localstack
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=dynamodb,cognito-idp,sqs,ses,s3,iam
+      - DEBUG=0
+      - PERSISTENCE=1
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - ./docker/localstack/init.sh:/etc/localstack/init/ready.d/init.sh
+    networks:
+      - aisss-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ─── Backend (Express dev server wrapping Lambda handlers) ───────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/lambda/Dockerfile
+    container_name: aisss-backend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - LOG_LEVEL=debug
+      # DynamoDB
+      - DYNAMODB_ENDPOINT=http://localstack:4566
+      - DYNAMODB_TABLE_USERS=aisss-dev-users
+      - DYNAMODB_TABLE_CONVERSATIONS=aisss-dev-conversations
+      - DYNAMODB_TABLE_MESSAGES=aisss-dev-messages
+      - DYNAMODB_TABLE_CACHE=aisss-dev-response-cache
+      - DYNAMODB_TABLE_ANALYTICS=aisss-dev-analytics
+      - DYNAMODB_TABLE_FEEDBACK=aisss-dev-feedback
+      - DYNAMODB_TABLE_AUDIT=aisss-dev-audit-logs
+      - DYNAMODB_TABLE_KNOWLEDGE=aisss-dev-knowledge-base
+      # Cognito (LocalStack — update after first init run)
+      - COGNITO_ENDPOINT=http://localstack:4566
+      - COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID:-us-east-1_localstack}
+      - COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID:-localstackclientid}
+      # SQS
+      - SQS_ENDPOINT=http://localstack:4566
+      - SQS_CHAT_QUEUE_URL=http://localstack:4566/000000000000/aisss-dev-chat-queue
+      # SNS / SES (stubbed for local)
+      - SNS_ALERTS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:aisss-dev-alerts
+      - SES_FROM_EMAIL=noreply@localhost
+      # Bedrock — uses real AWS; set real credentials in .env to enable AI
+      - BEDROCK_REGION=${BEDROCK_REGION:-us-east-1}
+      - BEDROCK_MODEL_ROUTINE=amazon.nova-lite-v1:0
+      - BEDROCK_MODEL_COMPLEX=anthropic.claude-3-5-sonnet-20241022-v2:0
+      - BEDROCK_GUARDRAIL_ID=${BEDROCK_GUARDRAIL_ID:-}
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - aisss-network
+
   # ─── Frontend (Qwik Dev Server) ───────────────────────────────────────────
   frontend:
     build:
-      context: ./docker/frontend
-      dockerfile: Dockerfile
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
     container_name: aisss-frontend
     ports:
       - '5173:5173'
@@ -14,65 +85,14 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://localhost:3000
-      - VITE_COGNITO_REGION=${COGNITO_REGION:-us-east-1}
-      - VITE_COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
-      - VITE_COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID}
+      - PUBLIC_API_URL=http://localhost:3000
+      - VITE_COGNITO_REGION=us-east-1
+      - VITE_COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID:-us-east-1_localstack}
+      - VITE_COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID:-localstackclientid}
     depends_on:
-      - localstack
+      - backend
     networks:
       - aisss-network
-
-  # ─── Backend (Lambda via SAM Local) ──────────────────────────────────────
-  backend:
-    build:
-      context: ./docker/lambda
-      dockerfile: Dockerfile
-    container_name: aisss-backend
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - NODE_ENV=development
-      - AWS_REGION=${AWS_REGION:-us-east-1}
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - DYNAMODB_ENDPOINT=http://localstack:4566
-      - COGNITO_ENDPOINT=http://localstack:4566
-      - SQS_ENDPOINT=http://localstack:4566
-      - SES_ENDPOINT=http://localstack:4566
-    depends_on:
-      - localstack
-    networks:
-      - aisss-network
-
-  # ─── LocalStack (AWS Services Emulation) ─────────────────────────────────
-  localstack:
-    image: localstack/localstack:3.8
-    container_name: aisss-localstack
-    ports:
-      - '4566:4566'
-      - '4510-4559:4510-4559'
-    environment:
-      - SERVICES=dynamodb,cognito-idp,sqs,ses,s3,secretsmanager,ssm,iam,lambda
-      - DEBUG=0
-      - PERSISTENCE=1
-      - LAMBDA_EXECUTOR=docker
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - AWS_DEFAULT_REGION=${AWS_REGION:-us-east-1}
-    volumes:
-      - localstack-data:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - aisss-network
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # ─── DynamoDB Admin UI ────────────────────────────────────────────────────
   dynamodb-admin:
@@ -82,11 +102,12 @@ services:
       - '8001:8001'
     environment:
       - DYNAMO_ENDPOINT=http://localstack:4566
-      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
     depends_on:
-      - localstack
+      localstack:
+        condition: service_healthy
     networks:
       - aisss-network
 

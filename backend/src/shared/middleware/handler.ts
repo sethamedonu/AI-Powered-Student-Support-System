@@ -6,8 +6,12 @@ import type {
 import { isAppError } from '../errors/index.js';
 import { errorResponse, optionsResponse } from '../utils/response.js';
 import { createLogger } from '../utils/logger.js';
+import { emitColdStart } from '../utils/metrics.js';
 import type { AuthContext } from '../types/index.js';
 import { extractAuthContext } from './auth.js';
+import { env } from '../types/env.js';
+
+let isColdStart = true;
 
 const logger = createLogger('handler-factory');
 
@@ -42,6 +46,12 @@ export function createHandler(
 
     if (event.httpMethod === 'OPTIONS') {
       return optionsResponse();
+    }
+
+    if (isColdStart) {
+      emitColdStart(context.functionName, env.NODE_ENV);
+      log.info('Cold start detected', { functionName: context.functionName });
+      isColdStart = false;
     }
 
     log.info('Request received');

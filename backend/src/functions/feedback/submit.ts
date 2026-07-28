@@ -1,36 +1,29 @@
-import { z } from 'zod';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { createHandler } from '../../shared/middleware/handler.js';
-import { validateBody } from '../../shared/utils/validation.js';
 import { successResponse } from '../../shared/utils/response.js';
-import { generateId } from '../../shared/utils/helpers.js';
+import { validateBody } from '../../shared/utils/validation.js';
+import { z } from 'zod';
 import { DynamoFeedbackRepository } from '../../core/infrastructure/repositories/index.js';
-
-const FeedbackSchema = z.object({
-  rating: z.number().int().min(1).max(5),
-  category: z.string().min(1),
-  comment: z.string().min(10).max(2000).trim(),
-  conversationId: z.string().uuid().optional(),
-  messageId: z.string().uuid().optional(),
-});
+import { generateId } from '../../shared/utils/helpers.js';
 
 const repo = new DynamoFeedbackRepository();
 
+const Schema = z.object({
+  conversationId: z.string().uuid(),
+  messageId: z.string().uuid(),
+  rating: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+  comment: z.string().max(500).optional(),
+});
+
 export const handler = createHandler(
   async ({ event, auth, requestId }): Promise<APIGatewayProxyResult> => {
-    const input = validateBody(FeedbackSchema, event.body);
-    const feedbackId = generateId();
-
-    await repo.create({
-      feedbackId,
+    const input = validateBody(Schema, event.body);
+    const feedback = await repo.create({
+      feedbackId: generateId(),
       userId: auth!.userId,
-      conversationId: input.conversationId ?? '',
-      messageId: input.messageId ?? '',
-      rating: input.rating as 1 | 2 | 3 | 4 | 5,
-      comment: input.comment,
+      ...input,
     });
-
-    return successResponse({ feedbackId }, 201, requestId);
+    return successResponse(feedback, 201, requestId);
   },
   { requireAuth: true },
 );

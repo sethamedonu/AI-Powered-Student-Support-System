@@ -1,50 +1,33 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { createHandler } from '../../shared/middleware/handler.js';
 import { successResponse } from '../../shared/utils/response.js';
-import { DynamoUserRepository } from '../../core/infrastructure/repositories/UserRepository.js';
 import { DynamoAnalyticsRepository } from '../../core/infrastructure/repositories/index.js';
-import { nowIso } from '../../shared/utils/helpers.js';
 
-const userRepo = new DynamoUserRepository();
-const analyticsRepo = new DynamoAnalyticsRepository();
+const repo = new DynamoAnalyticsRepository();
 
 export const handler = createHandler(
   async ({ requestId }): Promise<APIGatewayProxyResult> => {
-    const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
+    const now = new Date().toISOString();
+    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
-    const [users, messageEvents, cacheHitEvents, aiCallEvents, todayEvents] = await Promise.all([
-      userRepo.list({ limit: 1000 }),
-      analyticsRepo.query('ai_invocation', '2000-01-01T00:00:00.000Z', nowIso()),
-      analyticsRepo.query('cache_hit', '2000-01-01T00:00:00.000Z', nowIso()),
-      analyticsRepo.query('ai_invocation', '2000-01-01T00:00:00.000Z', nowIso()),
-      analyticsRepo.query('ai_invocation', todayStart.toISOString(), nowIso()),
+    const [aiEvents, cacheEvents] = await Promise.all([
+      repo.query('ai_invocation', weekAgo, now),
+      repo.query('cache_hit', weekAgo, now),
     ]);
 
-    const totalMessages = messageEvents.length + cacheHitEvents.length;
-    const cacheHitRate = totalMessages > 0
-      ? Math.round((cacheHitEvents.length / totalMessages) * 100)
+    const totalRequests = aiEvents.length + cacheEvents.length;
+    const cacheHitRate = totalRequests > 0
+      ? Math.round((cacheEvents.length / totalRequests) * 100)
       : 0;
-
-    const latencies = aiCallEvents
-      .map(e => (e.metadata?.['latencyMs'] as number) ?? 0)
-      .filter(l => l > 0);
-    const avgLatencyMs = latencies.length > 0
-      ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length)
-      : 0;
-
-    const activeUserIds = new Set(
-      todayEvents.map(e => e.metadata?.['userId'] as string).filter(Boolean),
-    );
+    const totalTokens = aiEvents.reduce((sum, e) => sum + ((e.metadata?.['tokensUsed'] as number) ?? 0), 0);
 
     return successResponse({
-      totalUsers: users.count,
-      totalConversations: messageEvents.length,
-      totalMessages,
+      totalRequests,
+      aiInvocations: aiEvents.length,
+      cacheHits: cacheEvents.length,
       cacheHitRate,
-      avgLatencyMs,
-      activeToday: activeUserIds.size,
+      totalTokensUsed: totalTokens,
+      period: '7d',
     }, 200, requestId);
   },
   { requireAuth: true, requireAdmin: true },

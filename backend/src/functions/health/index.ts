@@ -5,8 +5,14 @@ import { docClient } from '../../core/infrastructure/database/dynamoClient.js';
 import { SQSClient, GetQueueAttributesCommand } from '@aws-sdk/client-sqs';
 import { DescribeTableCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
-const dynamo = new DynamoDBClient({ region: env.AWS_REGION });
-const sqs = new SQSClient({ region: env.AWS_REGION });
+const dynamo = new DynamoDBClient({
+  region: env.AWS_REGION,
+  ...(env.DYNAMODB_ENDPOINT ? { endpoint: env.DYNAMODB_ENDPOINT } : {}),
+});
+const sqs = new SQSClient({
+  region: env.AWS_REGION,
+  ...(env.SQS_ENDPOINT ? { endpoint: env.SQS_ENDPOINT } : {}),
+});
 
 async function checkDynamo(): Promise<{ status: 'ok' | 'error'; latencyMs: number }> {
   const start = Date.now();

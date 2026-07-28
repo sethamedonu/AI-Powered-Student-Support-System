@@ -30,6 +30,7 @@ const envSchema = z.object({
   DYNAMODB_ENDPOINT: z.string().url().optional(),
   COGNITO_ENDPOINT: z.string().url().optional(),
   SQS_ENDPOINT: z.string().url().optional(),
+  SES_ENDPOINT: z.string().url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

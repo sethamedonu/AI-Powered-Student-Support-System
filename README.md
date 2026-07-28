@@ -176,6 +176,70 @@ docker-compose up -d
 # LocalStack: http://localhost:4566
 ```
 
+On first startup, LocalStack automatically runs `docker/localstack/init.sh` which creates all 8 DynamoDB tables, the SQS chat queue + DLQ, a Cognito user pool, and seeds 3 knowledge base entries. It also prints the generated `COGNITO_USER_POOL_ID` and `COGNITO_CLIENT_ID` values — copy these into your `.env` file, then restart the backend container:
+
+```bash
+# Check init output for Cognito IDs
+docker logs aisss-localstack
+
+# After updating .env
+docker-compose restart backend frontend
+```
+
+Two test accounts are created automatically:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@test.com` | `Admin123!` |
+| Student | `student@test.com` | `Student123!` |
+
+> **Note on Bedrock locally:** The AI chat feature calls real AWS Bedrock even in local dev — LocalStack does not emulate Bedrock. To use AI responses locally, set real AWS credentials with Bedrock access in your `.env`. Without them, chat requests will fail with an auth error but all other features (auth, conversations, feedback, admin) work fully via LocalStack.
+
+---
+
+## How Local Dev Differs from Production
+
+Understanding this is important if you deploy to AWS and later want to run locally again.
+
+**In production (AWS):**
+
+```
+Request → CloudFront → API Gateway → AWS Lambda (Node.js 22 runtime) → DynamoDB / SQS / Bedrock
+```
+
+AWS Lambda runs your handler code directly using its own managed Node.js runtime. There is no Docker, no SAM, no dev server involved at all. GitHub Actions builds the zip files and uploads them to Lambda via `deploy.js`.
+
+**Locally (Docker Compose):**
+
+```
+Request → backend container → dev-server.ts (Express-like HTTP server) → same handler code → LocalStack
+```
+
+`backend/src/dev-server.ts` is a lightweight Node.js HTTP server that imports your Lambda handlers directly and calls them with a simulated `APIGatewayProxyEvent`. It is **only used locally** — it is never deployed to AWS.
+
+| Tool | What it does | Used in production? |
+|------|-------------|--------------------|
+| `docker-compose.yml` | Runs all services locally | ❌ Never |
+| `docker/localstack/init.sh` | Creates AWS resources in LocalStack | ❌ Never |
+| `src/dev-server.ts` | Simulates API Gateway + Lambda locally | ❌ Never |
+| LocalStack | Emulates DynamoDB, SQS, Cognito locally | ❌ Never |
+| `scripts/bundle.js` | Builds Lambda zip files | ✅ CI/CD only |
+| `scripts/deploy.js` | Uploads zips to real AWS Lambda | ✅ CI/CD only |
+| GitHub Actions `deploy.yml` | Runs Terraform + build + deploy | ✅ Yes |
+
+**Coming back to local dev after a cloud deployment:**
+
+If you have already deployed to AWS and want to run locally again, nothing changes — `docker-compose up -d` still works exactly as described above. Local and cloud environments are fully independent. LocalStack always starts fresh with its own tables and users; it never touches your real AWS data.
+
+If you want to run the frontend locally against your **real deployed API** instead of LocalStack, skip the backend and localstack containers and set `PUBLIC_API_URL` to your API Gateway URL:
+
+```bash
+# Run only the frontend, pointed at the real deployed API
+PUBLIC_API_URL=https://api-dev.yourdomain.com docker-compose up frontend
+```
+
+---
+
 ### 3. Bootstrap Terraform Remote State
 
 ```bash

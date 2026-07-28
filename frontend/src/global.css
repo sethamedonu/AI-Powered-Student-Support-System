@@ -1,49 +1,66 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  /* ── Brand palette — deep navy + gold accent ── */
+  --color-primary-50:  #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  --color-primary-950: #1e1b4b;
 
-  --color-surface: #ffffff;
-  --color-surface-secondary: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+  --color-gold-600: #d97706;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* ── Surfaces ── */
+  --color-surface:           #ffffff;
+  --color-surface-secondary: #f8f7ff;
+  --color-surface-elevated:  #ffffff;
+  --color-border:            #e5e7eb;
+  --color-border-subtle:     #f3f4f6;
+
+  /* ── Text ── */
+  --color-text:       #0f0e17;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9ca3af;
+
+  /* ── Typography ── */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans:    "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Radii ── */
+  --radius-lg:  0.75rem;
+  --radius-xl:  1rem;
+  --radius-2xl: 1.5rem;
 }
 
 @layer base {
-  :root {
-    color-scheme: light;
-  }
+  :root { color-scheme: light; }
 
   .dark {
     color-scheme: dark;
-    --color-surface: #0f172a;
-    --color-surface-secondary: #1e293b;
-    --color-border: #334155;
-    --color-text: #f1f5f9;
-    --color-text-muted: #94a3b8;
+    --color-surface:           #0d0c1d;
+    --color-surface-secondary: #13122a;
+    --color-surface-elevated:  #1a1836;
+    --color-border:            #2d2b55;
+    --color-border-subtle:     #1f1d3d;
+    --color-text:              #f5f3ff;
+    --color-text-muted:        #a5b4fc;
+    --color-text-faint:        #6366f1;
   }
 
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
@@ -52,15 +69,57 @@
     min-height: 100dvh;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     background: var(--color-border);
-    border-radius: 3px;
+    border-radius: 99px;
   }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-primary-300); }
+
+  /* ── Selection ── */
+  ::selection {
+    background: var(--color-primary-200);
+    color: var(--color-primary-900);
+  }
+}
+
+/* ── Utility: display font ── */
+.font-display { font-family: var(--font-display); }
+
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glass card ── */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.dark .glass {
+  background: rgba(26, 24, 54, 0.7);
+  border-color: rgba(99, 102, 241, 0.15);
+}
+
+/* ── Subtle mesh background for auth panel ── */
+.mesh-bg {
+  background-color: #312e81;
+  background-image:
+    radial-gradient(at 20% 30%, #4338ca 0px, transparent 55%),
+    radial-gradient(at 80% 10%, #7c3aed 0px, transparent 50%),
+    radial-gradient(at 60% 80%, #1e1b4b 0px, transparent 55%),
+    radial-gradient(at 10% 90%, #4f46e5 0px, transparent 45%);
+}
+
+/* ── Animated gradient border on focus ── */
+.focus-ring:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }

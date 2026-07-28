@@ -6,8 +6,8 @@ RUN apk add --no-cache git
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install && npm install -g tsx
 
 EXPOSE 3000
 
-CMD ["node", "--loader", "ts-node/esm", "--no-warnings", "src/dev-server.ts"]
+CMD ["tsx", "src/dev-server.ts"]

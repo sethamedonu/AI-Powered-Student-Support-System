@@ -60,7 +60,7 @@ services:
       - SQS_CHAT_QUEUE_URL=http://localstack:4566/000000000000/aisss-dev-chat-queue
       # SNS / SES (stubbed for local)
       - SNS_ALERTS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:aisss-dev-alerts
-      - SES_FROM_EMAIL=noreply@localhost
+      - SES_FROM_EMAIL=noreply@localhost.com
       # Bedrock — uses real AWS; set real credentials in .env to enable AI
       - BEDROCK_REGION=${BEDROCK_REGION:-us-east-1}
       - BEDROCK_MODEL_ROUTINE=amazon.nova-lite-v1:0

@@ -54,10 +54,10 @@ export default component$(() => {
 
   return (
     <AuthLayout>
-      <div class="space-y-6">
+      <div class="space-y-7">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Create your account</h2>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h2 class="font-display text-3xl font-bold text-slate-900 dark:text-white">Create your account</h2>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Join thousands of students getting instant support
           </p>
         </div>
@@ -66,67 +66,20 @@ export default component$(() => {
           <Alert variant="error">{action.value.error}</Alert>
         )}
 
-        <form method="post" class="space-y-4">
+        <form method="post" class="space-y-5">
           <div class="grid grid-cols-2 gap-3">
-            <Input
-              label="First name"
-              name="givenName"
-              type="text"
-              autoComplete="given-name"
-              placeholder="Jane"
-              error={action.value?.fieldErrors?.['givenName']?.[0]}
-              required
-            />
-            <Input
-              label="Last name"
-              name="familyName"
-              type="text"
-              autoComplete="family-name"
-              placeholder="Doe"
-              error={action.value?.fieldErrors?.['familyName']?.[0]}
-              required
-            />
+            <Input label="First name" name="givenName" type="text" autoComplete="given-name" placeholder="Jane" error={action.value?.fieldErrors?.['givenName']?.[0]} required />
+            <Input label="Last name" name="familyName" type="text" autoComplete="family-name" placeholder="Doe" error={action.value?.fieldErrors?.['familyName']?.[0]} required />
           </div>
-
-          <Input
-            label="Email address"
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@university.edu"
-            error={action.value?.fieldErrors?.['email']?.[0]}
-            required
-          />
-
-          <Input
-            label="Student ID"
-            name="studentId"
-            type="text"
-            placeholder="e.g. STU-2024-001 (optional)"
-            error={action.value?.fieldErrors?.['studentId']?.[0]}
-          />
-
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-            hint="Min 8 chars, uppercase, number, and special character"
-            error={action.value?.fieldErrors?.['password']?.[0]}
-            required
-          />
-
-          <Button type="submit" fullWidth loading={action.isRunning}>
-            Create account
-          </Button>
+          <Input label="Email address" name="email" type="email" autoComplete="email" placeholder="you@university.edu" error={action.value?.fieldErrors?.['email']?.[0]} required />
+          <Input label="Student ID" name="studentId" type="text" placeholder="e.g. STU-2024-001 (optional)" error={action.value?.fieldErrors?.['studentId']?.[0]} />
+          <Input label="Password" name="password" type="password" autoComplete="new-password" placeholder="••••••••" hint="Min 8 chars, uppercase, number, and special character" error={action.value?.fieldErrors?.['password']?.[0]} required />
+          <Button type="submit" fullWidth loading={action.isRunning}>Create account</Button>
         </form>
 
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
           Already have an account?{' '}
-          <Link href="/auth/login" class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
-            Sign in
-          </Link>
+          <Link href="/auth/login" class="font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">Sign in</Link>
         </p>
       </div>
     </AuthLayout>

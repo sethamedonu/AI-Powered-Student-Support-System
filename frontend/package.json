@@ -28,11 +28,10 @@
     "test:e2e:ui": "playwright test --ui",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@qwik-ui/headless": "^0.7.7",
-    "lucide-qwik": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@qwik-ui/headless": "^0.7.7",
+    "lucide-qwik": "^1.0.0",
     "@playwright/test": "^1.49.0",
     "@vitest/coverage-v8": "^2.1.8",
     "@testing-library/dom": "^10.4.0",

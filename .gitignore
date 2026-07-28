@@ -67,3 +67,8 @@ Thumbs.db
 *.zip
 *.tar.gz
 .cache/
+
+# Word temp files
+docs/~$*
+docs/*.tmp
+*.tmp

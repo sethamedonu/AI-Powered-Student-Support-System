@@ -48,12 +48,15 @@ export default component$(() => {
 
   return (
     <AppLayout>
-      <div class="mx-auto max-w-5xl space-y-8 p-6">
+      <div class="mx-auto max-w-5xl space-y-8 p-6 lg:p-8">
         {/* Header */}
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
-              Good {getGreeting()}, {firstName} 👋
+            <p class="text-xs font-semibold uppercase tracking-widest text-primary-500 dark:text-primary-400">
+              {getGreeting()}
+            </p>
+            <h1 class="font-display mt-1 text-3xl font-bold text-slate-900 dark:text-white">
+              Hello, {firstName} 👋
             </h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
               What can I help you with today?
@@ -61,7 +64,7 @@ export default component$(() => {
           </div>
           <Link
             href="/chat"
-            class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
+            class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-600/25 hover:bg-primary-700 transition-all"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -96,18 +99,18 @@ export default component$(() => {
 
         {/* Quick start categories */}
         <div>
-          <h2 class="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Ask about</h2>
+          <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Ask about</h2>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {CATEGORIES.map(cat => (
               <Link
                 key={cat.value}
                 href={`/chat?category=${cat.value}`}
-                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-primary-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-primary-700"
+                class="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md dark:border-white/5 dark:bg-slate-900 dark:hover:border-primary-800"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class={`h-5 w-5 shrink-0 ${cat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                   <path stroke-linecap="round" stroke-linejoin="round" d={cat.icon} />
                 </svg>
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{cat.label}</span>
+                <span class="text-sm font-medium text-slate-700 group-hover:text-primary-700 dark:text-slate-300 dark:group-hover:text-primary-300">{cat.label}</span>
               </Link>
             ))}
           </div>
@@ -115,26 +118,26 @@ export default component$(() => {
 
         {/* Recent conversations */}
         <div>
-          <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Recent conversations</h2>
-            <Link href="/conversations" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400">
-              View all
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Recent conversations</h2>
+            <Link href="/conversations" class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
+              View all →
             </Link>
           </div>
 
           {loading.value ? (
             <div class="space-y-2">
               {[1, 2, 3].map(i => (
-                <div key={i} class="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+                <div key={i} class="h-16 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
               ))}
             </div>
           ) : conversations.value.length === 0 ? (
-            <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+            <div class="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center dark:border-white/10 dark:bg-slate-900">
               <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <p class="mt-3 text-sm text-slate-500">No conversations yet.</p>
-              <Link href="/chat" class="mt-2 inline-block text-sm font-medium text-primary-600 hover:text-primary-700">
+              <p class="mt-3 text-sm font-medium text-slate-500">No conversations yet.</p>
+              <Link href="/chat" class="mt-2 inline-block text-sm font-semibold text-primary-600 hover:text-primary-700">
                 Start your first chat →
               </Link>
             </div>
@@ -144,15 +147,15 @@ export default component$(() => {
                 <Link
                   key={conv.conversationId}
                   href={`/conversations/${conv.conversationId}`}
-                  class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 transition-all hover:border-primary-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-primary-700"
+                  class="group flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-5 py-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md dark:border-white/5 dark:bg-slate-900 dark:hover:border-primary-800"
                 >
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <p class="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
                       {truncate(conv.title, 55)}
                     </p>
                     <p class="text-xs text-slate-400">{conv.messageCount} messages · {timeAgo(conv.lastMessageAt)}</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="ml-3 h-4 w-4 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="ml-3 h-4 w-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>

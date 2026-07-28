@@ -50,13 +50,13 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
       href={item.href}
       onClick$={() => (isOpen.value = false)}
       class={[
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
         isActive(item.href)
-          ? 'bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300'
-          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+          ? 'bg-primary-600 text-white shadow-sm shadow-primary-600/30'
+          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200',
       ].join(' ')}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d={icons[item.icon]} />
       </svg>
       {item.label}
@@ -66,34 +66,40 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
   const sidebarContent = (
     <div class="flex h-full flex-col">
       {/* Logo */}
-      <div class="flex items-center gap-3 px-4 py-5">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <div class="flex items-center gap-3 px-5 py-6">
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 shadow-sm shadow-primary-600/40">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 0121 13c0 5.523-4.477 10-10 10S1 18.523 1 13c0-.85.1-1.678.29-2.472L12 14z" />
           </svg>
         </div>
-        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">AI Student Support</span>
+        <div>
+          <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">AI Student</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500">Support System</p>
+        </div>
       </div>
 
       {/* Nav */}
-      <nav class="flex-1 space-y-1 px-3">
+      <nav class="flex-1 space-y-0.5 px-3">
+        <p class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600">
+          Navigation
+        </p>
         {NAV_ITEMS.filter(i => !i.adminOnly || user?.role === 'admin').map(navLink)}
       </nav>
 
       {/* Bottom */}
-      <div class="border-t border-slate-200 p-3 dark:border-slate-700">
-        <div class="flex items-center justify-between">
+      <div class="border-t border-slate-100 p-3 dark:border-white/5">
+        <div class="flex items-center justify-between gap-2">
           {user && (
-            <div class="flex items-center gap-2 overflow-hidden">
+            <div class="flex min-w-0 flex-1 items-center gap-2.5">
               <Avatar initials={getInitials(user)} size="sm" />
               <div class="min-w-0">
-                <p class="truncate text-xs font-medium text-slate-700 dark:text-slate-300">{getFullName(user)}</p>
-                <p class="truncate text-xs text-slate-400">{user.role}</p>
+                <p class="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{getFullName(user)}</p>
+                <p class="truncate text-xs capitalize text-slate-400">{user.role}</p>
               </div>
             </div>
           )}
-          <div class="flex items-center gap-1">
+          <div class="flex shrink-0 items-center gap-1">
             <DarkModeToggle isDark={isDark} />
             <Link
               href="/auth/login"
@@ -103,10 +109,10 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
                 document.cookie = 'refreshToken=; Max-Age=0; path=/';
                 document.cookie = 'user=; Max-Age=0; path=/';
               }}
-              class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-500 dark:hover:bg-slate-800"
+              class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
               aria-label="Sign out"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </Link>
@@ -119,10 +125,10 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
   return (
     <>
       {/* Mobile top bar */}
-      <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900 lg:hidden">
-        <div class="flex items-center gap-2">
-          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <header class="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3 dark:border-white/5 dark:bg-slate-900 lg:hidden">
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
             </svg>
           </div>
@@ -131,7 +137,7 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
         <button
           type="button"
           onClick$={() => (isOpen.value = !isOpen.value)}
-          class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+          class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5"
           aria-label="Toggle menu"
         >
           {isOpen.value ? (
@@ -146,12 +152,9 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
         </button>
       </header>
 
-      {/* Mobile drawer overlay */}
+      {/* Mobile overlay */}
       {isOpen.value && (
-        <div
-          class="fixed inset-0 z-20 bg-black/40 lg:hidden"
-          onClick$={() => (isOpen.value = false)}
-        />
+        <div class="fixed inset-0 z-20 bg-black/50 backdrop-blur-sm lg:hidden" onClick$={() => (isOpen.value = false)} />
       )}
 
       {/* Mobile drawer */}
@@ -165,7 +168,7 @@ export const Sidebar = component$<SidebarProps>(({ user, isDark }) => {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside class="hidden w-64 shrink-0 border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:flex lg:flex-col">
+      <aside class="hidden w-64 shrink-0 border-r border-slate-100 bg-white dark:border-white/5 dark:bg-slate-900 lg:flex lg:flex-col">
         {sidebarContent}
       </aside>
     </>

@@ -46,17 +46,17 @@ export default component$(() => {
 
   return (
     <AuthLayout>
-      <div class="space-y-6">
+      <div class="space-y-7">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h2>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your student account</p>
+          <h2 class="font-display text-3xl font-bold text-slate-900 dark:text-white">Welcome back</h2>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Sign in to your student account</p>
         </div>
 
         {action.value?.success === false && (
           <Alert variant="error">{action.value.error}</Alert>
         )}
 
-        <form method="post" class="space-y-4">
+        <form method="post" class="space-y-5">
           <Input
             label="Email address"
             name="email"
@@ -67,12 +67,12 @@ export default component$(() => {
             required
           />
 
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-1.5">
             <div class="flex items-center justify-between">
               <label for="password" class="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Password
               </label>
-              <Link href="/auth/forgot-password" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400">
+              <Link href="/auth/forgot-password" class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
                 Forgot password?
               </Link>
             </div>
@@ -85,18 +85,18 @@ export default component$(() => {
                 placeholder="••••••••"
                 required
                 class={[
-                  'w-full rounded-lg border px-3 py-2 pr-10 text-sm outline-none transition-colors',
+                  'w-full rounded-xl border px-4 py-2.5 pr-10 text-sm outline-none transition-all',
                   'bg-white text-slate-900 placeholder:text-slate-400',
-                  'dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500',
+                  'dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500',
                   action.value?.fieldErrors?.['password']
                     ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200'
-                    : 'border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-600',
+                    : 'border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:focus:ring-primary-900/40',
                 ].join(' ')}
               />
               <button
                 type="button"
                 onClick$={() => (showPassword.value = !showPassword.value)}
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 aria-label={showPassword.value ? 'Hide password' : 'Show password'}
               >
                 {showPassword.value ? (
@@ -123,7 +123,7 @@ export default component$(() => {
 
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
           Don't have an account?{' '}
-          <Link href="/auth/register" class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
+          <Link href="/auth/register" class="font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">
             Create one
           </Link>
         </p>

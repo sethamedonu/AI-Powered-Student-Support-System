@@ -120,9 +120,9 @@ export default component$(() => {
     <AppLayout>
       <div class="flex h-full flex-col">
         {/* Header */}
-        <div class="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-700 dark:bg-slate-900">
+        <div class="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4 dark:border-white/5 dark:bg-slate-900">
           <div>
-            <h1 class="text-base font-semibold text-slate-900 dark:text-white">AI Chat</h1>
+            <h1 class="font-display text-lg font-bold text-slate-900 dark:text-white">AI Chat</h1>
             <p class="text-xs text-slate-400">Powered by Amazon Bedrock</p>
           </div>
           {conversationId.value && (
@@ -133,25 +133,25 @@ export default component$(() => {
                 conversationId.value = undefined;
                 error.value = '';
               }}
-              class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:hover:border-primary-700 dark:hover:text-primary-400"
             >
-              New conversation
+              + New conversation
             </button>
           )}
         </div>
 
         {/* Category selector */}
-        <div class="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-6 py-2 dark:border-slate-700 dark:bg-slate-900">
+        <div class="flex gap-2 overflow-x-auto border-b border-slate-100 bg-white px-6 py-3 dark:border-white/5 dark:bg-slate-900">
           {CATEGORIES.map(cat => (
             <button
               key={cat.value}
               type="button"
               onClick$={() => (category.value = cat.value)}
               class={[
-                'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                'shrink-0 rounded-full px-3.5 py-1 text-xs font-semibold transition-all',
                 category.value === cat.value
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700',
+                  ? 'bg-primary-600 text-white shadow-sm shadow-primary-600/25'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10',
               ].join(' ')}
             >
               {cat.label}
@@ -202,23 +202,23 @@ export default component$(() => {
         </div>
 
         {/* Input area */}
-        <div class="border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-700 dark:bg-slate-900">
+        <div class="border-t border-slate-100 bg-white px-6 py-4 dark:border-white/5 dark:bg-slate-900">
           <div class="mx-auto max-w-3xl">
-            <div class="flex items-end gap-3 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 dark:border-slate-600 dark:bg-slate-800 dark:focus-within:ring-primary-900">
+            <div class="flex items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-100 dark:border-white/10 dark:bg-white/5 dark:focus-within:ring-primary-900/40">
               <textarea
                 value={input.value}
                 onInput$={(e) => (input.value = (e.target as HTMLTextAreaElement).value)}
                 onKeyDown$={handleKeyDown}
                 placeholder="Ask a question about admissions, courses, tuition..."
                 rows={1}
-                class="flex-1 resize-none bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
+                class="flex-1 resize-none bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
                 style="max-height: 120px; overflow-y: auto;"
               />
               <button
                 type="button"
                 onClick$={sendMessage}
                 disabled={!input.value.trim() || isTyping.value}
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-40"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white shadow-sm shadow-primary-600/30 transition-all hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 aria-label="Send message"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -227,7 +227,7 @@ export default component$(() => {
               </button>
             </div>
             <p class="mt-2 text-center text-xs text-slate-400">
-              Press Enter to send · Shift+Enter for new line
+              Enter to send · Shift+Enter for new line
             </p>
           </div>
         </div>

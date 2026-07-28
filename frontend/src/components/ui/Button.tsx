@@ -12,18 +12,18 @@ type ButtonProps = PropsOf<'button'> & {
 
 const variantClass: Record<Variant, string> = {
   primary:
-    'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500 disabled:bg-primary-300',
+    'bg-primary-600 text-white shadow-sm shadow-primary-600/25 hover:bg-primary-700 hover:shadow-primary-700/30 focus-visible:ring-primary-500 disabled:bg-primary-300 disabled:shadow-none',
   secondary:
-    'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-700',
+    'bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 focus-visible:ring-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700',
   ghost:
     'text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-300 dark:hover:bg-slate-800',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 disabled:bg-red-300',
+    'bg-red-600 text-white shadow-sm shadow-red-600/25 hover:bg-red-700 focus-visible:ring-red-500 disabled:bg-red-300',
 };
 
 const sizeClass: Record<Size, string> = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-sm',
+  sm: 'px-3.5 py-1.5 text-xs',
+  md: 'px-4 py-2.5 text-sm',
   lg: 'px-6 py-3 text-base',
 };
 
@@ -34,8 +34,8 @@ export const Button = component$<ButtonProps>(
         {...props}
         disabled={props.disabled || loading}
         class={[
-          'inline-flex items-center justify-center gap-2 rounded-lg font-medium',
-          'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+          'inline-flex items-center justify-center gap-2 rounded-xl font-semibold',
+          'transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-60',
           variantClass[variant],
           sizeClass[size],

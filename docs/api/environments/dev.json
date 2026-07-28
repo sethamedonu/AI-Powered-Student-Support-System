@@ -1,0 +1,8 @@
+{
+  "name": "AISSS — Dev",
+  "values": [
+    { "key": "BASE_URL", "value": "https://api-dev.yourdomain.com", "enabled": true },
+    { "key": "TEST_EMAIL", "value": "testuser@yourdomain.com", "enabled": true },
+    { "key": "TEST_PASSWORD", "value": "REPLACE_WITH_SECRET", "enabled": true }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "AISSS — Staging",
+  "values": [
+    { "key": "BASE_URL", "value": "https://api-staging.yourdomain.com", "enabled": true },
+    { "key": "TEST_EMAIL", "value": "testuser@yourdomain.com", "enabled": true },
+    { "key": "TEST_PASSWORD", "value": "REPLACE_WITH_SECRET", "enabled": true }
+  ]
+}

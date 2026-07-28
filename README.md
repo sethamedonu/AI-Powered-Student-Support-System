@@ -1,161 +1,198 @@
-# AI-Powered Student Support System
+<div align="center">
 
-A production-ready, cloud-native conversational AI assistant for educational institutions. Students get instant, accurate answers to questions about admissions, course registration, tuition, examinations, academic calendars, graduation requirements, scholarships, and campus services — powered by Amazon Bedrock and built entirely on AWS Serverless.
+<img src="https://img.shields.io/badge/AWS-Serverless-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />
+<img src="https://img.shields.io/badge/Amazon_Bedrock-AI_Powered-6366F1?style=for-the-badge&logo=amazonaws&logoColor=white" />
+<img src="https://img.shields.io/badge/Node.js-22-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+<img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+<img src="https://img.shields.io/badge/Terraform-1.9-7B42BC?style=for-the-badge&logo=terraform&logoColor=white" />
+<img src="https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge" />
+
+<br /><br />
+
+<h1>🎓 AI-Powered Student Support System</h1>
+
+<p align="center">
+  <strong>A production-ready, cloud-native conversational AI assistant for educational institutions.</strong><br />
+  Students get instant, accurate answers about admissions, registration, tuition, exams, scholarships,<br />
+  and campus services — powered by <strong>Amazon Bedrock</strong> and built entirely on <strong>AWS Serverless</strong>.
+</p>
+
+<br />
+
+[![CI](https://img.shields.io/github/actions/workflow/status/sethamedonu/AI-Powered-Student-Support-System/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white&style=flat-square)](https://github.com/sethamedonu/AI-Powered-Student-Support-System/actions)
+[![Deploy](https://img.shields.io/github/actions/workflow/status/sethamedonu/AI-Powered-Student-Support-System/deploy.yml?branch=main&label=Deploy&logo=githubactions&logoColor=white&style=flat-square)](https://github.com/sethamedonu/AI-Powered-Student-Support-System/actions)
+[![Last Commit](https://img.shields.io/github/last-commit/sethamedonu/AI-Powered-Student-Support-System?style=flat-square&logo=git&logoColor=white)](https://github.com/sethamedonu/AI-Powered-Student-Support-System/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/sethamedonu/AI-Powered-Student-Support-System?style=flat-square)](https://github.com/sethamedonu/AI-Powered-Student-Support-System)
+
+</div>
 
 ---
 
-## Architecture Overview
+## ✨ Key Features
+
+| | Feature | Description |
+|---|---|---|
+| 🤖 | **Multi-Model AI** | Routes questions to Amazon Nova Lite or Claude 3.5 Sonnet based on complexity |
+| ⚡ | **Smart Caching** | DynamoDB response cache eliminates redundant Bedrock calls — instant repeat answers |
+| 📚 | **Knowledge Base** | Institutional knowledge lookup before AI invocation for accurate, grounded responses |
+| 🛡️ | **Guardrails** | Amazon Bedrock Guardrails enforce content safety on every AI response |
+| 🔐 | **Secure Auth** | Amazon Cognito with JWT, RBAC, and MFA — zero secrets exposed to the frontend |
+| 📊 | **Admin Dashboard** | Real-time analytics, user management, feedback review, and knowledge base editing |
+| 🌍 | **Multi-Environment** | Dev, staging, and prod environments managed with modular Terraform |
+| 🔄 | **Full CI/CD** | GitHub Actions pipeline — lint, test, build, Terraform apply, Lambda deploy |
+| 🐳 | **Local Dev** | Full local stack with Docker Compose + LocalStack — no AWS account needed to develop |
+| 📡 | **Observability** | CloudWatch Logs, Metrics, Dashboards, and Alarms across all services |
+
+---
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Students / Admins                           │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │ HTTPS
-┌──────────────────────────────▼──────────────────────────────────────┐
-│              AWS Amplify Hosting + CloudFront CDN                   │
-│                    Qwik Frontend (SSR + Resumability)               │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │ REST API (JWT)
-┌──────────────────────────────▼──────────────────────────────────────┐
-│                    Amazon API Gateway (REST)                         │
-│              Cognito Authorizer + Rate Limiting + CORS              │
-└──────┬──────────────┬──────────────┬──────────────┬─────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                      Students / Admins                           │
+│                    (Browser — Qwik SSR App)                      │
+└─────────────────────────┬────────────────────────────────────────┘
+                          │ HTTPS
+┌─────────────────────────▼────────────────────────────────────────┐
+│           AWS Amplify Hosting  +  CloudFront CDN                 │
+└─────────────────────────┬────────────────────────────────────────┘
+                          │ REST API  (JWT Bearer)
+┌─────────────────────────▼────────────────────────────────────────┐
+│              Amazon API Gateway  (REST)                          │
+│         Cognito Authorizer · Rate Limiting · CORS                │
+└──────┬──────────────┬──────────────┬──────────────┬─────────────┘
        │              │              │              │
-  ┌────▼────┐   ┌─────▼─────┐ ┌────▼────┐   ┌────▼────┐
-  │  Auth   │   │   Chat    │ │Convos   │   │ Admin   │
-  │ Lambda  │   │  Lambda   │ │ Lambda  │   │ Lambda  │
-  └────┬────┘   └─────┬─────┘ └────┬────┘   └────┬────┘
-       │              │              │              │
-       │         ┌────▼────┐         │              │
-       │         │   SQS   │         │              │
-       │         │  Queue  │         │              │
-       │         └────┬────┘         │              │
-       │              │              │              │
-┌──────▼──────────────▼──────────────▼──────────────▼─────────────────┐
-│                         Amazon DynamoDB                              │
-│  Users │ Conversations │ Messages │ Cache │ Analytics │ Knowledge   │
-└─────────────────────────────────────────────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────────────┐
-│                    AI Provider Interface                             │
-│         ┌──────────────────────────────────────────┐               │
-│         │  1. DynamoDB Cache Check                  │               │
-│         │  2. Knowledge Base Lookup                 │               │
-│         │  3. Amazon Bedrock Invocation             │               │
-│         │     ├── Nova Lite (routine questions)     │               │
-│         │     └── Claude 3.5 (complex reasoning)   │               │
-│         │  4. Bedrock Guardrails (content filter)  │               │
-│         └──────────────────────────────────────────┘               │
-└─────────────────────────────────────────────────────────────────────┘
+  ┌────▼────┐   ┌─────▼─────┐  ┌───▼────┐   ┌────▼────┐
+  │  Auth   │   │   Chat    │  │ Convos │   │  Admin  │
+  │ Lambda  │   │  Lambda   │  │ Lambda │   │ Lambda  │
+  └────┬────┘   └─────┬─────┘  └───┬────┘   └────┬────┘
+       │              │             │              │
+       │         ┌────▼────┐        │              │
+       │         │   SQS   │        │              │
+       │         │  Queue  │        │              │
+       │         └────┬────┘        │              │
+       │              │             │              │
+┌──────▼──────────────▼─────────────▼──────────────▼──────────────┐
+│                       Amazon DynamoDB                            │
+│   Users · Conversations · Messages · Cache · Analytics ·        │
+│                  Feedback · Audit Logs · Knowledge Base          │
+└─────────────────────────┬────────────────────────────────────────┘
+                          │
+┌─────────────────────────▼────────────────────────────────────────┐
+│                   AI Provider Interface                          │
+│                                                                  │
+│   1. DynamoDB Cache Check  ──────────── HIT → return (free)     │
+│   2. Knowledge Base Lookup ──────────── FOUND → ground response │
+│   3. Route by Complexity                                         │
+│      ├── Simple  → Amazon Nova Lite   (fast · cheap)            │
+│      └── Complex → Claude 3.5 Sonnet  (accurate · thorough)     │
+│   4. Bedrock Guardrails  (content safety filter)                 │
+│   5. Cache response for future reuse                             │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Qwik + Qwik City, TypeScript, Tailwind CSS v4, Qwik UI, Framer Motion |
-| Backend | AWS Lambda (Node.js 22), TypeScript, Clean Architecture |
-| Database | Amazon DynamoDB (8 tables with GSIs) |
-| Auth | Amazon Cognito (JWT, RBAC, MFA) |
-| AI | Amazon Bedrock (Nova Lite + Claude 3.5 Sonnet), Guardrails |
-| Async | Amazon SQS (chat queue + DLQ) |
-| Email | Amazon SES |
-| Alerts | Amazon SNS |
-| Hosting | AWS Amplify + CloudFront |
-| DNS/SSL | Route 53 + ACM |
-| IaC | Terraform (modular, remote state) |
-| CI/CD | GitHub Actions |
-| Local Dev | Docker + LocalStack |
-| Testing | Vitest, Playwright, Postman/Newman |
-| Monitoring | CloudWatch Logs, Metrics, Dashboards, Alarms |
+### Frontend
+![Qwik](https://img.shields.io/badge/Qwik-1.20-18B6F6?style=flat-square&logo=qwik&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white)
+
+### Backend
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-Serverless-FF9900?style=flat-square&logo=awslambda&logoColor=white)
+![Clean Architecture](https://img.shields.io/badge/Clean_Architecture-Domain_Driven-6366F1?style=flat-square)
+
+### AWS Services
+![Amazon Bedrock](https://img.shields.io/badge/Amazon_Bedrock-Nova_Lite_%7C_Claude_3.5-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![DynamoDB](https://img.shields.io/badge/DynamoDB-8_Tables-4053D6?style=flat-square&logo=amazondynamodb&logoColor=white)
+![Cognito](https://img.shields.io/badge/Cognito-JWT_%7C_RBAC_%7C_MFA-DD344C?style=flat-square&logo=amazonaws&logoColor=white)
+![API Gateway](https://img.shields.io/badge/API_Gateway-REST-FF4F8B?style=flat-square&logo=amazonaws&logoColor=white)
+![SQS](https://img.shields.io/badge/SQS-Chat_Queue_%7C_DLQ-FF9900?style=flat-square&logo=amazonsqs&logoColor=white)
+![CloudFront](https://img.shields.io/badge/CloudFront-CDN-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![Amplify](https://img.shields.io/badge/Amplify-Hosting-FF9900?style=flat-square&logo=awsamplify&logoColor=white)
+![SES](https://img.shields.io/badge/SES-Email-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![SNS](https://img.shields.io/badge/SNS-Alerts-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+![CloudWatch](https://img.shields.io/badge/CloudWatch-Monitoring-FF9900?style=flat-square&logo=amazonaws&logoColor=white)
+
+### Infrastructure & DevOps
+![Terraform](https://img.shields.io/badge/Terraform-1.9-7B42BC?style=flat-square&logo=terraform&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=flat-square&logo=githubactions&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![LocalStack](https://img.shields.io/badge/LocalStack-Local_AWS-1A1A2E?style=flat-square)
+
+### Testing
+![Vitest](https://img.shields.io/badge/Vitest-Unit_%7C_Integration-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33?style=flat-square&logo=playwright&logoColor=white)
+![Newman](https://img.shields.io/badge/Newman-API_Tests-FF6C37?style=flat-square&logo=postman&logoColor=white)
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ai-powered-student-support-system/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # Lint, test, build on every PR
-│       ├── deploy.yml          # Infrastructure + backend deployment
-│       ├── e2e.yml             # Playwright E2E tests
-│       └── api-tests.yml       # Newman API tests
 │
-├── frontend/                   # Qwik application
-│   ├── src/
-│   │   ├── components/         # Atomic design components
-│   │   ├── routes/             # Qwik City file-based routing
-│   │   ├── lib/                # Utilities, API client, auth
-│   │   └── styles/             # Global styles
-│   └── tests/                  # Vitest + Playwright tests
+├── .github/workflows/
+│   ├── ci.yml              # Lint, test, build on every PR
+│   ├── deploy.yml          # Terraform + Lambda deployment
+│   ├── e2e.yml             # Playwright end-to-end tests
+│   └── api-tests.yml       # Newman API tests
 │
-├── backend/                    # Lambda functions (Clean Architecture)
-│   ├── src/
-│   │   ├── functions/          # Lambda handlers by domain
-│   │   │   ├── auth/
-│   │   │   ├── chat/
-│   │   │   ├── conversations/
-│   │   │   ├── admin/
-│   │   │   ├── analytics/
-│   │   │   ├── feedback/
-│   │   │   └── health/
-│   │   ├── core/
-│   │   │   ├── domain/         # Entities, repositories (interfaces), value objects
-│   │   │   ├── application/    # Use cases, services, DTOs
-│   │   │   └── infrastructure/ # DynamoDB repos, AI provider, DB client
-│   │   └── shared/             # Middleware, utils, types, errors
-│   └── tests/
+├── frontend/               # Qwik SSR application
+│   └── src/
+│       ├── components/     # Atomic design components
+│       ├── routes/         # File-based routing (Qwik City)
+│       ├── lib/            # API client, auth, utilities
+│       └── global.css      # Tailwind v4 design system
 │
-├── infrastructure/             # Terraform IaC
-│   ├── bootstrap/              # Remote state S3 + DynamoDB lock
-│   ├── modules/                # Reusable Terraform modules
-│   │   ├── cognito/
-│   │   ├── dynamodb/
-│   │   ├── lambda/
-│   │   ├── api-gateway/
-│   │   ├── amplify/
-│   │   ├── sqs/
-│   │   ├── sns/
-│   │   ├── ses/
-│   │   ├── cloudwatch/
-│   │   ├── iam/
-│   │   ├── route53/
-│   │   └── acm/
-│   └── environments/
-│       ├── dev/
-│       ├── staging/
-│       └── prod/
+├── backend/                # Lambda functions — Clean Architecture
+│   └── src/
+│       ├── functions/      # Handlers: auth · chat · conversations · admin
+│       ├── core/
+│       │   ├── domain/     # Entities, repository interfaces, value objects
+│       │   ├── application/# Use cases, services, DTOs
+│       │   └── infrastructure/ # DynamoDB repos, AI provider, DB client
+│       └── shared/         # Middleware, error handling, types
 │
-├── docs/
-│   ├── architecture/           # Architecture diagrams
-│   ├── api/                    # OpenAPI spec + Postman collections
-│   └── deployment/             # Deployment guides
+├── infrastructure/         # Terraform IaC (modular)
+│   ├── bootstrap/          # Remote state: S3 + DynamoDB lock table
+│   ├── modules/            # cognito · dynamodb · lambda · api-gateway
+│   │                       # amplify · sqs · sns · ses · cloudwatch · iam
+│   └── environments/       # dev · staging · prod
 │
 ├── docker/
 │   ├── frontend/Dockerfile
-│   └── lambda/Dockerfile
+│   ├── lambda/Dockerfile
+│   └── localstack/init.sh  # Auto-creates all AWS resources locally
 │
-├── docker-compose.yml
-├── .env.example
-└── README.md
+├── docs/
+│   ├── architecture/
+│   ├── api/                # OpenAPI spec + Postman collection
+│   └── deployment/
+│
+├── docker-compose.yml      # Full local stack
+└── .env.example
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 22+
-- Docker Desktop
-- AWS CLI (configured)
-- GitHub CLI (`gh`)
-- Terraform 1.9+
+| Tool | Version |
+|------|---------|
+| Node.js | 22+ |
+| Docker Desktop | Latest |
+| AWS CLI | Configured |
+| Terraform | 1.9+ |
 
-### 1. Clone & Install
+### 1 — Clone & Install
 
 ```bash
 git clone https://github.com/sethamedonu/AI-Powered-Student-Support-System.git
@@ -164,136 +201,110 @@ cp .env.example .env
 npm install
 ```
 
-### 2. Start Local Development
+### 2 — Start Local Development
 
 ```bash
-# Start all services (LocalStack, frontend, backend, DynamoDB Admin)
 docker-compose up -d
-
-# Frontend: http://localhost:5173
-# Backend API: http://localhost:3000
-# DynamoDB Admin UI: http://localhost:8001
-# LocalStack: http://localhost:4566
 ```
 
-On first startup, LocalStack automatically runs `docker/localstack/init.sh` which creates all 8 DynamoDB tables, the SQS chat queue + DLQ, a Cognito user pool, and seeds 3 knowledge base entries. It also prints the generated `COGNITO_USER_POOL_ID` and `COGNITO_CLIENT_ID` values — copy these into your `.env` file, then restart the backend container:
+| Service | URL |
+|---------|-----|
+| 🖥️ Frontend | http://localhost:5173 |
+| ⚙️ Backend API | http://localhost:3000 |
+| 🗄️ DynamoDB Admin | http://localhost:8001 |
+| ☁️ LocalStack | http://localhost:4566 |
+
+On first startup, LocalStack automatically creates all 8 DynamoDB tables, the SQS chat queue + DLQ, seeds the knowledge base, and prints the generated Cognito IDs. Copy them into your `.env`:
 
 ```bash
-# Check init output for Cognito IDs
+# Get the generated Cognito IDs
 docker logs aisss-localstack
 
-# After updating .env
+# Update .env, then restart
 docker-compose restart backend frontend
 ```
 
-Two test accounts are created automatically:
+**Test accounts created automatically:**
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@test.com` | `Admin123!` |
-| Student | `student@test.com` | `Student123!` |
+| 👑 Admin | `admin@test.com` | `Admin123!` |
+| 🎓 Student | `student@test.com` | `Student123!` |
 
-> **Note on Bedrock locally:** The AI chat feature calls real AWS Bedrock even in local dev — LocalStack does not emulate Bedrock. To use AI responses locally, set real AWS credentials with Bedrock access in your `.env`. Without them, chat requests will fail with an auth error but all other features (auth, conversations, feedback, admin) work fully via LocalStack.
-
----
-
-## How Local Dev Differs from Production
-
-Understanding this is important if you deploy to AWS and later want to run locally again.
-
-**In production (AWS):**
-
-```
-Request → CloudFront → API Gateway → AWS Lambda (Node.js 22 runtime) → DynamoDB / SQS / Bedrock
-```
-
-AWS Lambda runs your handler code directly using its own managed Node.js runtime. There is no Docker, no SAM, no dev server involved at all. GitHub Actions builds the zip files and uploads them to Lambda via `deploy.js`.
-
-**Locally (Docker Compose):**
-
-```
-Request → backend container → dev-server.ts (Express-like HTTP server) → same handler code → LocalStack
-```
-
-`backend/src/dev-server.ts` is a lightweight Node.js HTTP server that imports your Lambda handlers directly and calls them with a simulated `APIGatewayProxyEvent`. It is **only used locally** — it is never deployed to AWS.
-
-| Tool | What it does | Used in production? |
-|------|-------------|--------------------|
-| `docker-compose.yml` | Runs all services locally | ❌ Never |
-| `docker/localstack/init.sh` | Creates AWS resources in LocalStack | ❌ Never |
-| `src/dev-server.ts` | Simulates API Gateway + Lambda locally | ❌ Never |
-| LocalStack | Emulates DynamoDB, SQS, Cognito locally | ❌ Never |
-| `scripts/bundle.js` | Builds Lambda zip files | ✅ CI/CD only |
-| `scripts/deploy.js` | Uploads zips to real AWS Lambda | ✅ CI/CD only |
-| GitHub Actions `deploy.yml` | Runs Terraform + build + deploy | ✅ Yes |
-
-**Coming back to local dev after a cloud deployment:**
-
-If you have already deployed to AWS and want to run locally again, nothing changes — `docker-compose up -d` still works exactly as described above. Local and cloud environments are fully independent. LocalStack always starts fresh with its own tables and users; it never touches your real AWS data.
-
-If you want to run the frontend locally against your **real deployed API** instead of LocalStack, skip the backend and localstack containers and set `PUBLIC_API_URL` to your API Gateway URL:
-
-```bash
-# Run only the frontend, pointed at the real deployed API
-PUBLIC_API_URL=https://api-dev.yourdomain.com docker-compose up frontend
-```
+> **💡 Note on Bedrock:** AI chat calls real AWS Bedrock even locally — LocalStack does not emulate it. Set real AWS credentials with Bedrock access in `.env` to enable AI responses. All other features work fully via LocalStack without AWS credentials.
 
 ---
 
-### 3. Bootstrap Terraform Remote State
+## ☁️ Deploying to AWS
+
+### Step 1 — Bootstrap Terraform Remote State
 
 ```bash
 cd infrastructure/bootstrap
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your AWS account ID
-terraform init
-terraform apply
+# Edit with your AWS account ID
+terraform init && terraform apply
 ```
 
-### 4. Deploy Infrastructure (Dev)
+### Step 2 — Deploy Infrastructure
 
 ```bash
 cd infrastructure/environments/dev
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
+# Edit with your domain, region, and email values
 terraform init
 terraform plan
 terraform apply
 ```
 
+### Step 3 — Configure GitHub Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `AWS_DEPLOY_ROLE_ARN` | IAM role ARN for OIDC-based deployment |
+| `AWS_REGION` | AWS region (e.g. `us-east-1`) |
+| `GH_ACCESS_TOKEN` | GitHub PAT for Amplify repository access |
+| `DOMAIN` | Your root domain name |
+| `SES_FROM_EMAIL` | Verified SES sender email |
+| `ALERT_EMAIL` | Email for SNS infrastructure alerts |
+| `E2E_TEST_USER_EMAIL` | Test user for Playwright E2E |
+| `E2E_TEST_USER_PASSWORD` | Test user password for Playwright E2E |
+
+Push to `dev` branch to trigger the full CI/CD pipeline automatically.
+
 ---
 
-## AI Response Strategy
+## 🧠 AI Response Strategy
 
-The system uses a multi-layer cost optimization strategy before invoking Bedrock:
+The system uses a **5-layer cost optimization pipeline** before invoking Bedrock:
 
 ```
 Student Question
       │
       ▼
-1. DynamoDB Cache Lookup ──── HIT ──► Return cached response (free)
+① DynamoDB Cache ──── HIT ──────────────► Return instantly   (free)
       │ MISS
       ▼
-2. Knowledge Base Search ──── FOUND ► Generate with context (cheap)
+② Knowledge Base ──── FOUND ────────────► Ground the response (cheap)
       │ NOT FOUND
       ▼
-3. Route by Complexity
-   ├── Simple ──► Amazon Nova Lite (fast, cheap)
-   └── Complex ► Anthropic Claude 3.5 (accurate, thorough)
+③ Route by Complexity
+      ├── Simple  ──► Amazon Nova Lite    (fast · low cost)
+      └── Complex ──► Claude 3.5 Sonnet  (accurate · thorough)
       │
       ▼
-4. Apply Bedrock Guardrails (content filtering)
+④ Bedrock Guardrails  (content safety enforcement)
       │
       ▼
-5. Cache response in DynamoDB for future reuse
+⑤ Cache in DynamoDB   (free on next identical question)
       │
       ▼
-Return response to student
+   Response delivered to student
 ```
 
 ---
 
-## DynamoDB Tables
+## 🗄️ DynamoDB Tables
 
 | Table | Partition Key | Sort Key | Purpose |
 |-------|--------------|----------|---------|
@@ -308,51 +319,36 @@ Return response to student
 
 ---
 
-## GitHub Actions Secrets Required
+## 🔒 Security
 
-| Secret | Description |
-|--------|-------------|
-| `AWS_DEPLOY_ROLE_ARN` | IAM role ARN for OIDC-based deployment |
-| `AWS_REGION` | AWS region (e.g. `us-east-1`) |
-| `GH_ACCESS_TOKEN` | GitHub PAT for Amplify repository access |
-| `DOMAIN` | Your root domain name |
-| `SES_FROM_EMAIL` | Verified SES sender email |
-| `ALERT_EMAIL` | Email for SNS infrastructure alerts |
-| `E2E_TEST_USER_EMAIL` | Test user email for Playwright E2E |
-| `E2E_TEST_USER_PASSWORD` | Test user password for Playwright E2E |
+- ✅ All API endpoints protected by Cognito JWT authorizer
+- ✅ IAM least-privilege policy per Lambda function
+- ✅ DynamoDB encryption at rest + Point-in-Time Recovery on all tables
+- ✅ Bedrock Guardrails enforce content safety on every AI response
+- ✅ Zero secrets or AI endpoints exposed to the frontend
+- ✅ HTTPS enforced end-to-end via ACM + CloudFront
+- ✅ Secrets managed via GitHub Actions secrets — never in code
+- ✅ OIDC-based AWS authentication in CI/CD — no long-lived access keys
 
 ---
 
-## Environments
+## 🌿 Environments
 
 | Environment | Branch | Purpose |
 |-------------|--------|---------|
-| `dev` | `dev` | Active development |
-| `staging` | `staging` | Pre-production testing |
-| `prod` | `main` | Production |
+| `dev` | `dev` | Active development & integration testing |
+| `staging` | `staging` | Pre-production validation |
+| `prod` | `main` | Live production |
 
 ---
 
-## Security
+## ✅ Milestones
 
-- All API endpoints protected by Cognito JWT authorizer
-- IAM least-privilege per Lambda function
-- DynamoDB encryption at rest + PITR enabled on all tables
-- Bedrock Guardrails for content filtering
-- No secrets or AI endpoints exposed to frontend
-- HTTPS enforced via ACM + CloudFront
-- Secrets managed via GitHub Actions secrets (never in code)
-- OIDC-based AWS authentication in CI/CD (no long-lived keys)
-
----
-
-## Milestones
-
-- [x] **Milestone 1** — Project setup, structure, Terraform base, GitHub Actions, Docker
+- [x] **Milestone 1** — Project setup, Terraform base, GitHub Actions, Docker
 - [x] **Milestone 2** — Backend core (clean architecture, middleware, error handling)
-- [x] **Milestone 3** — Authentication (Cognito integration, JWT, RBAC)
-- [x] **Milestone 4** — AI layer (provider interface, Bedrock, caching, SQS)
-- [x] **Milestone 5** — Frontend (Qwik app, all pages, chat UI, dark mode)
+- [x] **Milestone 3** — Authentication (Cognito, JWT, RBAC)
+- [x] **Milestone 4** — AI layer (Bedrock, caching, knowledge base, SQS)
+- [x] **Milestone 5** — Frontend (Qwik, all pages, chat UI, dark mode)
 - [x] **Milestone 6** — Admin dashboard & analytics
 - [x] **Milestone 7** — Monitoring, alerts, observability
 - [x] **Milestone 8** — Testing (Vitest, Playwright, Newman)
@@ -360,6 +356,18 @@ Return response to student
 
 ---
 
-## License
+## 📄 License
 
 MIT — Built for educational institutions.
+
+---
+
+<div align="center">
+
+Built with ❤️ on AWS · Powered by Amazon Bedrock
+
+<br />
+
+[![GitHub](https://img.shields.io/badge/GitHub-sethamedonu-181717?style=flat-square&logo=github)](https://github.com/sethamedonu)
+
+</div>

@@ -1,3 +1,4 @@
+# Deploy workflow — triggers on dev (dev env) and main (prod env)
 name: Deploy — Infrastructure & Backend
 
 on:

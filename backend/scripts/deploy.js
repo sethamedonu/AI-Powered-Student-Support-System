@@ -41,17 +41,25 @@ async function deployFunction(name) {
     return;
   }
 
-  const zipBuffer = fs.readFileSync(zipPath);
+  try {
+    const zipBuffer = fs.readFileSync(zipPath);
 
-  await lambda.send(
-    new UpdateFunctionCodeCommand({
-      FunctionName: functionName,
-      ZipFile: zipBuffer,
-      Publish: true,
-    }),
-  );
+    await lambda.send(
+      new UpdateFunctionCodeCommand({
+        FunctionName: functionName,
+        ZipFile: zipBuffer,
+        Publish: true,
+      }),
+    );
 
-  console.log(`✅ Deployed: ${functionName}`);
+    console.log(`✅ Deployed: ${functionName}`);
+  } catch (err) {
+    if (err.name === 'ResourceNotFoundException') {
+      console.warn(`⚠️  Skipping ${functionName} — function not found in AWS`);
+      return;
+    }
+    throw err;
+  }
 }
 
 async function main() {

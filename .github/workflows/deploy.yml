@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev
-      - staging
       - main
   workflow_dispatch:
     inputs:
@@ -12,7 +11,7 @@ on:
         description: 'Target environment'
         required: true
         type: choice
-        options: [dev, staging, prod]
+        options: [dev, prod]
       action:
         description: 'Terraform action'
         required: true
@@ -46,9 +45,6 @@ jobs:
             echo "tf_action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
-            echo "tf_action=apply" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" == "refs/heads/staging" ]; then
-            echo "environment=staging" >> $GITHUB_OUTPUT
             echo "tf_action=apply" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT

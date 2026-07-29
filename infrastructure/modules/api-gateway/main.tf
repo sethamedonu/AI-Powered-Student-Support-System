@@ -2,6 +2,29 @@ locals {
   prefix = "${var.app_name}-${var.environment}"
 }
 
+# ─── CloudWatch Logs Role for API Gateway ────────────────────────────────────
+resource "aws_iam_role" "api_gateway_cloudwatch" {
+  name = "${local.prefix}-apigw-cloudwatch-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "apigateway.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "api_gateway_cloudwatch" {
+  role       = aws_iam_role.api_gateway_cloudwatch.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+}
+
+resource "aws_api_gateway_account" "main" {
+  cloudwatch_role_arn = aws_iam_role.api_gateway_cloudwatch.arn
+}
+
 # ─── REST API ─────────────────────────────────────────────────────────────────
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${local.prefix}-api"
@@ -18,11 +41,11 @@ resource "aws_api_gateway_rest_api" "main" {
 
 # ─── Cognito Authorizer ───────────────────────────────────────────────────────
 resource "aws_api_gateway_authorizer" "cognito" {
-  name                   = "${local.prefix}-cognito-authorizer"
-  rest_api_id            = aws_api_gateway_rest_api.main.id
-  type                   = "COGNITO_USER_POOLS"
-  identity_source        = "method.request.header.Authorization"
-  provider_arns          = [var.cognito_user_pool_arn]
+  name            = "${local.prefix}-cognito-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.main.id
+  type            = "COGNITO_USER_POOLS"
+  identity_source = "method.request.header.Authorization"
+  provider_arns   = [var.cognito_user_pool_arn]
 }
 
 # ─── Gateway Responses (CORS on 4xx/5xx) ─────────────────────────────────────
@@ -267,6 +290,8 @@ resource "aws_api_gateway_stage" "main" {
       errorMessage   = "$context.error.message"
     })
   }
+
+  depends_on = [aws_api_gateway_account.main]
 
   tags = {
     Name = "${local.prefix}-api-stage"

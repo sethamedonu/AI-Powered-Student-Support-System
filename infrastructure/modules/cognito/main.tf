@@ -36,9 +36,7 @@ resource "aws_cognito_user_pool" "main" {
   }
 
   email_configuration {
-    email_sending_account = "DEVELOPER"
-    from_email_address    = var.ses_from_email
-    source_arn            = "arn:aws:ses:us-east-1:${data.aws_caller_identity.current.account_id}:identity/${var.ses_from_email}"
+    email_sending_account = "COGNITO_DEFAULT"
   }
 
   verification_message_template {
@@ -157,22 +155,6 @@ resource "aws_cognito_user_pool_client" "main" {
   id_token_validity      = 1
   refresh_token_validity = 30
 
-  read_attributes = [
-    "email",
-    "email_verified",
-    "given_name",
-    "family_name",
-    "custom:role",
-    "custom:studentId",
-  ]
-
-  write_attributes = [
-    "email",
-    "given_name",
-    "family_name",
-    "custom:role",
-    "custom:studentId",
-  ]
 }
 
 # ─── Cognito User Groups ──────────────────────────────────────────────────────

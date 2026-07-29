@@ -183,13 +183,4 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   retention_in_days = var.environment == "prod" ? 90 : 14
 }
 
-# ─── Placeholder zip for initial deploy ──────────────────────────────────────
-resource "null_resource" "placeholder_zip" {
-  provisioner "local-exec" {
-    command = "echo 'placeholder' > /tmp/placeholder.js && zip ${path.module}/placeholder.zip /tmp/placeholder.js"
-  }
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}

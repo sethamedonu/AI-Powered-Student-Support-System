@@ -62,10 +62,10 @@ module "sqs" {
 }
 
 module "sns" {
-  source       = "../../modules/sns"
-  environment  = var.environment
-  app_name     = var.app_name
-  alert_email  = var.alert_email
+  source             = "../../modules/sns"
+  environment        = var.environment
+  app_name           = var.app_name
+  alert_email        = var.alert_email
   monthly_budget_usd = "100"
 }
 
@@ -111,15 +111,15 @@ module "api_gateway" {
 }
 
 module "cloudwatch" {
-  source                      = "../../modules/cloudwatch"
-  environment                 = var.environment
-  app_name                    = var.app_name
-  sns_alerts_topic_arn        = module.sns.alerts_topic_arn
-  api_gateway_id              = module.api_gateway.rest_api_id
-  lambda_function_names       = module.lambda.function_names
-  queue_name                  = module.sqs.chat_queue_name
-  dlq_name                    = module.sqs.chat_dlq_name
-  log_retention_days          = 60
+  source                       = "../../modules/cloudwatch"
+  environment                  = var.environment
+  app_name                     = var.app_name
+  sns_alerts_topic_arn         = module.sns.alerts_topic_arn
+  api_gateway_id               = module.api_gateway.rest_api_id
+  lambda_function_names        = module.lambda.function_names
+  queue_name                   = module.sqs.chat_queue_name
+  dlq_name                     = module.sqs.chat_dlq_name
+  log_retention_days           = 60
   lambda_duration_threshold_ms = 8000
 }
 
@@ -131,12 +131,12 @@ module "acm" {
 }
 
 module "route53" {
-  source             = "../../modules/route53"
-  environment        = var.environment
-  app_name           = var.app_name
-  domain             = var.domain
-  amplify_app_domain = module.amplify.app_default_domain
-  api_gateway_domain = module.api_gateway.custom_domain_name
+  source              = "../../modules/route53"
+  environment         = var.environment
+  app_name            = var.app_name
+  domain              = var.domain
+  amplify_app_domain  = module.amplify.app_default_domain
+  api_gateway_domain  = module.api_gateway.custom_domain_name
   acm_certificate_arn = module.acm.certificate_arn
 }
 

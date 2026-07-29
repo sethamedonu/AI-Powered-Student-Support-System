@@ -50,8 +50,8 @@ resource "aws_amplify_branch" "main" {
   app_id      = aws_amplify_app.main.id
   branch_name = var.environment == "prod" ? "main" : var.environment
 
-  enable_auto_build            = true
-  enable_pull_request_preview  = var.environment != "prod"
+  enable_auto_build           = true
+  enable_pull_request_preview = var.environment != "prod"
 
   tags = {
     Name = "${local.prefix}-branch-${var.environment}"

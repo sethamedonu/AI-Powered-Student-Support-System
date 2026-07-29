@@ -5,9 +5,6 @@ import {
   InitiateAuthCommand,
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand,
-  AdminAddUserToGroupCommand,
-  AdminGetUserCommand,
-  GetUserCommand,
   AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
 import type { IUserRepository } from '../../domain/repositories/index.js';

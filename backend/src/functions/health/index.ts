@@ -1,7 +1,6 @@
 import { createHandler } from '../../shared/middleware/handler.js';
 import { successResponse } from '../../shared/utils/response.js';
 import { env } from '../../shared/types/env.js';
-import { docClient } from '../../core/infrastructure/database/dynamoClient.js';
 import { SQSClient, GetQueueAttributesCommand } from '@aws-sdk/client-sqs';
 import { DescribeTableCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb';
 

@@ -49,7 +49,7 @@ export function publishMetrics(
   };
 
   // EMF requires stdout — CloudWatch Logs agent picks it up automatically
-  console.log(JSON.stringify(payload));
+  console.warn(JSON.stringify(payload));
 }
 
 /** Convenience: emit a single AI invocation metric */

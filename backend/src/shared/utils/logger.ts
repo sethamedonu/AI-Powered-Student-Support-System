@@ -68,7 +68,7 @@ class Logger {
     if (level === 'error' || level === 'warn') {
       console.error(output);
     } else {
-      console.log(output);
+      console.warn(output);
     }
   }
 }

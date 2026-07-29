@@ -22,7 +22,7 @@ import type {
   AnalyticsEvent,
 } from '../../domain/entities/index.js';
 import type { PaginatedResult, PaginationParams, KnowledgeCategory } from '../../../shared/types/index.js';
-import { generateId, nowIso, ttlDays, ttlHours } from '../../../shared/utils/helpers.js';
+import { generateId, nowIso, ttlDays } from '../../../shared/utils/helpers.js';
 import { env } from '../../../shared/types/env.js';
 
 // ─── Cache Repository ─────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ export class DynamoCacheRepository implements ICacheRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { cacheKey } }),
     );
-    return (result.Item as ResponseCache) ?? null;
+    return (result.Item ?? null) as ResponseCache | null;
   }
 
   async set(cache: Omit<ResponseCache, 'hitCount' | 'createdAt' | 'updatedAt'>): Promise<void> {
@@ -72,7 +72,7 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { knowledgeId } }),
     );
-    return (result.Item as KnowledgeEntry) ?? null;
+    return (result.Item ?? null) as KnowledgeEntry | null;
   }
 
   async listByCategory(
@@ -86,12 +86,12 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
         KeyConditionExpression: 'category = :cat',
         ExpressionAttributeValues: { ':cat': category },
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as KnowledgeEntry[]) ?? [],
+      items: (result.Items ?? []) as KnowledgeEntry[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -107,7 +107,7 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
       }),
     );
 
-    const entries = (result.Items as KnowledgeEntry[]) ?? [];
+    const entries = (result.Items ?? []) as KnowledgeEntry[];
     return entries.filter((entry) => {
       const searchable = `${entry.title} ${entry.content} ${entry.keywords.join(' ')}`.toLowerCase();
       return terms.some((term) => searchable.includes(term));
@@ -152,12 +152,12 @@ export class DynamoFeedbackRepository implements IFeedbackRepository {
         ExpressionAttributeValues: { ':uid': userId },
         ScanIndexForward: false,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as Feedback[]) ?? [],
+      items: (result.Items ?? []) as Feedback[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -187,12 +187,12 @@ export class DynamoAuditRepository implements IAuditRepository {
         ExpressionAttributeValues: { ':uid': userId },
         ScanIndexForward: false,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as AuditLog[]) ?? [],
+      items: (result.Items ?? []) as AuditLog[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -223,6 +223,6 @@ export class DynamoAnalyticsRepository implements IAnalyticsRepository {
         ExpressionAttributeValues: { ':type': metricType, ':from': from, ':to': to },
       }),
     );
-    return (result.Items as AnalyticsEvent[]) ?? [];
+    return (result.Items ?? []) as AnalyticsEvent[];
   }
 }

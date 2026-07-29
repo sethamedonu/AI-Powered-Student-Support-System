@@ -28,7 +28,7 @@ export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
 
   for (const record of event.Records) {
     try {
-      const body = JSON.parse(record.body);
+      const body = JSON.parse(record.body) as Record<string, unknown>;
       const parsed = SQSChatMessageSchema.safeParse(body);
 
       if (!parsed.success) {
@@ -37,7 +37,7 @@ export const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
         continue;
       }
 
-      const { userId, question, category, conversationHistory, conversationId } = parsed.data;
+      const { userId, question, category, conversationId } = parsed.data;
 
       await chatService.sendMessage(userId, {
         conversationId,

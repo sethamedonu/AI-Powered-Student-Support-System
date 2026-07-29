@@ -4,6 +4,9 @@
  */
 import http from 'http';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { createLogger } from './shared/utils/logger.js';
+
+const logger = createLogger('dev-server');
 
 // ─── Import all handlers ──────────────────────────────────────────────────────
 import { handler as health } from './functions/health/index.js';
@@ -28,34 +31,29 @@ import { handler as adminKnowledge } from './functions/admin/upsertKnowledge.js'
 
 type LambdaHandler = (event: APIGatewayProxyEvent, ctx: Context) => Promise<APIGatewayProxyResult>;
 
-// ─── Route table: [method, path-pattern, handler] ────────────────────────────
+// ─── Route table: [method, path-pattern, handler, paramMap] ──────────────────
 const routes: [string, RegExp, LambdaHandler, Record<string, number>][] = [
-  ['GET',    /^\/health$/,                          health,           {}],
-  ['POST',   /^\/auth\/register$/,                  authRegister,     {}],
-  ['POST',   /^\/auth\/login$/,                     authLogin,        {}],
-  ['POST',   /^\/auth\/verify$/,                    authVerify,       {}],
-  ['POST',   /^\/auth\/forgot-password$/,           authForgot,       {}],
-  ['POST',   /^\/auth\/reset-password$/,            authReset,        {}],
-  ['POST',   /^\/auth\/refresh$/,                   authRefresh,      {}],
-  ['POST',   /^\/chat\/message$/,                   chatSend,         {}],
-  ['GET',    /^\/conversations$/,                   convList,         {}],
-  ['GET',    /^\/conversations\/([^/]+)$/,          convGet,          { conversationId: 1 }],
-  ['DELETE', /^\/conversations\/([^/]+)$/,          convDelete,       { conversationId: 1 }],
-  ['POST',   /^\/feedback$/,                        feedbackSubmit,   {}],
-  ['GET',    /^\/analytics$/,                       analyticsGet,     {}],
-  ['GET',    /^\/admin\/stats$/,                    adminStats,       {}],
-  ['GET',    /^\/admin\/analytics$/,                adminAnalytics,   {}],
-  ['GET',    /^\/admin\/users$/,                    adminUsersList,   {}],
-  ['PUT',    /^\/admin\/users\/([^/]+)$/,           adminUsersUpdate, { userId: 1 }],
-  ['GET',    /^\/admin\/feedback$/,                 adminFeedbackList,{}],
-  ['POST',   /^\/admin\/knowledge$/,                adminKnowledge,   {}],
-  ['PUT',    /^\/admin\/knowledge$/,                adminKnowledge,   {}],
+  ['GET',    /^\/health$/,                         health,            {}],
+  ['POST',   /^\/auth\/register$/,                 authRegister,      {}],
+  ['POST',   /^\/auth\/login$/,                    authLogin,         {}],
+  ['POST',   /^\/auth\/verify$/,                   authVerify,        {}],
+  ['POST',   /^\/auth\/forgot-password$/,          authForgot,        {}],
+  ['POST',   /^\/auth\/reset-password$/,           authReset,         {}],
+  ['POST',   /^\/auth\/refresh$/,                  authRefresh,       {}],
+  ['POST',   /^\/chat\/message$/,                  chatSend,          {}],
+  ['GET',    /^\/conversations$/,                  convList,          {}],
+  ['GET',    /^\/conversations\/([^/]+)$/,         convGet,           { conversationId: 1 }],
+  ['DELETE', /^\/conversations\/([^/]+)$/,         convDelete,        { conversationId: 1 }],
+  ['POST',   /^\/feedback$/,                       feedbackSubmit,    {}],
+  ['GET',    /^\/analytics$/,                      analyticsGet,      {}],
+  ['GET',    /^\/admin\/stats$/,                   adminStats,        {}],
+  ['GET',    /^\/admin\/analytics$/,               adminAnalytics,    {}],
+  ['GET',    /^\/admin\/users$/,                   adminUsersList,    {}],
+  ['PUT',    /^\/admin\/users\/([^/]+)$/,          adminUsersUpdate,  { userId: 1 }],
+  ['GET',    /^\/admin\/feedback$/,                adminFeedbackList, {}],
+  ['POST',   /^\/admin\/knowledge$/,               adminKnowledge,    {}],
+  ['PUT',    /^\/admin\/knowledge$/,               adminKnowledge,    {}],
 ];
-
-const PARAM_NAMES: Record<string, string[]> = {
-  '/conversations/:conversationId': ['conversationId'],
-  '/admin/users/:userId': ['userId'],
-};
 
 function makeContext(path: string): Context {
   return {
@@ -67,11 +65,11 @@ function makeContext(path: string): Context {
     logGroupName: '/aws/lambda/local',
     logStreamName: 'local',
     getRemainingTimeInMillis: () => 30000,
-    done: () => {},
-    fail: () => {},
-    succeed: () => {},
+    done: (): void => {},
+    fail: (): void => {},
+    succeed: (): void => {},
     callbackWaitsForEmptyEventLoop: false,
-  } as unknown as Context;
+  };
 }
 
 function buildEvent(
@@ -95,7 +93,7 @@ function buildEvent(
     resource: '',
     body: body || null,
     isBase64Encoded: false,
-  } as unknown as APIGatewayProxyEvent;
+  };
 }
 
 const PORT = Number(process.env['PORT'] ?? 3000);
@@ -108,7 +106,6 @@ const server = http.createServer((req, res) => {
     new URLSearchParams(rawQuery).forEach((v, k) => { queryParams[k] = v; });
   }
 
-  // CORS preflight
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -120,48 +117,48 @@ const server = http.createServer((req, res) => {
   }
 
   let body = '';
-  req.on('data', chunk => { body += chunk; });
-  req.on('end', async () => {
-    // Match route
-    let matched: LambdaHandler | null = null;
-    let pathParams: Record<string, string> = {};
+  req.on('data', (chunk: unknown) => { body += String(chunk); });
+  req.on('end', (): void => {
+    void (async (): Promise<void> => {
+      let matched: LambdaHandler | null = null;
+      let pathParams: Record<string, string> = {};
 
-    for (const [method, pattern, handler, paramMap] of routes) {
-      if (req.method !== method) continue;
-      const m = rawPath.match(pattern);
-      if (!m) continue;
-      matched = handler;
-      for (const [name, idx] of Object.entries(paramMap)) {
-        pathParams[name] = m[idx as number] ?? '';
+      for (const [method, pattern, handler, paramMap] of routes) {
+        if (req.method !== method) continue;
+        const m = rawPath.match(pattern);
+        if (!m) continue;
+        matched = handler;
+        for (const [name, idx] of Object.entries(paramMap)) {
+          pathParams[name] = m[idx] ?? '';
+        }
+        break;
       }
-      break;
-    }
 
-    if (!matched) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: `No route: ${req.method} ${rawPath}` } }));
-      return;
-    }
+      if (!matched) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: `No route: ${req.method} ${rawPath}` } }));
+        return;
+      }
 
-    try {
-      const event = buildEvent(req, body, pathParams, queryParams);
-      const ctx = makeContext(rawPath);
-      const result = await matched(event, ctx);
-
-      const headers = { 'Content-Type': 'application/json', ...result.headers };
-      res.writeHead(result.statusCode, headers);
-      res.end(result.body);
-    } catch (err) {
-      console.error('Dev server error:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Unhandled server error' } }));
-    }
+      try {
+        const event = buildEvent(req, body, pathParams, queryParams);
+        const ctx = makeContext(rawPath);
+        const result = await matched(event, ctx);
+        const headers = { 'Content-Type': 'application/json', ...result.headers };
+        res.writeHead(result.statusCode, headers);
+        res.end(result.body);
+      } catch (err) {
+        logger.error('Dev server error', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Unhandled server error' } }));
+      }
+    })();
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 AISSS dev server running at http://0.0.0.0:${PORT}\n`);
-  console.log('Routes:');
-  routes.forEach(([method, pattern]) => console.log(`  ${method.padEnd(7)} ${pattern}`));
-  console.log('');
+server.listen(PORT, '0.0.0.0', (): void => {
+  console.warn(`\n🚀 AISSS dev server running at http://0.0.0.0:${PORT}\n`);
+  console.warn('Routes:');
+  routes.forEach(([method, pattern]) => console.warn(`  ${method.padEnd(7)} ${String(pattern)}`));
+  console.warn('');
 });

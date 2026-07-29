@@ -1,7 +1,6 @@
 import {
   GetCommand,
   PutCommand,
-  UpdateCommand,
   DeleteCommand,
   ScanCommand,
   QueryCommand,
@@ -21,7 +20,7 @@ export class DynamoUserRepository implements IUserRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { userId } }),
     );
-    return (result.Item as User) ?? null;
+    return (result.Item ?? null) as User | null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -34,7 +33,7 @@ export class DynamoUserRepository implements IUserRepository {
         Limit: 1,
       }),
     );
-    return ((result.Items?.[0]) as User) ?? null;
+    return ((result.Items?.[0]) ?? null) as User | null;
   }
 
   async create(input: CreateUserInput): Promise<User> {
@@ -81,12 +80,12 @@ export class DynamoUserRepository implements IUserRepository {
       new ScanCommand({
         TableName: this.table,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as User[]) ?? [],
+      items: (result.Items ?? []) as User[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };

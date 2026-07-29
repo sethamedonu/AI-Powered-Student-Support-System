@@ -1,8 +1,7 @@
 import type { IAIProvider, AIMessage } from '../ai/provider.interface.js';
 import type { ICacheRepository, IKnowledgeRepository, IAnalyticsRepository } from '../../domain/repositories/index.js';
 import { createLogger } from '../../../shared/utils/logger.js';
-import { generateCacheKey, ttlDays, nowIso } from '../../../shared/utils/helpers.js';
-import { generateId } from '../../../shared/utils/helpers.js';
+import { generateCacheKey, ttlDays } from '../../../shared/utils/helpers.js';
 import type { KnowledgeCategory, RequestComplexity } from '../../../shared/types/index.js';
 
 const logger = createLogger('ai-orchestrator');

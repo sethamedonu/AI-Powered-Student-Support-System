@@ -7,7 +7,6 @@ import { env } from '../../../shared/types/env.js';
 import { AIProviderError } from '../../../shared/errors/index.js';
 import { createLogger } from '../../../shared/utils/logger.js';
 import type { IAIProvider, AIRequest, AIResponse } from './provider.interface.js';
-import type { AIModel } from '../../../shared/types/index.js';
 
 const logger = createLogger('bedrock-provider');
 
@@ -51,16 +50,20 @@ export class BedrockProvider implements IAIProvider {
 
       const command = new InvokeModelCommand(input);
       const response = await this.client.send(command);
-      const parsed = JSON.parse(new TextDecoder().decode(response.body));
+      const parsed = JSON.parse(new TextDecoder().decode(response.body)) as Record<string, unknown>;
 
       const latencyMs = Date.now() - start;
+      const novaOutput = parsed['output'] as { message?: { content?: Array<{ text?: string }> } } | undefined;
+      const claudeContent = parsed['content'] as Array<{ text?: string }> | undefined;
       const content = isNova
-        ? (parsed.output?.message?.content?.[0]?.text ?? '')
-        : (parsed.content?.[0]?.text ?? '');
+        ? (novaOutput?.message?.content?.[0]?.text ?? '')
+        : (claudeContent?.[0]?.text ?? '');
 
+      const novaUsage = parsed['usage'] as { inputTokens?: number; outputTokens?: number } | undefined;
+      const claudeUsage = parsed['usage'] as { input_tokens?: number; output_tokens?: number } | undefined;
       const tokensUsed = isNova
-        ? (parsed.usage?.inputTokens ?? 0) + (parsed.usage?.outputTokens ?? 0)
-        : (parsed.usage?.input_tokens ?? 0) + (parsed.usage?.output_tokens ?? 0);
+        ? ((novaUsage?.inputTokens ?? 0) + (novaUsage?.outputTokens ?? 0))
+        : ((claudeUsage?.input_tokens ?? 0) + (claudeUsage?.output_tokens ?? 0));
 
       const guardrailAction = (response as unknown as Record<string, unknown>)['amazonBedrockGuardrailAction'] as AIResponse['guardrailAction'] ?? 'NONE';
 
@@ -88,7 +91,7 @@ export class BedrockProvider implements IAIProvider {
     }
   }
 
-  private buildNovaPayload(request: AIRequest, _model: string) {
+  private buildNovaPayload(request: AIRequest, _model: string): Record<string, unknown> {
     const system = request.systemPrompt ?? SYSTEM_PROMPT;
     return {
       system: [{ text: system }],
@@ -103,7 +106,7 @@ export class BedrockProvider implements IAIProvider {
     };
   }
 
-  private buildClaudePayload(request: AIRequest, _model: string) {
+  private buildClaudePayload(request: AIRequest, _model: string): Record<string, unknown> {
     const system = request.systemPrompt ?? SYSTEM_PROMPT;
     return {
       anthropic_version: 'bedrock-2023-05-31',

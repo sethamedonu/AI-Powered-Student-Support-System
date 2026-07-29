@@ -13,9 +13,10 @@ resource "aws_amplify_app" "main" {
       phases:
         preBuild:
           commands:
-            - nvm use 20
+            - nvm install 22
+            - nvm use 22
             - cd frontend
-            - npm ci
+            - npm ci --prefix .
         build:
           commands:
             - npm run build.client

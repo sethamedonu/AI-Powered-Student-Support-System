@@ -13,11 +13,12 @@ resource "aws_amplify_app" "main" {
       phases:
         preBuild:
           commands:
+            - nvm use 20
             - cd frontend
             - npm ci
         build:
           commands:
-            - npm run build
+            - npm run build.client
       artifacts:
         baseDirectory: frontend/dist
         files:

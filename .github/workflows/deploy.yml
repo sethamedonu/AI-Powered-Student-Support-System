@@ -99,6 +99,7 @@ jobs:
     name: Deploy Backend — ${{ needs.setup.outputs.environment }}
     runs-on: ubuntu-latest
     needs: [setup, infrastructure]
+    environment: ${{ needs.setup.outputs.environment }}
 
     steps:
       - name: Checkout

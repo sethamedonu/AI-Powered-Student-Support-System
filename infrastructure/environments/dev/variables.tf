@@ -45,3 +45,18 @@ variable "bedrock_guardrail_id" {
   type    = string
   default = ""
 }
+
+variable "github_repository" {
+  type    = string
+  default = "https://github.com/sethamedonu/AI-Powered-Student-Support-System"
+}
+
+variable "github_access_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "domain" {
+  type    = string
+  default = ""
+}

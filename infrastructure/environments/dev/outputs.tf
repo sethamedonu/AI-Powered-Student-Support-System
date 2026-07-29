@@ -46,3 +46,13 @@ output "cloudfront_arn" {
   description = "CloudFront distribution ARN"
   value       = "arn:aws:cloudfront::646966486144:distribution/E1PTK0MXNGRETB"
 }
+
+output "amplify_app_id" {
+  description = "Amplify app ID"
+  value       = module.amplify.app_id
+}
+
+output "amplify_default_domain" {
+  description = "Amplify default domain"
+  value       = module.amplify.app_default_domain
+}

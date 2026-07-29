@@ -121,3 +121,19 @@ module "cloudwatch" {
   queue_name            = module.sqs.chat_queue_name
   dlq_name              = module.sqs.chat_dlq_name
 }
+
+module "amplify" {
+  source              = "../../modules/amplify"
+  environment         = var.environment
+  app_name            = var.app_name
+  github_repository   = var.github_repository
+  github_access_token = var.github_access_token
+  domain              = var.domain
+  acm_certificate_arn = ""
+  environment_variables = {
+    VITE_API_URL           = module.api_gateway.invoke_url
+    VITE_COGNITO_USER_POOL = module.cognito.user_pool_id
+    VITE_COGNITO_CLIENT_ID = module.cognito.user_pool_client_id
+    VITE_ENVIRONMENT       = var.environment
+  }
+}

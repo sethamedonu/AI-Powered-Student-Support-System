@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
@@ -23,7 +23,7 @@ export default component$(() => {
     }
   });
 
-  const deleteConversation = async (conversationId: string) => {
+  const deleteConversation = $(async (conversationId: string) => {
     deletingId.value = conversationId;
     try {
       await conversationsApi.delete(conversationId);
@@ -33,7 +33,7 @@ export default component$(() => {
     } finally {
       deletingId.value = null;
     }
-  };
+  });
 
   return (
     <AppLayout>

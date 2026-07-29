@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { Avatar } from '~/components/ui/Avatar';
@@ -31,7 +31,7 @@ export default component$(() => {
     }
   });
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = $(async () => {
     pwError.value = '';
     pwSuccess.value = false;
 
@@ -59,7 +59,7 @@ export default component$(() => {
     } finally {
       pwLoading.value = false;
     }
-  };
+  });
 
   const u = user.value;
 

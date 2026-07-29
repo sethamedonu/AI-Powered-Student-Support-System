@@ -3,7 +3,7 @@ import { Link } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { StatCard } from '~/components/ui/StatCard';
-import { timeAgo, truncate, getFullName, getInitials } from '~/lib';
+import { timeAgo, truncate } from '~/lib';
 import { conversationsApi } from '~/lib/api';
 import type { Conversation, User } from '~/lib/types';
 

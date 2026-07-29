@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
@@ -34,7 +34,7 @@ export default component$(() => {
   const loading = useSignal(true);
   const error = useSignal('');
 
-  const loadData = async (p: Period) => {
+  const loadData = $(async (p: Period) => {
     loading.value = true;
     error.value = '';
     try {
@@ -44,7 +44,7 @@ export default component$(() => {
     } finally {
       loading.value = false;
     }
-  };
+  });
 
   useVisibleTask$(async () => {
     await loadData(period.value);

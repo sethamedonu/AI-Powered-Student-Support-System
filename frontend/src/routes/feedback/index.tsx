@@ -1,4 +1,4 @@
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal, $ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { Button } from '~/components/ui/Button';
@@ -28,7 +28,7 @@ export default component$(() => {
   const success = useSignal(false);
   const error = useSignal('');
 
-  const handleSubmit = async () => {
+  const handleSubmit = $(async () => {
     if (rating.value === 0) {
       error.value = 'Please select a star rating.';
       return;
@@ -56,7 +56,7 @@ export default component$(() => {
     } finally {
       loading.value = false;
     }
-  };
+  });
 
   const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
 

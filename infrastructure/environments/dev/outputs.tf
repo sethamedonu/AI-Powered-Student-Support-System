@@ -46,3 +46,13 @@ output "amplify_default_domain" {
   description = "Amplify default domain"
   value       = module.amplify.app_default_domain
 }
+
+output "cloudfront_domain" {
+  description = "CloudFront distribution domain (legacy)"
+  value       = "https://d1056g6ybpps7o.cloudfront.net"
+}
+
+output "cloudfront_arn" {
+  description = "CloudFront distribution ARN (legacy)"
+  value       = "arn:aws:cloudfront::646966486144:distribution/E1PTK0MXNGRETB"
+}

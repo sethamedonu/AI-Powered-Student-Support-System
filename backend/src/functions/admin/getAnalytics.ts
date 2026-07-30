@@ -8,7 +8,10 @@ const repo = new DynamoAnalyticsRepository();
 export const handler = createHandler(
   async ({ event, requestId }): Promise<APIGatewayProxyResult> => {
     const qs = event.queryStringParameters ?? {};
-    const from = qs['from'] ?? new Date(Date.now() - 30 * 86400000).toISOString();
+    const period = qs['period'] ?? 'week';
+    const periodMs: Record<string, number> = { day: 86400000, week: 7 * 86400000, month: 30 * 86400000 };
+    const rangeMs = periodMs[period] ?? periodMs['week'];
+    const from = qs['from'] ?? new Date(Date.now() - rangeMs).toISOString();
     const to = qs['to'] ?? new Date().toISOString();
 
     const [aiEvents, cacheEvents] = await Promise.all([

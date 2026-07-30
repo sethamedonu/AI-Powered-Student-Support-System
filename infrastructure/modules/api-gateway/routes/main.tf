@@ -1,3 +1,11 @@
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke-${var.http_method}"
+  action        = "lambda:InvokeFunction"
+  function_name = var.lambda_arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:apigateway:${var.aws_region}::/restapis/${var.rest_api_id}/*/"
+}
+
 locals {
   resource_id = var.use_parent ? var.parent_id : aws_api_gateway_resource.this[0].id
 }

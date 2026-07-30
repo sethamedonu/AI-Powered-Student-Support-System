@@ -98,6 +98,7 @@ module "lambda" {
   ses_from_email               = var.ses_from_email
   bedrock_region               = var.aws_region
   bedrock_guardrail_id         = var.bedrock_guardrail_id
+  cors_allowed_origins         = var.cors_allowed_origins
 }
 
 module "api_gateway" {
@@ -131,9 +132,9 @@ module "amplify" {
   domain              = var.domain
   acm_certificate_arn = ""
   environment_variables = {
-    VITE_API_URL           = module.api_gateway.invoke_url
-    VITE_COGNITO_USER_POOL = module.cognito.user_pool_id
-    VITE_COGNITO_CLIENT_ID = module.cognito.user_pool_client_id
-    VITE_ENVIRONMENT       = var.environment
+    VITE_API_URL              = module.api_gateway.invoke_url
+    VITE_COGNITO_USER_POOL_ID = module.cognito.user_pool_id
+    VITE_COGNITO_CLIENT_ID    = module.cognito.user_pool_client_id
+    VITE_ENVIRONMENT          = var.environment
   }
 }

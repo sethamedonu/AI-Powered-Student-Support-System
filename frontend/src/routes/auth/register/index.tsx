@@ -9,7 +9,7 @@ import { Alert } from '~/components/ui/Alert';
 export const useRegisterAction = routeAction$(
   async (data, { redirect }) => {
     const res = await fetch(
-      `${process.env['PUBLIC_API_URL'] ?? 'http://localhost:3000'}/auth/register`,
+      `${import.meta.env.VITE_API_URL ?? 'http://localhost:3000'}/auth/register`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

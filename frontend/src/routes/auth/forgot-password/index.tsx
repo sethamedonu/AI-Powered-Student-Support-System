@@ -9,7 +9,7 @@ import { Alert } from '~/components/ui/Alert';
 export const useForgotPasswordAction = routeAction$(
   async (data, { redirect }) => {
     await fetch(
-      `${process.env['PUBLIC_API_URL'] ?? 'http://localhost:3000'}/auth/forgot-password`,
+      `${import.meta.env.VITE_API_URL ?? 'http://localhost:3000'}/auth/forgot-password`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

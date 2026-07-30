@@ -1,9 +1,19 @@
 import { staticAdapter } from "@builder.io/qwik-city/adapters/static/vite";
 import { extendConfig } from "@builder.io/qwik-city/vite";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import baseConfig from "../../vite.config";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const srcDir = resolve(__dirname, "../../src");
 
 export default extendConfig(baseConfig, () => {
   return {
+    resolve: {
+      alias: {
+        "~": srcDir,
+      },
+    },
     build: {
       ssr: true,
       rollupOptions: {
@@ -12,7 +22,7 @@ export default extendConfig(baseConfig, () => {
     },
     plugins: [
       staticAdapter({
-        origin: "https://dev.d1qwgdujp8oq1u.amplifyapp.com",
+        origin: process.env.VITE_APP_ORIGIN ?? "https://dev.d1qwgdujp8oq1u.amplifyapp.com",
       }),
     ],
   };

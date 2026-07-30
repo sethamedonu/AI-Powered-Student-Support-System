@@ -54,7 +54,7 @@ resource "aws_api_gateway_gateway_response" "default_4xx" {
   response_type = "DEFAULT_4XX"
 
   response_parameters = {
-    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'${join(",", var.cors_allowed_origins)}'"
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'${var.cors_allowed_origins[0]}'"
     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Amz-Date,X-Api-Key'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
@@ -65,7 +65,7 @@ resource "aws_api_gateway_gateway_response" "default_5xx" {
   response_type = "DEFAULT_5XX"
 
   response_parameters = {
-    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'${join(",", var.cors_allowed_origins)}'"
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'${var.cors_allowed_origins[0]}'"
     "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Amz-Date,X-Api-Key'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
@@ -207,6 +207,115 @@ module "route_analytics_get" {
   use_parent    = true
 }
 
+# ─── Admin routes ─────────────────────────────────────────────────────────────
+resource "aws_api_gateway_resource" "admin_stats" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin.id
+  path_part   = "stats"
+}
+
+resource "aws_api_gateway_resource" "admin_users" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin.id
+  path_part   = "users"
+}
+
+resource "aws_api_gateway_resource" "admin_feedback" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin.id
+  path_part   = "feedback"
+}
+
+resource "aws_api_gateway_resource" "admin_analytics" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin.id
+  path_part   = "analytics"
+}
+
+module "route_admin_stats" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.admin_stats.id
+  path_part     = ""
+  http_method   = "GET"
+  lambda_arn    = var.lambda_functions["admin-stats"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
+module "route_admin_users" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.admin_users.id
+  path_part     = ""
+  http_method   = "GET"
+  lambda_arn    = var.lambda_functions["admin-users-list"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
+module "route_admin_feedback" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.admin_feedback.id
+  path_part     = ""
+  http_method   = "GET"
+  lambda_arn    = var.lambda_functions["admin-feedback-list"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
+module "route_admin_analytics" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.admin_analytics.id
+  path_part     = ""
+  http_method   = "GET"
+  lambda_arn    = var.lambda_functions["admin-analytics"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
+resource "aws_api_gateway_resource" "conversation_id" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.conversations.id
+  path_part   = "{conversationId}"
+}
+
+module "route_conversations_get" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.conversation_id.id
+  path_part     = ""
+  http_method   = "GET"
+  lambda_arn    = var.lambda_functions["conversations-get"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
+module "route_conversations_delete" {
+  source        = "./routes"
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  parent_id     = aws_api_gateway_resource.conversation_id.id
+  path_part     = ""
+  http_method   = "DELETE"
+  lambda_arn    = var.lambda_functions["conversations-delete"]
+  aws_region    = var.aws_region
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  require_auth  = true
+  use_parent    = true
+}
+
 # ─── Parent Resources ─────────────────────────────────────────────────────────
 resource "aws_api_gateway_resource" "auth" {
   rest_api_id = aws_api_gateway_rest_api.main.id
@@ -264,6 +373,12 @@ resource "aws_api_gateway_deployment" "main" {
     module.route_conversations_list,
     module.route_feedback_submit,
     module.route_analytics_get,
+    module.route_admin_stats,
+    module.route_admin_users,
+    module.route_admin_feedback,
+    module.route_admin_analytics,
+    module.route_conversations_get,
+    module.route_conversations_delete,
   ]
 }
 

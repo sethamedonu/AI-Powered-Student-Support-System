@@ -40,7 +40,7 @@ const routes: [string, RegExp, LambdaHandler, Record<string, number>][] = [
   ['POST',   /^\/auth\/forgot-password$/,          authForgot,        {}],
   ['POST',   /^\/auth\/reset-password$/,           authReset,         {}],
   ['POST',   /^\/auth\/refresh$/,                  authRefresh,       {}],
-  ['POST',   /^\/chat\/message$/,                  chatSend,          {}],
+  ['POST',   /^\/chat\/send$/,                   chatSend,          {}],
   ['GET',    /^\/conversations$/,                  convList,          {}],
   ['GET',    /^\/conversations\/([^/]+)$/,         convGet,           { conversationId: 1 }],
   ['DELETE', /^\/conversations\/([^/]+)$/,         convDelete,        { conversationId: 1 }],

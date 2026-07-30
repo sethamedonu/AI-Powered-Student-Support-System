@@ -85,12 +85,13 @@ jobs:
         run: npm run test --workspace=frontend
 
       - name: Build
-        run: npm run build.client --workspace=frontend && npm run build.preview --workspace=frontend
+        run: npm run build.static --workspace=frontend
         env:
           VITE_API_URL: https://api.placeholder.com
           VITE_COGNITO_REGION: us-east-1
           VITE_COGNITO_USER_POOL_ID: placeholder
           VITE_COGNITO_CLIENT_ID: placeholder
+          VITE_APP_ORIGIN: https://dev.d1qwgdujp8oq1u.amplifyapp.com
 
   # ─── Terraform Validate ─────────────────────────────────────────────────────
   terraform:

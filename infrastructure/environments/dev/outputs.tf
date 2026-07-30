@@ -37,16 +37,6 @@ output "sns_alerts_topic_arn" {
   value       = module.sns.alerts_topic_arn
 }
 
-output "cloudfront_domain" {
-  description = "CloudFront distribution domain (manually created)"
-  value       = "https://d1056g6ybpps7o.cloudfront.net"
-}
-
-output "cloudfront_arn" {
-  description = "CloudFront distribution ARN"
-  value       = "arn:aws:cloudfront::646966486144:distribution/E1PTK0MXNGRETB"
-}
-
 output "amplify_app_id" {
   description = "Amplify app ID"
   value       = module.amplify.app_id

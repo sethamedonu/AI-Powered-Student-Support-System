@@ -18,3 +18,7 @@ variable "sns_alerts_topic_arn" { type = string }
 variable "ses_from_email" { type = string }
 variable "bedrock_region" { type = string }
 variable "bedrock_guardrail_id" { type = string }
+variable "cors_allowed_origins" {
+  type    = list(string)
+  default = ["*"]
+}

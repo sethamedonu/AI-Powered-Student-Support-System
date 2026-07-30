@@ -17,7 +17,7 @@ export const useResetPasswordAction = routeAction$(
     }
 
     const res = await fetch(
-      `${process.env['PUBLIC_API_URL'] ?? 'http://localhost:3000'}/auth/reset-password`,
+      `${import.meta.env.VITE_API_URL ?? 'http://localhost:3000'}/auth/reset-password`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

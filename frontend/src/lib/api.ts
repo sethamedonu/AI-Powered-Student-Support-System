@@ -8,7 +8,7 @@ import type {
   User,
 } from './types';
 
-const API_BASE = import.meta.env.PUBLIC_API_URL as string ?? 'http://localhost:3000';
+const API_BASE = (import.meta.env.VITE_API_URL as string) ?? 'http://localhost:3000';
 
 class ApiError extends Error {
   constructor(
@@ -134,7 +134,7 @@ export const chatApi = {
     message: string;
     conversationId?: string;
     category?: string;
-  }) => request<SendMessageResponse>('/chat/message', {
+  }) => request<SendMessageResponse>('/chat/send', {
     method: 'POST',
     body: JSON.stringify(body),
   }),

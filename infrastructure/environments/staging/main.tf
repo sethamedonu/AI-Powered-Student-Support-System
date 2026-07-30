@@ -98,6 +98,7 @@ module "lambda" {
   ses_from_email               = var.ses_from_email
   bedrock_region               = var.aws_region
   bedrock_guardrail_id         = var.bedrock_guardrail_id
+  cors_allowed_origins         = var.cors_allowed_origins
 }
 
 module "api_gateway" {
@@ -114,6 +115,7 @@ module "cloudwatch" {
   source                       = "../../modules/cloudwatch"
   environment                  = var.environment
   app_name                     = var.app_name
+  aws_region                   = var.aws_region
   sns_alerts_topic_arn         = module.sns.alerts_topic_arn
   api_gateway_id               = module.api_gateway.rest_api_id
   lambda_function_names        = module.lambda.function_names
@@ -150,9 +152,8 @@ module "amplify" {
   acm_certificate_arn = module.acm.certificate_arn
   environment_variables = {
     VITE_API_URL              = module.api_gateway.invoke_url
-    VITE_COGNITO_REGION       = var.aws_region
     VITE_COGNITO_USER_POOL_ID = module.cognito.user_pool_id
     VITE_COGNITO_CLIENT_ID    = module.cognito.user_pool_client_id
-    VITE_APP_NAME             = var.app_name
+    VITE_ENVIRONMENT          = var.environment
   }
 }

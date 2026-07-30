@@ -35,17 +35,20 @@ resource "aws_amplify_app" "main" {
             - npm ci
         build:
           commands:
-            - npm run --workspace=frontend build.server
+            - npm run --workspace=frontend build.static
       artifacts:
-        baseDirectory: frontend/dist
+        baseDirectory: frontend/dist/client
         files:
           - '**/*'
       cache:
         paths:
           - node_modules/**/*
+          - frontend/node_modules/**/*
   EOT
 
-  environment_variables = var.environment_variables
+  environment_variables = merge(var.environment_variables, {
+    VITE_APP_ORIGIN = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
+  })
 
   # SPA routing — rewrite all non-asset paths to index.html
   custom_rule {
@@ -70,7 +73,9 @@ resource "aws_amplify_branch" "main" {
   enable_auto_build           = true
   enable_pull_request_preview = var.environment != "prod"
 
-  environment_variables = var.environment_variables
+  environment_variables = merge(var.environment_variables, {
+    VITE_APP_ORIGIN = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
+  })
 
   tags = {
     Name = "${local.prefix}-branch-${local.branch_name}"

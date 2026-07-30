@@ -9,7 +9,7 @@ import { Alert } from '~/components/ui/Alert';
 export const useLoginAction = routeAction$(
   async (data, { cookie, redirect }) => {
     const res = await fetch(
-      `${process.env['PUBLIC_API_URL'] ?? 'http://localhost:3000'}/auth/login`,
+      `${import.meta.env.VITE_API_URL ?? 'http://localhost:3000'}/auth/login`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

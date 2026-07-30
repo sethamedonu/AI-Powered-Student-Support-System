@@ -2,7 +2,7 @@ locals {
   prefix = "${var.app_name}-${var.environment}"
 
   common_env = {
-    NODE_ENV                     = var.environment
+    NODE_ENV                     = var.environment == "prod" ? "production" : var.environment == "dev" ? "development" : var.environment
     APP_NAME                     = "AI-Powered Student Support System"
     AWS_ACCOUNT_ID               = data.aws_caller_identity.current.account_id
     DYNAMODB_TABLE_USERS         = var.dynamodb_table_users
@@ -18,9 +18,10 @@ locals {
     SQS_CHAT_QUEUE_URL           = var.sqs_chat_queue_url
     SNS_ALERTS_TOPIC_ARN         = var.sns_alerts_topic_arn
     SES_FROM_EMAIL               = var.ses_from_email
-    BEDROCK_REGION               = var.bedrock_region
-    BEDROCK_GUARDRAIL_ID         = var.bedrock_guardrail_id
-    LOG_LEVEL                    = var.environment == "prod" ? "info" : "debug"
+    BEDROCK_REGION                 = var.bedrock_region
+    BEDROCK_GUARDRAIL_ID           = var.bedrock_guardrail_id
+    CORS_ALLOWED_ORIGINS           = var.cors_allowed_origins[0]
+    LOG_LEVEL                      = var.environment == "prod" ? "info" : "debug"
   }
 
   functions = {

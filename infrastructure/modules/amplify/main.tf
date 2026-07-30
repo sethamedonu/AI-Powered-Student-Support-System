@@ -9,8 +9,8 @@ resource "aws_amplify_app" "main" {
   access_token = var.github_access_token
   platform     = "WEB"
 
-  enable_branch_auto_build       = true
-  enable_branch_auto_deletion    = true
+  enable_branch_auto_build    = true
+  enable_branch_auto_deletion = true
 
   auto_branch_creation_config {
     enable_auto_build           = true

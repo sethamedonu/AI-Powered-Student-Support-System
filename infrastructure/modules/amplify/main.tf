@@ -15,18 +15,17 @@ resource "aws_amplify_app" "main" {
           commands:
             - nvm install 22
             - nvm use 22
-            - cd frontend
-            - npm ci --prefix .
+            - npm ci
         build:
           commands:
-            - npm run build.client
+            - npm run build:frontend
       artifacts:
         baseDirectory: frontend/dist
         files:
           - '**/*'
       cache:
         paths:
-          - frontend/node_modules/**/*
+          - node_modules/**/*
   EOT
 
   environment_variables = var.environment_variables

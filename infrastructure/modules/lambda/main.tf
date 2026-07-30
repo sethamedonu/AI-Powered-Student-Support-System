@@ -26,121 +26,121 @@ locals {
 
   functions = {
     health = {
-      handler     = "health/index.handler"
+      handler     = "index.handler"
       description = "Health check endpoint"
       timeout     = 10
       memory      = 128
     }
     auth-register = {
-      handler     = "auth/register.handler"
+      handler     = "index.handler"
       description = "User registration"
       timeout     = 30
       memory      = 256
     }
     auth-login = {
-      handler     = "auth/login.handler"
+      handler     = "index.handler"
       description = "User login"
       timeout     = 30
       memory      = 256
     }
     auth-verify = {
-      handler     = "auth/verify.handler"
+      handler     = "index.handler"
       description = "Email verification"
       timeout     = 30
       memory      = 256
     }
     auth-forgot-password = {
-      handler     = "auth/forgotPassword.handler"
+      handler     = "index.handler"
       description = "Forgot password flow"
       timeout     = 30
       memory      = 256
     }
     auth-reset-password = {
-      handler     = "auth/resetPassword.handler"
+      handler     = "index.handler"
       description = "Reset password"
       timeout     = 30
       memory      = 256
     }
     auth-refresh = {
-      handler     = "auth/refresh.handler"
+      handler     = "index.handler"
       description = "Refresh JWT tokens"
       timeout     = 30
       memory      = 256
     }
     chat-send = {
-      handler     = "chat/send.handler"
+      handler     = "index.handler"
       description = "Send a chat message and get AI response"
       timeout     = 60
       memory      = 512
     }
     chat-process = {
-      handler     = "chat/process.handler"
+      handler     = "index.handler"
       description = "Async SQS chat message processor"
       timeout     = 300
       memory      = 512
     }
     conversations-list = {
-      handler     = "conversations/list.handler"
+      handler     = "index.handler"
       description = "List user conversations"
       timeout     = 30
       memory      = 256
     }
     conversations-get = {
-      handler     = "conversations/get.handler"
+      handler     = "index.handler"
       description = "Get a single conversation with messages"
       timeout     = 30
       memory      = 256
     }
     conversations-delete = {
-      handler     = "conversations/delete.handler"
+      handler     = "index.handler"
       description = "Delete a conversation"
       timeout     = 30
       memory      = 256
     }
     feedback-submit = {
-      handler     = "feedback/submit.handler"
+      handler     = "index.handler"
       description = "Submit feedback for an AI response"
       timeout     = 30
       memory      = 256
     }
     analytics-get = {
-      handler     = "analytics/get.handler"
+      handler     = "index.handler"
       description = "Get analytics data (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-users-list = {
-      handler     = "admin/listUsers.handler"
+      handler     = "index.handler"
       description = "List all users (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-users-update = {
-      handler     = "admin/updateUser.handler"
+      handler     = "index.handler"
       description = "Update user role or status (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-stats = {
-      handler     = "admin/getStats.handler"
+      handler     = "index.handler"
       description = "Get system stats (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-analytics = {
-      handler     = "admin/getAnalytics.handler"
+      handler     = "index.handler"
       description = "Get analytics (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-feedback-list = {
-      handler     = "admin/listFeedback.handler"
+      handler     = "index.handler"
       description = "List feedback (admin only)"
       timeout     = 30
       memory      = 256
     }
     admin-knowledge-upsert = {
-      handler     = "admin/upsertKnowledge.handler"
+      handler     = "index.handler"
       description = "Create or update knowledge base entry (admin only)"
       timeout     = 30
       memory      = 256

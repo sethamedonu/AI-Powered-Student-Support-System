@@ -45,9 +45,7 @@ resource "aws_amplify_app" "main" {
           - frontend/node_modules/**/*
   EOT
 
-  environment_variables = merge(var.environment_variables, {
-    VITE_APP_ORIGIN = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
-  })
+  environment_variables = var.environment_variables
 
   # SPA routing — rewrite all non-asset paths to index.html
   custom_rule {

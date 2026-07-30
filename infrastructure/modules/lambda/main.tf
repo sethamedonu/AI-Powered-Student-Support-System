@@ -18,10 +18,10 @@ locals {
     SQS_CHAT_QUEUE_URL           = var.sqs_chat_queue_url
     SNS_ALERTS_TOPIC_ARN         = var.sns_alerts_topic_arn
     SES_FROM_EMAIL               = var.ses_from_email
-    BEDROCK_REGION                 = var.bedrock_region
-    BEDROCK_GUARDRAIL_ID           = var.bedrock_guardrail_id
-    CORS_ALLOWED_ORIGINS           = var.cors_allowed_origins[0]
-    LOG_LEVEL                      = var.environment == "prod" ? "info" : "debug"
+    BEDROCK_REGION               = var.bedrock_region
+    BEDROCK_GUARDRAIL_ID         = var.bedrock_guardrail_id
+    CORS_ALLOWED_ORIGINS         = var.cors_allowed_origins[0]
+    LOG_LEVEL                    = var.environment == "prod" ? "info" : "debug"
   }
 
   functions = {
@@ -118,6 +118,24 @@ locals {
     admin-users-update = {
       handler     = "admin/updateUser.handler"
       description = "Update user role or status (admin only)"
+      timeout     = 30
+      memory      = 256
+    }
+    admin-stats = {
+      handler     = "admin/getStats.handler"
+      description = "Get system stats (admin only)"
+      timeout     = 30
+      memory      = 256
+    }
+    admin-analytics = {
+      handler     = "admin/getAnalytics.handler"
+      description = "Get analytics (admin only)"
+      timeout     = 30
+      memory      = 256
+    }
+    admin-feedback-list = {
+      handler     = "admin/listFeedback.handler"
+      description = "List feedback (admin only)"
       timeout     = 30
       memory      = 256
     }

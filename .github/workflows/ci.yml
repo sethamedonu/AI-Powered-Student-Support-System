@@ -70,22 +70,27 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci --workspace=frontend
+        run: npm ci
+        working-directory: frontend
 
       - name: Lint
-        run: npm run lint --workspace=frontend
+        run: npm run lint
+        working-directory: frontend
 
       - name: Type check
-        run: npm run typecheck --workspace=frontend
+        run: npm run typecheck
+        working-directory: frontend
 
       - name: Unit tests
-        run: npm run test --workspace=frontend
+        run: npm run test
+        working-directory: frontend
 
       - name: Build
-        run: npm run build.static --workspace=frontend
+        run: npm run build.static
+        working-directory: frontend
         env:
           VITE_API_URL: https://api.placeholder.com
           VITE_COGNITO_REGION: us-east-1

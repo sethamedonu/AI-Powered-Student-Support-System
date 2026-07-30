@@ -32,17 +32,16 @@ resource "aws_amplify_app" "main" {
           commands:
             - nvm install 22
             - nvm use 22
-            - npm ci
+            - npm ci --prefix frontend
         build:
           commands:
-            - npm run --workspace=frontend build.static
+            - npm run build.static --prefix frontend
       artifacts:
         baseDirectory: frontend/dist/client
         files:
           - '**/*'
       cache:
         paths:
-          - node_modules/**/*
           - frontend/node_modules/**/*
   EOT
 

@@ -81,12 +81,7 @@ jobs:
           TF_VAR_github_access_token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Terraform Plan
-        run: |
-          terraform plan -out=tfplan \
-            -var='cognito_callback_urls=["http://localhost:5173/auth/callback","https://dev.d1qwgdujp8oq1u.amplifyapp.com/auth/callback"]' \
-            -var='cognito_logout_urls=["http://localhost:5173/auth/logout","https://dev.d1qwgdujp8oq1u.amplifyapp.com/auth/logout"]' \
-            -var='cors_allowed_origins=["http://localhost:5173","https://dev.d1qwgdujp8oq1u.amplifyapp.com"]' \
-            -var='bedrock_guardrail_id='
+        run: terraform plan -out=tfplan
         working-directory: infrastructure/environments/${{ needs.setup.outputs.environment }}
         env:
           TF_VAR_github_access_token: ${{ secrets.GH_ACCESS_TOKEN }}

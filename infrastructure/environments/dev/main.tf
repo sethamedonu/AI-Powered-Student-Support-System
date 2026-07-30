@@ -133,6 +133,7 @@ module "amplify" {
   acm_certificate_arn = ""
   environment_variables = {
     VITE_API_URL              = module.api_gateway.invoke_url
+    VITE_COGNITO_REGION       = var.aws_region
     VITE_COGNITO_USER_POOL_ID = module.cognito.user_pool_id
     VITE_COGNITO_CLIENT_ID    = module.cognito.user_pool_client_id
     VITE_ENVIRONMENT          = var.environment

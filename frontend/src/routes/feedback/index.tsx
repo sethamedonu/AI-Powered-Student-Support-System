@@ -1,4 +1,5 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
+import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { Button } from '~/components/ui/Button';
@@ -6,6 +7,11 @@ import { Textarea } from '~/components/ui/Textarea';
 import { Select } from '~/components/ui/Select';
 import { Alert } from '~/components/ui/Alert';
 import { feedbackApi } from '~/lib/api';
+import { requireAuth } from '~/lib/auth';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 const CATEGORIES = [
   { label: 'General experience', value: 'general' },

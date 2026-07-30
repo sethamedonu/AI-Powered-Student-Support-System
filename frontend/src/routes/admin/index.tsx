@@ -1,12 +1,18 @@
 import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { StatCard } from '~/components/ui/StatCard';
 import { Spinner } from '~/components/ui/Spinner';
 import { adminApi } from '~/lib/api';
+import { requireAdmin } from '~/lib/auth';
 import { formatDate } from '~/lib/utils';
 import type { User } from '~/lib/types';
+
+// Server-side guard: unauthenticated → /auth/login, non-admin → /dashboard
+export const useAdminGuard = routeLoader$(async (event) => {
+  return requireAdmin(event);
+});
 
 interface AdminStats {
   totalUsers: number;
@@ -28,28 +34,16 @@ interface FeedbackItem {
 const STARS = [1, 2, 3, 4, 5];
 
 export default component$(() => {
+  const serverUser = useAdminGuard();
   const stats = useSignal<AdminStats | null>(null);
   const users = useSignal<User[]>([]);
   const feedback = useSignal<FeedbackItem[]>([]);
   const loading = useSignal(true);
   const error = useSignal('');
-  const currentUser = useSignal<User | null>(null);
+  const currentUser = useSignal<User | null>(serverUser.value ?? null);
 
   useVisibleTask$(async () => {
-    // Load current user and guard admin access
-    try {
-      const raw = document.cookie.split('; ').find(r => r.startsWith('user='))?.split('=').slice(1).join('=');
-      if (raw) currentUser.value = JSON.parse(decodeURIComponent(raw)) as User;
-    } catch {
-      const stored = localStorage.getItem('user');
-      if (stored) currentUser.value = JSON.parse(stored) as User;
-    }
-
-    if (currentUser.value?.role !== 'admin') {
-      window.location.href = '/dashboard';
-      return;
-    }
-
+    // Server guard already validated admin role — load data directly
     try {
       const [statsData, usersData, feedbackData] = await Promise.all([
         adminApi.getStats(),

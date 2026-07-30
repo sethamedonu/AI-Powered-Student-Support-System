@@ -1,12 +1,16 @@
 import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
-import { Link, useLocation } from '@builder.io/qwik-city';
+import { Link, useLocation, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { ChatMessage } from '~/components/chat/ChatMessage';
 import { conversationsApi } from '~/lib/api';
-import { getInitials } from '~/lib/auth';
+import { getInitials, requireAuth } from '~/lib/auth';
 import { formatDate, truncate } from '~/lib/utils';
 import type { Conversation, Message, User } from '~/lib/types';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 export default component$(() => {
   const loc = useLocation();

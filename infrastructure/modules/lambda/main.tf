@@ -19,6 +19,8 @@ locals {
     SNS_ALERTS_TOPIC_ARN         = var.sns_alerts_topic_arn
     SES_FROM_EMAIL               = var.ses_from_email
     BEDROCK_REGION               = var.bedrock_region
+    BEDROCK_MODEL_ROUTINE        = var.bedrock_model_routine
+    BEDROCK_MODEL_COMPLEX        = var.bedrock_model_complex
     BEDROCK_GUARDRAIL_ID         = var.bedrock_guardrail_id
     CORS_ALLOWED_ORIGINS         = var.cors_allowed_origins[0]
     LOG_LEVEL                    = var.environment == "prod" ? "info" : "debug"

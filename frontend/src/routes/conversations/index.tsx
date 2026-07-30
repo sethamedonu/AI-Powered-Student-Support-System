@@ -1,10 +1,15 @@
 import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { conversationsApi } from '~/lib/api';
+import { requireAuth } from '~/lib/auth';
 import { timeAgo, truncate, formatDate } from '~/lib/utils';
 import type { Conversation } from '~/lib/types';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 export default component$(() => {
   const conversations = useSignal<Conversation[]>([]);

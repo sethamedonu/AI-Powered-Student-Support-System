@@ -1,12 +1,16 @@
 import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
-import { useLocation } from '@builder.io/qwik-city';
+import { useLocation, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { ChatMessage } from '~/components/chat/ChatMessage';
 import { TypingIndicator } from '~/components/chat/TypingIndicator';
 import { chatApi } from '~/lib/api';
-import { getInitials } from '~/lib/auth';
+import { getInitials, requireAuth } from '~/lib/auth';
 import type { Message, User, KnowledgeCategory } from '~/lib/types';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 const CATEGORIES: { label: string; value: KnowledgeCategory }[] = [
   { label: 'General', value: 'general' },
@@ -28,8 +32,9 @@ const SUGGESTIONS = [
 ];
 
 export default component$(() => {
+  const serverUser = useAuthGuard();
   const loc = useLocation();
-  const user = useSignal<User | null>(null);
+  const user = useSignal<User | null>(serverUser.value ?? null);
   const messages = useSignal<Message[]>([]);
   const conversationId = useSignal<string | undefined>(undefined);
   const input = useSignal('');
@@ -41,12 +46,15 @@ export default component$(() => {
   const messagesEndRef = useSignal<Element>();
 
   useVisibleTask$(() => {
-    try {
-      const raw = document.cookie.split('; ').find(r => r.startsWith('user='))?.split('=').slice(1).join('=');
-      if (raw) user.value = JSON.parse(decodeURIComponent(raw)) as User;
-    } catch {
-      const stored = localStorage.getItem('user');
-      if (stored) user.value = JSON.parse(stored) as User;
+    // user already seeded from server guard — cookie fallback only if needed
+    if (!user.value) {
+      try {
+        const raw = document.cookie.split('; ').find(r => r.startsWith('user='))?.split('=').slice(1).join('=');
+        if (raw) user.value = JSON.parse(decodeURIComponent(raw)) as User;
+      } catch {
+        const stored = localStorage.getItem('user');
+        if (stored) user.value = JSON.parse(stored) as User;
+      }
     }
   });
 

@@ -1,10 +1,15 @@
 import { component$, useSignal } from '@builder.io/qwik';
-import { Link, routeAction$, z, zod$ } from '@builder.io/qwik-city';
+import { Link, routeAction$, routeLoader$, z, zod$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AuthLayout } from '~/components/layout/AuthLayout';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { Alert } from '~/components/ui/Alert';
+import { redirectIfAuthenticated } from '~/lib/auth';
+
+export const useGuestGuard = routeLoader$(async (event) => {
+  redirectIfAuthenticated(event);
+});
 
 export const useLoginAction = routeAction$(
   async (data, { cookie, redirect }) => {

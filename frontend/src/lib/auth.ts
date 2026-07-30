@@ -1,5 +1,8 @@
+import type { RequestEventBase } from '@builder.io/qwik-city';
 import { authApi, clearTokens, getStoredUser, saveTokens } from './api';
 import type { User } from './types';
+
+// ─── Client-side helpers ─────────────────────────────────────────────────────
 
 export function isAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
@@ -34,16 +37,75 @@ export async function refreshSession(): Promise<boolean> {
   }
 }
 
-/** Redirect to login if not authenticated. Call in routeLoader$. */
-export function requireAuth(url: URL): Response | null {
-  // Server-side: check cookie or header — for now handled client-side
-  return null;
+// ─── Server-side guards (use inside routeLoader$) ────────────────────────────
+
+/**
+ * Read the user object stored in the cookie set at login.
+ * Returns null when the cookie is absent or unparseable.
+ */
+export function getUserFromCookie(event: RequestEventBase): User | null {
+  const raw = event.cookie.get('user')?.value;
+  if (!raw) return null;
+  try {
+    return JSON.parse(decodeURIComponent(raw)) as User;
+  } catch {
+    return null;
+  }
 }
 
-/** Redirect to dashboard if already authenticated. */
-export function redirectIfAuthenticated(url: URL): Response | null {
-  return null;
+/**
+ * Guard for protected pages.
+ * If no valid accessToken cookie is present, redirects to /auth/login
+ * preserving the current URL as a `redirect` query param.
+ *
+ * Usage inside routeLoader$:
+ *   export const useAuthGuard = routeLoader$(async (event) => {
+ *     return requireAuth(event);
+ *   });
+ */
+export function requireAuth(event: RequestEventBase): User {
+  const token = event.cookie.get('accessToken')?.value;
+  if (!token) {
+    const returnTo = encodeURIComponent(event.url.pathname + event.url.search);
+    throw event.redirect(302, `/auth/login?redirect=${returnTo}`);
+  }
+  const user = getUserFromCookie(event);
+  if (!user) {
+    // Token present but user cookie is missing/corrupt — clear and re-auth
+    event.cookie.delete('accessToken', { path: '/' });
+    event.cookie.delete('refreshToken', { path: '/' });
+    event.cookie.delete('user', { path: '/' });
+    throw event.redirect(302, '/auth/login');
+  }
+  return user;
 }
+
+/**
+ * Admin-only guard. Redirects non-admins to /dashboard.
+ * Calls requireAuth internally — no need to call both.
+ */
+export function requireAdmin(event: RequestEventBase): User {
+  const user = requireAuth(event);
+  if (user.role !== 'admin') {
+    throw event.redirect(302, '/dashboard');
+  }
+  return user;
+}
+
+/**
+ * Guard for auth pages (login, register, etc.).
+ * If the user is already logged in, redirects to /dashboard
+ * or to the `redirect` query param if present.
+ */
+export function redirectIfAuthenticated(event: RequestEventBase): void {
+  const token = event.cookie.get('accessToken')?.value;
+  if (token) {
+    const returnTo = event.url.searchParams.get('redirect');
+    throw event.redirect(302, returnTo ?? '/dashboard');
+  }
+}
+
+// ─── Display helpers ─────────────────────────────────────────────────────────
 
 export function getInitials(user: User): string {
   return `${user.givenName[0] ?? ''}${user.familyName[0] ?? ''}`.toUpperCase();

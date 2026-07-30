@@ -1,4 +1,5 @@
 import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
+import { routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { Avatar } from '~/components/ui/Avatar';
@@ -6,9 +7,13 @@ import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { Alert } from '~/components/ui/Alert';
 import { authApi } from '~/lib/api';
-import { getInitials, getFullName } from '~/lib/auth';
+import { getInitials, getFullName, requireAuth } from '~/lib/auth';
 import { formatDate } from '~/lib/utils';
 import type { User } from '~/lib/types';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 export default component$(() => {
   const user = useSignal<User | null>(null);

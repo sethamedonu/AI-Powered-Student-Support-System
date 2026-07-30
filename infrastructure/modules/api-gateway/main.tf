@@ -156,11 +156,11 @@ module "route_auth_refresh" {
   require_auth  = false
 }
 
-module "route_chat_send" {
+module "route_chat_message" {
   source        = "./routes"
   rest_api_id   = aws_api_gateway_rest_api.main.id
   parent_id     = aws_api_gateway_resource.chat.id
-  path_part     = "send"
+  path_part     = "message"
   http_method   = "POST"
   lambda_arn    = var.lambda_functions["chat-send"]
   aws_region    = var.aws_region
@@ -369,7 +369,7 @@ resource "aws_api_gateway_deployment" "main" {
     module.route_auth_forgot_password,
     module.route_auth_reset_password,
     module.route_auth_refresh,
-    module.route_chat_send,
+    module.route_chat_message,
     module.route_conversations_list,
     module.route_feedback_submit,
     module.route_analytics_get,

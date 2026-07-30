@@ -1,11 +1,16 @@
 import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { StatCard } from '~/components/ui/StatCard';
 import { timeAgo, truncate } from '~/lib';
 import { conversationsApi } from '~/lib/api';
+import { requireAuth } from '~/lib/auth';
 import type { Conversation, User } from '~/lib/types';
+
+export const useAuthGuard = routeLoader$(async (event) => {
+  return requireAuth(event);
+});
 
 const CATEGORIES = [
   { label: 'Admissions', value: 'admissions', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', color: 'text-blue-500' },
@@ -17,20 +22,12 @@ const CATEGORIES = [
 ];
 
 export default component$(() => {
-  const user = useSignal<User | null>(null);
+  const serverUser = useAuthGuard();
+  const user = useSignal<User | null>(serverUser.value ?? null);
   const conversations = useSignal<Conversation[]>([]);
   const loading = useSignal(true);
 
   useVisibleTask$(async () => {
-    // Load user
-    try {
-      const raw = document.cookie.split('; ').find(r => r.startsWith('user='))?.split('=').slice(1).join('=');
-      if (raw) user.value = JSON.parse(decodeURIComponent(raw)) as User;
-    } catch {
-      const stored = localStorage.getItem('user');
-      if (stored) user.value = JSON.parse(stored) as User;
-    }
-
     // Load recent conversations
     try {
       const result = await conversationsApi.list(5);

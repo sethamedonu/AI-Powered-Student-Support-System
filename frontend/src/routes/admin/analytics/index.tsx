@@ -1,10 +1,16 @@
 import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, routeLoader$ } from '@builder.io/qwik-city';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { AppLayout } from '~/components/layout/AppLayout';
 import { Spinner } from '~/components/ui/Spinner';
 import { adminApi } from '~/lib/api';
+import { requireAdmin } from '~/lib/auth';
 import { formatDate } from '~/lib/utils';
+
+// Server-side guard: unauthenticated → /auth/login, non-admin → /dashboard
+export const useAdminGuard = routeLoader$(async (event) => {
+  return requireAdmin(event);
+});
 
 type Period = 'day' | 'week' | 'month';
 

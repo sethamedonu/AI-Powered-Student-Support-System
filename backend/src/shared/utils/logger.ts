@@ -68,6 +68,7 @@ class Logger {
     if (level === 'error' || level === 'warn') {
       console.error(output);
     } else {
+      // eslint-disable-next-line no-console
       console.log(output);
     }
   }

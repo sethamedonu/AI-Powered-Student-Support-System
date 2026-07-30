@@ -35,7 +35,7 @@ resource "aws_amplify_app" "main" {
             - npm ci
         build:
           commands:
-            - npm run build:frontend
+            - npm run --workspace=frontend build.client
       artifacts:
         baseDirectory: frontend/dist
         files:

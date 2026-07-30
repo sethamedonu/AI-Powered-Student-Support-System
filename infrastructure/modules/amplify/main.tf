@@ -47,16 +47,10 @@ resource "aws_amplify_app" "main" {
 
   environment_variables = var.environment_variables
 
-  # SPA routing — send all non-asset requests to index.html
+  # SPA routing — rewrite all non-asset paths to index.html
   custom_rule {
     source = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json)$)([^.]+$)/>"
     status = "200"
-    target = "/index.html"
-  }
-
-  custom_rule {
-    source = "/<*>"
-    status = "404"
     target = "/index.html"
   }
 

@@ -73,6 +73,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Terraform Init
         run: terraform init
@@ -81,19 +82,13 @@ jobs:
           TF_VAR_github_access_token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Terraform Plan
-        id: plan
         run: terraform plan -out=tfplan
         working-directory: infrastructure/environments/${{ needs.setup.outputs.environment }}
-        continue-on-error: true
         env:
           TF_VAR_github_access_token: ${{ secrets.GH_ACCESS_TOKEN }}
           TF_VAR_domain: ${{ secrets.DOMAIN }}
           TF_VAR_ses_from_email: ${{ secrets.SES_FROM_EMAIL }}
           TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
-
-      - name: Check plan exit code
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
 
       - name: Terraform Apply
         if: needs.setup.outputs.tf_action == 'apply'

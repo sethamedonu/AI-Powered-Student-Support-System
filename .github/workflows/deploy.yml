@@ -92,11 +92,8 @@ jobs:
           TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
 
       - name: Check plan exit code
-        run: |
-          if [ ${{ steps.plan.outcome }} == 'failure' ]; then
-            echo "Terraform plan failed"
-            exit 1
-          fi
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
 
       - name: Terraform Apply
         if: needs.setup.outputs.tf_action == 'apply'

@@ -19,7 +19,7 @@
  *   └── deploy-manifest.json ← routing rules (static vs compute)
  */
 
-import { cpSync, mkdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { cpSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
@@ -65,16 +65,33 @@ cpSync(distServer, computeOut, { recursive: true });
 console.log("Copied dist/server/ → .amplify-hosting/compute/default/");
 
 // ─── Determine server entry point ─────────────────────────────────────────────
-// Qwik's nodeServerAdapter emits entry.node-server.js in dist/server/
+// The SSR build emits entry.node-server.js in dist/server/.
 // Verify it exists so we fail loudly here rather than at runtime.
-const entryFile = "entry.node-server.js";
-if (!existsSync(resolve(computeOut, entryFile))) {
-  console.error(
-    `ERROR: Expected entry point '${entryFile}' not found in dist/server/.\n` +
-    `Check that adapters/node-server/vite.config.ts has input: ["src/entry.node-server.tsx", "@qwik-city-plan"]`
-  );
-  process.exit(1);
+const ssrBundleFile = "entry.node-server.js";
+if (!existsSync(resolve(computeOut, ssrBundleFile))) {
+  // Fallback: check if qwikVite named it differently
+  const altFile = "entry.ssr.js";
+  if (!existsSync(resolve(computeOut, altFile))) {
+    console.error(
+      `ERROR: Expected SSR entry '${ssrBundleFile}' (or '${altFile}') not found in dist/server/.\n` +
+      `Check adapters/node-server/vite.config.ts.`
+    );
+    process.exit(1);
+  }
+  console.warn(`Note: Using '${altFile}' as SSR entry (entry.node-server.js not found).`);
 }
+
+// server.js is already emitted by the build as entry.node-server.js — no wrapper needed.
+// Rename it to server.js so Amplify can start it with: node server.js
+const { renameSync } = await import("node:fs");
+const srcEntry = resolve(computeOut, existsSync(resolve(computeOut, ssrBundleFile)) ? ssrBundleFile : "entry.ssr.js");
+const destEntry = resolve(computeOut, "server.js");
+if (srcEntry !== destEntry) {
+  renameSync(srcEntry, destEntry);
+  console.log(`Renamed ${ssrBundleFile} → server.js`);
+}
+
+const entryFile = "server.js";
 
 // ─── Determine Qwik version for framework metadata ────────────────────────────
 let qwikVersion = "1.0.0";

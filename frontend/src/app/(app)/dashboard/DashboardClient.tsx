@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { StatCard } from "@/components/ui/StatCard";
-import { Spinner } from "@/components/ui/Spinner";
 import { conversationsApi } from "@/lib/api";
 import { timeAgo, truncate } from "@/lib/utils";
 import type { Conversation, User } from "@/lib/types";

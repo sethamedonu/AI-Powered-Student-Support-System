@@ -35,7 +35,6 @@ export async function requireAuth(returnPath?: string): Promise<User> {
   const token = cookieStore.get("accessToken")?.value;
 
   if (!token) {
-    const path = returnPath ?? "/auth/login";
     const redirectTo = returnPath
       ? `/auth/login?redirect=${encodeURIComponent(returnPath)}`
       : "/auth/login";

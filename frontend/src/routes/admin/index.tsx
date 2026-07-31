@@ -34,7 +34,7 @@ interface FeedbackItem {
 const STARS = [1, 2, 3, 4, 5];
 
 export default component$(() => {
-  const serverUser = useAdminGuard();
+  const _serverUser = useAdminGuard();
   const stats = useSignal<AdminStats | null>(null);
   const users = useSignal<User[]>([]);
   const feedback = useSignal<FeedbackItem[]>([]);

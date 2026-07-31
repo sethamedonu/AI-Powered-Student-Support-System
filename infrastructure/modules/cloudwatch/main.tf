@@ -3,16 +3,12 @@ locals {
 }
 
 # ─── Log Groups ───────────────────────────────────────────────────────────────
-resource "aws_cloudwatch_log_group" "lambda" {
-  for_each          = toset(var.lambda_function_names)
-  name              = "/aws/lambda/${each.value}"
-  retention_in_days = var.log_retention_days
-
-  lifecycle {
-    ignore_changes = [name]
-  }
-
-  tags = { Environment = var.environment }
+# Log groups are already created by the lambda module; reference them via data
+# source so metric filters can depend on them without Terraform trying to
+# create duplicates.
+data "aws_cloudwatch_log_group" "lambda" {
+  for_each = toset(var.lambda_function_names)
+  name     = "/aws/lambda/${each.value}"
 }
 
 # ─── Metric Filters ───────────────────────────────────────────────────────────
@@ -28,7 +24,7 @@ resource "aws_cloudwatch_log_metric_filter" "errors" {
     value     = "1"
   }
 
-  depends_on = [aws_cloudwatch_log_group.lambda]
+  depends_on = [data.aws_cloudwatch_log_group.lambda]
 }
 
 resource "aws_cloudwatch_log_metric_filter" "cold_starts" {
@@ -43,7 +39,7 @@ resource "aws_cloudwatch_log_metric_filter" "cold_starts" {
     value     = "1"
   }
 
-  depends_on = [aws_cloudwatch_log_group.lambda]
+  depends_on = [data.aws_cloudwatch_log_group.lambda]
 }
 
 # ─── Lambda Error Alarms ──────────────────────────────────────────────────────

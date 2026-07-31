@@ -32,10 +32,10 @@ resource "aws_amplify_app" "main" {
           commands:
             - nvm install 22
             - nvm use 22
-            - npm ci --prefix frontend
+            - cd frontend && npm ci
         build:
           commands:
-            - npm run build.amplify --prefix frontend
+            - npm run build.amplify
       artifacts:
         baseDirectory: frontend/.amplify-hosting
         files:

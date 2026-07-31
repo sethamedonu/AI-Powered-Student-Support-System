@@ -72,9 +72,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
-        working-directory: frontend
 
       - name: Lint
         run: npm run lint
@@ -89,14 +88,13 @@ jobs:
         working-directory: frontend
 
       - name: Build
-        run: npm run build.amplify
+        run: npm run build
         working-directory: frontend
         env:
-          VITE_API_URL: https://api.placeholder.com
-          VITE_COGNITO_REGION: us-east-1
-          VITE_COGNITO_USER_POOL_ID: placeholder
-          VITE_COGNITO_CLIENT_ID: placeholder
-          VITE_APP_ORIGIN: https://dev.d1qwgdujp8oq1u.amplifyapp.com
+          NEXT_PUBLIC_API_URL: https://api.placeholder.com
+          NEXT_PUBLIC_COGNITO_REGION: us-east-1
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: placeholder
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: placeholder
 
   # ─── Terraform Validate ─────────────────────────────────────────────────────
   terraform:

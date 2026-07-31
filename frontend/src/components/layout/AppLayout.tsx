@@ -1,48 +1,31 @@
-import { component$, Slot, useSignal, useVisibleTask$ } from '@builder.io/qwik';
-import { Sidebar } from './Sidebar';
-import type { User } from '~/lib/types';
+"use client";
 
-export const AppLayout = component$(() => {
-  const user = useSignal<User | null>(null);
-  const isDark = useSignal(false);
+import { useEffect, useState } from "react";
+import { Sidebar } from "./Sidebar";
+import { getUserFromClientCookie } from "@/lib/auth";
+import type { User } from "@/lib/types";
 
-  useVisibleTask$(() => {
-    // Load user from cookie/localStorage
-    try {
-      const raw = document.cookie
-        .split('; ')
-        .find(r => r.startsWith('user='))
-        ?.split('=')
-        .slice(1)
-        .join('=');
-      if (raw) user.value = JSON.parse(decodeURIComponent(raw)) as User;
-    } catch {
-      // fallback to localStorage
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        try { user.value = JSON.parse(stored) as User; } catch { /* ignore */ }
-      }
-    }
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isDark, setIsDark] = useState(false);
 
-    isDark.value = document.documentElement.classList.contains('dark');
+  useEffect(() => {
+    setUser(getUserFromClientCookie());
+    setIsDark(document.documentElement.classList.contains("dark"));
 
-    // Keep isDark in sync when toggled
     const observer = new MutationObserver(() => {
-      isDark.value = document.documentElement.classList.contains('dark');
+      setIsDark(document.documentElement.classList.contains("dark"));
     });
-    observer.observe(document.documentElement, { attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributeFilter: ["class"] });
     return () => observer.disconnect();
-  });
+  }, []);
 
   return (
-    <div class="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
-      <Sidebar user={user.value} isDark={isDark.value} />
-      <div class="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile top bar spacer handled inside Sidebar */}
-        <main class="flex-1 overflow-y-auto">
-          <Slot />
-        </main>
+    <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <Sidebar user={user} isDark={isDark} />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
-});
+}

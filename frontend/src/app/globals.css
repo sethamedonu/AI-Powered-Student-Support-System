@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --color-surface: #ffffff;
+    --color-surface-secondary: #f8f7ff;
+    --color-border: #e5e7eb;
+    --color-text: #0f0e17;
+    --color-text-muted: #6b7280;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --color-surface: #0d0c1d;
+    --color-surface-secondary: #13122a;
+    --color-border: #2d2b55;
+    --color-text: #f5f3ff;
+    --color-text-muted: #a5b4fc;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    min-height: 100dvh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+
+  /* Selection */
+  ::selection {
+    background: #c7d2fe;
+    color: #312e81;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Playfair Display", Georgia, serif;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .dark .glass {
+    background: rgba(26, 24, 54, 0.7);
+    border-color: rgba(99, 102, 241, 0.15);
+  }
+
+  .mesh-bg {
+    background-color: #312e81;
+    background-image:
+      radial-gradient(at 20% 30%, #4338ca 0px, transparent 55%),
+      radial-gradient(at 80% 10%, #7c3aed 0px, transparent 50%),
+      radial-gradient(at 60% 80%, #1e1b4b 0px, transparent 55%),
+      radial-gradient(at 10% 90%, #4f46e5 0px, transparent 45%);
+  }
+}

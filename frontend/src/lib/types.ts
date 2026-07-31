@@ -1,18 +1,18 @@
-export type UserRole = 'student' | 'admin';
-export type MessageRole = 'user' | 'assistant';
-export type CacheStatus = 'hit' | 'miss';
-export type ConversationStatus = 'active' | 'archived';
+export type UserRole = "student" | "admin";
+export type MessageRole = "user" | "assistant";
+export type CacheStatus = "hit" | "miss";
+export type ConversationStatus = "active" | "archived";
 
 export type KnowledgeCategory =
-  | 'admissions'
-  | 'registration'
-  | 'tuition'
-  | 'examinations'
-  | 'calendar'
-  | 'graduation'
-  | 'scholarships'
-  | 'campus-services'
-  | 'general';
+  | "admissions"
+  | "registration"
+  | "tuition"
+  | "examinations"
+  | "calendar"
+  | "graduation"
+  | "scholarships"
+  | "campus-services"
+  | "general";
 
 export interface User {
   userId: string;

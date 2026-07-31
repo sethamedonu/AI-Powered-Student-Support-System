@@ -112,8 +112,17 @@ await esbuild({
   target: "node22",
   format: "esm",
   outfile: resolve(computeOut, "server.js"),
-  // Don't bundle node built-ins or the already-bundled SSR file
-  external: ["node:*", `./${ssrBundle}`],
+  // Don't bundle node built-ins or the already-bundled SSR file.
+  // Also exclude Qwik's Vite virtual modules — they're embedded in entry.ssr.js
+  // by the Vite build and don't exist as real packages.
+  external: [
+    "node:*",
+    `./${ssrBundle}`,
+    "@qwik-city-plan",
+    "@qwik-city-not-found-paths",
+    "@qwik-city-static-paths",
+    "@qwik-client-manifest",
+  ],
   logLevel: "silent",
 });
 

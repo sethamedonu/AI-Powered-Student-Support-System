@@ -89,7 +89,7 @@ jobs:
         working-directory: frontend
 
       - name: Build
-        run: npm run build.static
+        run: npm run build.amplify
         working-directory: frontend
         env:
           VITE_API_URL: https://api.placeholder.com

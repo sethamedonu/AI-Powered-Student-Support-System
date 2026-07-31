@@ -7,5 +7,5 @@ output "dashboard_url" {
 }
 
 output "log_group_names" {
-  value = { for fn, lg in data.aws_cloudwatch_log_group.lambda : fn => lg.name }
+  value = [for fn in var.lambda_function_names : "/aws/lambda/${fn}"]
 }

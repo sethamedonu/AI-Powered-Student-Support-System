@@ -1,4 +1,4 @@
-import type { RequestEventBase } from '@builder.io/qwik-city';
+import type { RequestEventLoader } from '@builder.io/qwik-city';
 import { authApi, clearTokens, getStoredUser, saveTokens } from './api';
 import type { User } from './types';
 
@@ -43,7 +43,7 @@ export async function refreshSession(): Promise<boolean> {
  * Read the user object stored in the cookie set at login.
  * Returns null when the cookie is absent or unparseable.
  */
-export function getUserFromCookie(event: RequestEventBase): User | null {
+export function getUserFromCookie(event: RequestEventLoader): User | null {
   const raw = event.cookie.get('user')?.value;
   if (!raw) return null;
   try {
@@ -63,7 +63,7 @@ export function getUserFromCookie(event: RequestEventBase): User | null {
  *     return requireAuth(event);
  *   });
  */
-export function requireAuth(event: RequestEventBase): User {
+export function requireAuth(event: RequestEventLoader): User {
   const token = event.cookie.get('accessToken')?.value;
   if (!token) {
     const returnTo = encodeURIComponent(event.url.pathname + event.url.search);
@@ -84,7 +84,7 @@ export function requireAuth(event: RequestEventBase): User {
  * Admin-only guard. Redirects non-admins to /dashboard.
  * Calls requireAuth internally — no need to call both.
  */
-export function requireAdmin(event: RequestEventBase): User {
+export function requireAdmin(event: RequestEventLoader): User {
   const user = requireAuth(event);
   if (user.role !== 'admin') {
     throw event.redirect(302, '/dashboard');
@@ -97,7 +97,7 @@ export function requireAdmin(event: RequestEventBase): User {
  * If the user is already logged in, redirects to /dashboard
  * or to the `redirect` query param if present.
  */
-export function redirectIfAuthenticated(event: RequestEventBase): void {
+export function redirectIfAuthenticated(event: RequestEventLoader): void {
   const token = event.cookie.get('accessToken')?.value;
   if (token) {
     const returnTo = event.url.searchParams.get('redirect');

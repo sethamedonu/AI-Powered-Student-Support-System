@@ -1,198 +1,198 @@
 /**
  * build-amplify.mjs
  *
- * Post-build script that reorganises Qwik City's SSR build output into the
- * directory structure required by AWS Amplify Hosting WEB_COMPUTE.
+ * Packages the Qwik City SSR app for AWS Amplify Hosting WEB_COMPUTE.
  *
- * AWS Amplify deployment specification:
+ * Amplify deployment spec:
  *   https://docs.aws.amazon.com/amplify/latest/userguide/ssr-deployment-specification.html
  *
- * Input (produced by Vite builds):
- *   dist/client/   — hashed JS/CSS/assets  (npm run build.client)
- *   dist/server/   — SSR render bundle     (npm run build.server  →  vite build --mode ssr)
+ * Build inputs:
+ *   dist/          — client assets from `vite build` (qwikVite puts them here)
+ *   dist/server/   — SSR render bundle from `vite build --mode ssr`
  *
- * Output (consumed by Amplify):
+ * Output:
  *   .amplify-hosting/
- *   ├── static/              ← dist/client/* served by CloudFront CDN
- *   ├── compute/
- *   │   └── default/
- *   │       ├── entry.ssr.js    ← Qwik render function (bundled from dist/server/)
- *   │       └── server.js       ← Node.js HTTP server wrapper (entry point)
- *   └── deploy-manifest.json ← routing rules
+ *   ├── static/                    ← CDN-served client assets
+ *   ├── compute/default/
+ *   │   ├── entry.ssr.js           ← Qwik render bundle
+ *   │   ├── server.js              ← Node HTTP server (entry point for Amplify)
+ *   │   └── node_modules/          ← runtime deps copied from project
+ *   └── deploy-manifest.json
  */
 
-import { cpSync, mkdirSync, rmSync, existsSync, writeFileSync, readFileSync } from "node:fs";
+import {
+  cpSync, mkdirSync, rmSync, existsSync,
+  writeFileSync, readFileSync,
+} from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, "..");
+const root      = resolve(__dirname, "..");
+const nodeModules = resolve(root, "node_modules");
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
-// qwikVite outputs the client build to dist/ (not dist/client/)
-const distClient = resolve(root, "dist");
-const distServer = resolve(root, "dist/server");
-const amplifyOut = resolve(root, ".amplify-hosting");
-const staticOut  = resolve(amplifyOut, "static");
-const computeOut = resolve(amplifyOut, "compute/default");
+const distClient  = resolve(root, "dist");
+const distServer  = resolve(root, "dist/server");
+const amplifyOut  = resolve(root, ".amplify-hosting");
+const staticOut   = resolve(amplifyOut, "static");
+const computeOut  = resolve(amplifyOut, "compute/default");
 
-// ─── Validate build inputs ────────────────────────────────────────────────────
+// ─── Validate inputs ──────────────────────────────────────────────────────────
 if (!existsSync(distClient)) {
-  console.error("ERROR: dist/ not found. Run 'npm run build.client' first.");
+  console.error("ERROR: dist/ not found — run 'npm run build.client' first.");
   process.exit(1);
 }
 if (!existsSync(distServer)) {
-  console.error("ERROR: dist/server not found. Run 'npm run build.server' first.");
+  console.error("ERROR: dist/server not found — run 'npm run build.server' first.");
   process.exit(1);
 }
 
 // ─── Clean previous output ───────────────────────────────────────────────────
 if (existsSync(amplifyOut)) {
   rmSync(amplifyOut, { recursive: true, force: true });
-  console.log("Cleaned previous .amplify-hosting/ output");
+  console.log("Cleaned previous .amplify-hosting/");
 }
 
-// ─── Copy static assets ──────────────────────────────────────────────────────
-// qwikVite outputs client assets directly to dist/ (build/, assets/, etc.)
-// We copy everything from dist/ except the dist/server/ subdirectory.
+// ─── Static assets ───────────────────────────────────────────────────────────
+// Copy dist/ (client assets) to static/, excluding dist/server/
 mkdirSync(staticOut, { recursive: true });
 cpSync(distClient, staticOut, {
   recursive: true,
   filter: (src) => !src.startsWith(distServer),
 });
-console.log("Copied dist/ (excluding dist/server/) → .amplify-hosting/static/");
+console.log("Copied client assets → .amplify-hosting/static/");
 
-// ─── Copy server bundle ───────────────────────────────────────────────────────
-// dist/server/ → .amplify-hosting/compute/default/
-// This is the Qwik SSR render bundle.
+// ─── SSR bundle ──────────────────────────────────────────────────────────────
+// Copy dist/server/ (Qwik render bundle) to compute/default/
 mkdirSync(computeOut, { recursive: true });
 cpSync(distServer, computeOut, { recursive: true });
 console.log("Copied dist/server/ → .amplify-hosting/compute/default/");
 
-// ─── Verify SSR render bundle ─────────────────────────────────────────────────
-// vite build --mode ssr emits dist/server/entry.ssr.js
 const ssrBundle = "entry.ssr.js";
 if (!existsSync(resolve(computeOut, ssrBundle))) {
-  console.error(
-    `ERROR: Expected '${ssrBundle}' in dist/server/.\n` +
-    `Make sure vite.config.ts has build.ssr = "src/entry.ssr.tsx" when mode === "ssr".`
-  );
+  console.error(`ERROR: '${ssrBundle}' not found in dist/server/`);
   process.exit(1);
 }
 
-// ─── Write server.js — the Amplify compute entry point ───────────────────────
+// ─── Runtime node_modules ─────────────────────────────────────────────────────
+// Amplify's compute sandbox is self-contained — no host node_modules.
+// We copy only the packages needed at runtime (the Node middleware).
+// @builder.io/qwik-city/middleware/node is the only direct runtime dep.
+// It in turn depends on @builder.io/qwik (already bundled into entry.ssr.js)
+// but its package.json still contains module resolution paths we need.
 //
-// Amplify starts the compute resource with:  node server.js
-// We bundle the Qwik City Node middleware + our server code into a single
-// self-contained file using esbuild, so no node_modules need to be copied.
-//
-import { build as esbuild } from "esbuild";
+// We copy the minimum required packages:
+const runtimePkgs = [
+  "@builder.io/qwik-city",  // Node.js middleware (createQwikCity)
+  "@builder.io/qwik",       // Qwik server runtime (renderToStream etc.)
+];
 
-// Write the unbundled server source first, then bundle it
-const serverSrc = `
+const computeNodeModules = resolve(computeOut, "node_modules");
+mkdirSync(computeNodeModules, { recursive: true });
+
+for (const pkg of runtimePkgs) {
+  const src  = resolve(nodeModules, pkg);
+  const dest = resolve(computeNodeModules, pkg);
+  if (!existsSync(src)) {
+    console.error(`ERROR: node_modules/${pkg} not found — run 'npm ci' first.`);
+    process.exit(1);
+  }
+  // Create scoped directory if needed (e.g. @builder.io)
+  mkdirSync(resolve(computeNodeModules, pkg.split("/")[0]), { recursive: true });
+  cpSync(src, dest, { recursive: true });
+  console.log(`Copied node_modules/${pkg} → compute/default/node_modules/`);
+}
+
+// ─── server.js — Amplify compute entry point ─────────────────────────────────
+// Amplify starts this with: node server.js
+// It imports the Qwik City Node middleware and the SSR render bundle,
+// then starts an HTTP server on port 3000.
+//
+// Note: @qwik-city-plan is a Vite virtual module that was bundled into
+// entry.ssr.js at build time — we don't import it here.
+//
+const serverJs = `
+// Auto-generated by scripts/build-amplify.mjs — do not edit
 import { createQwikCity } from "@builder.io/qwik-city/middleware/node";
-import render from "./${ssrBundle}";
+import render from "./entry.ssr.js";
 import { createServer } from "node:http";
+
 const { router, notFound } = createQwikCity({ render });
 const port = parseInt(process.env.PORT ?? "3000", 10);
+
 createServer(async (req, res) => {
-  await router(req, res, () => { notFound(req, res, () => {}); });
+  await router(req, res, () => {
+    notFound(req, res, () => {});
+  });
 }).listen(port, () => {
-  console.log("Qwik City SSR server on http://localhost:" + port);
+  console.log("[aisss] Qwik City SSR server on http://localhost:" + port);
 });
 `.trimStart();
 
-const serverSrcPath = resolve(computeOut, "_server-src.mjs");
-writeFileSync(serverSrcPath, serverSrc, "utf8");
+writeFileSync(resolve(computeOut, "server.js"), serverJs, "utf8");
+console.log("Written .amplify-hosting/compute/default/server.js");
 
-await esbuild({
-  entryPoints: [serverSrcPath],
-  bundle: true,
-  platform: "node",
-  target: "node22",
-  format: "esm",
-  outfile: resolve(computeOut, "server.js"),
-  // Don't bundle node built-ins or the already-bundled SSR file.
-  // Also exclude Qwik's Vite virtual modules — they're embedded in entry.ssr.js
-  // by the Vite build and don't exist as real packages.
-  external: [
-    "node:*",
-    `./${ssrBundle}`,
-    "@qwik-city-plan",
-    "@qwik-city-not-found-paths",
-    "@qwik-city-static-paths",
-    "@qwik-client-manifest",
-  ],
-  logLevel: "silent",
-});
+// ─── package.json for compute dir (needed for ESM resolution) ────────────────
+// Node needs a package.json with "type":"module" to load .js files as ESM.
+writeFileSync(
+  resolve(computeOut, "package.json"),
+  JSON.stringify({ type: "module", name: "aisss-compute" }, null, 2),
+  "utf8"
+);
+console.log("Written .amplify-hosting/compute/default/package.json");
 
-// Clean up temp source file
-import { unlinkSync } from "node:fs";
-unlinkSync(serverSrcPath);
-console.log("Written .amplify-hosting/compute/default/server.js (bundled)");
-
-// ─── Detect Qwik version for manifest metadata ────────────────────────────────
+// ─── deploy-manifest.json ─────────────────────────────────────────────────────
 let qwikVersion = "1.20.0";
 try {
-  const pkg = JSON.parse(
-    readFileSync(resolve(root, "node_modules/@builder.io/qwik/package.json"), "utf8")
+  const qwikPkg = JSON.parse(
+    readFileSync(resolve(nodeModules, "@builder.io/qwik/package.json"), "utf8")
   );
-  qwikVersion = pkg.version ?? qwikVersion;
-} catch {
-  // CI runner installs them; local runs may not have node_modules
-}
+  qwikVersion = qwikPkg.version ?? qwikVersion;
+} catch { /* fallback */ }
 
-// ─── Write deploy-manifest.json ───────────────────────────────────────────────
-//
-// Routing rules (evaluated in order, first match wins):
-//   /build/*  — Qwik's hashed JS bundles — long cache, static CDN
-//   /assets/* — public folder assets — short cache, static CDN
-//   /*.*      — any path with a file extension → static, SSR fallback on 404
-//   /*        — catch-all → Node.js SSR server
-//
-const deployManifest = {
+const manifest = {
   version: 1,
   routes: [
+    // Qwik's hashed JS chunks — immutable, very long cache
     {
       path: "/build/*",
       target: { kind: "Static", cacheControl: "public, max-age=31536000, immutable" },
     },
+    // Public folder assets
     {
       path: "/assets/*",
       target: { kind: "Static", cacheControl: "public, max-age=86400" },
     },
+    // Files with extensions → static first, SSR fallback on 404
     {
       path: "/*.*",
       target: { kind: "Static" },
       fallback: { kind: "Compute", src: "default" },
     },
+    // Everything else → SSR server
     {
       path: "/*",
       target: { kind: "Compute", src: "default" },
     },
   ],
-  computeResources: [
-    {
-      name: "default",
-      runtime: "nodejs22.x",
-      entrypoint: "server.js",
-    },
-  ],
-  framework: {
-    name: "qwik-city",
-    version: qwikVersion,
-  },
+  computeResources: [{
+    name: "default",
+    runtime: "nodejs22.x",
+    entrypoint: "server.js",
+  }],
+  framework: { name: "qwik-city", version: qwikVersion },
 };
 
 writeFileSync(
   resolve(amplifyOut, "deploy-manifest.json"),
-  JSON.stringify(deployManifest, null, 2),
+  JSON.stringify(manifest, null, 2),
   "utf8"
 );
 console.log("Written .amplify-hosting/deploy-manifest.json");
 
 // ─── Summary ──────────────────────────────────────────────────────────────────
-console.log("\n✅ Amplify WEB_COMPUTE build package ready:");
-console.log("   Static assets  : .amplify-hosting/static/");
-console.log("   SSR compute    : .amplify-hosting/compute/default/server.js");
-console.log("   Manifest       : .amplify-hosting/deploy-manifest.json");
+console.log("\n✅ Amplify WEB_COMPUTE package ready:");
+console.log("   Static     : .amplify-hosting/static/");
+console.log("   Compute    : .amplify-hosting/compute/default/server.js");
+console.log("   Manifest   : .amplify-hosting/deploy-manifest.json");

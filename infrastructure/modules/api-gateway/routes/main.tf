@@ -38,6 +38,7 @@ resource "aws_api_gateway_integration" "this" {
 
 # ─── CORS OPTIONS ─────────────────────────────────────────────────────────────
 resource "aws_api_gateway_method" "options" {
+  count         = var.create_options ? 1 : 0
   rest_api_id   = var.rest_api_id
   resource_id   = local.resource_id
   http_method   = "OPTIONS"
@@ -45,9 +46,10 @@ resource "aws_api_gateway_method" "options" {
 }
 
 resource "aws_api_gateway_integration" "options" {
+  count       = var.create_options ? 1 : 0
   rest_api_id = var.rest_api_id
   resource_id = local.resource_id
-  http_method = aws_api_gateway_method.options.http_method
+  http_method = aws_api_gateway_method.options[0].http_method
   type        = "MOCK"
 
   request_templates = {
@@ -56,9 +58,10 @@ resource "aws_api_gateway_integration" "options" {
 }
 
 resource "aws_api_gateway_method_response" "options" {
+  count       = var.create_options ? 1 : 0
   rest_api_id = var.rest_api_id
   resource_id = local.resource_id
-  http_method = aws_api_gateway_method.options.http_method
+  http_method = aws_api_gateway_method.options[0].http_method
   status_code = "200"
 
   response_parameters = {
@@ -69,10 +72,11 @@ resource "aws_api_gateway_method_response" "options" {
 }
 
 resource "aws_api_gateway_integration_response" "options" {
+  count       = var.create_options ? 1 : 0
   rest_api_id = var.rest_api_id
   resource_id = local.resource_id
-  http_method = aws_api_gateway_method.options.http_method
-  status_code = aws_api_gateway_method_response.options.status_code
+  http_method = aws_api_gateway_method.options[0].http_method
+  status_code = aws_api_gateway_method_response.options[0].status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization,X-Amz-Date,X-Api-Key'"

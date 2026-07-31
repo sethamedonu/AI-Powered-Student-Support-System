@@ -304,16 +304,17 @@ module "route_conversations_get" {
 }
 
 module "route_conversations_delete" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.conversation_id.id
-  path_part     = ""
-  http_method   = "DELETE"
-  lambda_arn    = var.lambda_functions["conversations-delete"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.conversation_id.id
+  path_part      = ""
+  http_method    = "DELETE"
+  lambda_arn     = var.lambda_functions["conversations-delete"]
+  aws_region     = var.aws_region
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
+  create_options = false
 }
 
 # ─── Parent Resources ─────────────────────────────────────────────────────────

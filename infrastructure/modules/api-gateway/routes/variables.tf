@@ -10,3 +10,9 @@ variable "use_parent" {
   type    = bool
   default = false
 }
+
+variable "create_options" {
+  type        = bool
+  default     = true
+  description = "Whether to create the CORS OPTIONS method for this route. Set false when another route on the same resource already creates it."
+}

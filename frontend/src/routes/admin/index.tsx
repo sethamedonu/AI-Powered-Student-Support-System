@@ -40,7 +40,6 @@ export default component$(() => {
   const feedback = useSignal<FeedbackItem[]>([]);
   const loading = useSignal(true);
   const error = useSignal('');
-  const currentUser = useSignal<User | null>(serverUser.value ?? null);
 
   useVisibleTask$(async () => {
     // Server guard already validated admin role — load data directly

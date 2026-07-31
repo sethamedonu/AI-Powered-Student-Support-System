@@ -89,6 +89,7 @@ jobs:
           TF_VAR_domain: ${{ secrets.DOMAIN }}
           TF_VAR_ses_from_email: ${{ secrets.SES_FROM_EMAIL }}
           TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
+          TF_VAR_bedrock_guardrail_id: ${{ secrets.BEDROCK_GUARDRAIL_ID }}
 
       - name: Terraform Apply
         if: needs.setup.outputs.tf_action == 'apply'

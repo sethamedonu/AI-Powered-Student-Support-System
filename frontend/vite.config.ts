@@ -21,6 +21,27 @@ errorOnDuplicatesPkgDeps(devDependencies, dependencies);
  * Note that Vite normally starts from `index.html` but the qwikCity plugin makes start at `src/entry.ssr.tsx` instead.
  */
 export default defineConfig(({ command, mode }): UserConfig => {
+  // ── SSR server build ─────────────────────────────────────────────────────
+  // Triggered by: vite build --mode ssr
+  // Produces:     dist/server/entry.ssr.js  (the render function)
+  // build-amplify.mjs then wraps it with a Node HTTP server (server.js).
+  if (command === "build" && mode === "ssr") {
+    return {
+      plugins: [tailwindcss(), qwikCity(), qwikVite(), tsconfigPaths({ root: "." })],
+      build: {
+        ssr: "src/entry.ssr.tsx",
+        outDir: "dist/server",
+        rollupOptions: {
+          output: {
+            entryFileNames: "[name].js",
+            chunkFileNames: "[name]-[hash].js",
+          },
+        },
+      },
+    };
+  }
+
+  // ── Client / default build ───────────────────────────────────────────────
   return {
     plugins: [tailwindcss(), qwikCity(), qwikVite(), tsconfigPaths({ root: "." })],
     // This tells Vite which dependencies to pre-build in dev mode.

@@ -29,7 +29,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
-const distClient = resolve(root, "dist/client");
+// qwikVite outputs the client build to dist/ (not dist/client/)
+const distClient = resolve(root, "dist");
 const distServer = resolve(root, "dist/server");
 const amplifyOut = resolve(root, ".amplify-hosting");
 const staticOut  = resolve(amplifyOut, "static");
@@ -37,7 +38,7 @@ const computeOut = resolve(amplifyOut, "compute/default");
 
 // ─── Validate build inputs ────────────────────────────────────────────────────
 if (!existsSync(distClient)) {
-  console.error("ERROR: dist/client not found. Run 'npm run build.client' first.");
+  console.error("ERROR: dist/ not found. Run 'npm run build.client' first.");
   process.exit(1);
 }
 if (!existsSync(distServer)) {
@@ -52,11 +53,14 @@ if (existsSync(amplifyOut)) {
 }
 
 // ─── Copy static assets ──────────────────────────────────────────────────────
-// dist/client/ → .amplify-hosting/static/
-// Amplify serves these directly from its CDN.
+// qwikVite outputs client assets directly to dist/ (build/, assets/, etc.)
+// We copy everything from dist/ except the dist/server/ subdirectory.
 mkdirSync(staticOut, { recursive: true });
-cpSync(distClient, staticOut, { recursive: true });
-console.log("Copied dist/client/ → .amplify-hosting/static/");
+cpSync(distClient, staticOut, {
+  recursive: true,
+  filter: (src) => !src.startsWith(distServer),
+});
+console.log("Copied dist/ (excluding dist/server/) → .amplify-hosting/static/");
 
 // ─── Copy server bundle ───────────────────────────────────────────────────────
 // dist/server/ → .amplify-hosting/compute/default/

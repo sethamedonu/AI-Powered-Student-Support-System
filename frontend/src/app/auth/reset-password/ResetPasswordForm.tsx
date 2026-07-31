@@ -28,8 +28,8 @@ export function ResetPasswordForm({ email }: { email: string }) {
         confirmPassword: data.get("confirmPassword") as string,
       });
       if (result?.error) setError(result.error);
-      if (result?.fieldErrors) setFieldErrors(result.fieldErrors);
-      if (result?.redirectTo) router.push(result.redirectTo);
+      if (result && "fieldErrors" in result && result.fieldErrors) setFieldErrors(result.fieldErrors);
+      if (result && "redirectTo" in result && result.redirectTo) router.push(result.redirectTo);
     });
   }
 

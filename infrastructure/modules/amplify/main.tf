@@ -7,7 +7,7 @@ resource "aws_amplify_app" "main" {
   name         = "${local.prefix}-frontend"
   repository   = var.github_repository
   access_token = var.github_access_token
-  platform     = "WEB"
+  platform     = "WEB_COMPUTE"
 
   enable_branch_auto_build    = true
   enable_branch_auto_deletion = true
@@ -35,9 +35,9 @@ resource "aws_amplify_app" "main" {
             - npm ci --prefix frontend
         build:
           commands:
-            - npm run build.static --prefix frontend
+            - npm run build.amplify --prefix frontend
       artifacts:
-        baseDirectory: frontend/dist/client
+        baseDirectory: frontend/.amplify-hosting
         files:
           - '**/*'
       cache:
@@ -46,13 +46,6 @@ resource "aws_amplify_app" "main" {
   EOT
 
   environment_variables = var.environment_variables
-
-  # SPA routing — rewrite all non-asset paths to index.html
-  custom_rule {
-    source = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json)$)([^.]+$)/>"
-    status = "200"
-    target = "/index.html"
-  }
 
   tags = {
     Name = "${local.prefix}-frontend"

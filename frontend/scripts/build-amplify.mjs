@@ -29,7 +29,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root      = resolve(__dirname, "..");
-const nodeModules = resolve(root, "node_modules");
+// In an npm workspace, packages are hoisted to the repo root, not frontend/node_modules/
+const nodeModules = existsSync(resolve(root, "node_modules/@builder.io/qwik-city"))
+  ? resolve(root, "node_modules")           // local install (non-workspace)
+  : resolve(root, "../node_modules");       // workspace root (hoisted)
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 const distClient  = resolve(root, "dist");

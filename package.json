@@ -33,7 +33,8 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.3.0",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "next": "15.3.3"
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx}": [

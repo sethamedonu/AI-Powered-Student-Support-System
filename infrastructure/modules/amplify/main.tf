@@ -26,31 +26,8 @@ resource "aws_amplify_app" "main" {
     "feature/*",
   ]
 
-  # Amplify detects Next.js automatically when framework is set.
-  # build_spec overrides the auto-detected commands so we control
-  # the working directory (monorepo: code lives in frontend/).
-  build_spec = <<-EOT
-    version: 1
-    appRoot: frontend
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - nvm install 22
-            - nvm use 22
-            - cd .. && npm ci
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: .next
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - ../node_modules/**/*
-          - .next/cache/**/*
-  EOT
+  # Build config lives in amplify.yml at the repo root.
+  # Amplify picks that file up automatically — no build_spec override needed.
 
   environment_variables = var.environment_variables
 

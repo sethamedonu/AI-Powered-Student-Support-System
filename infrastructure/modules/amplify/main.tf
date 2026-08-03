@@ -31,24 +31,25 @@ resource "aws_amplify_app" "main" {
   # the working directory (monorepo: code lives in frontend/).
   build_spec = <<-EOT
     version: 1
+    appRoot: frontend
     frontend:
       phases:
         preBuild:
           commands:
             - nvm install 22
             - nvm use 22
-            - npm ci
+            - cd .. && npm ci
         build:
           commands:
-            - npm run build --workspace=frontend
+            - npm run build
       artifacts:
-        baseDirectory: frontend/.next
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
-          - node_modules/**/*
-          - frontend/.next/cache/**/*
+          - ../node_modules/**/*
+          - .next/cache/**/*
   EOT
 
   environment_variables = var.environment_variables

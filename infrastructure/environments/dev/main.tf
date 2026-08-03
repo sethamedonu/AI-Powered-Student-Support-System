@@ -137,5 +137,6 @@ module "amplify" {
     NEXT_PUBLIC_COGNITO_USER_POOL_ID = module.cognito.user_pool_id
     NEXT_PUBLIC_COGNITO_CLIENT_ID    = module.cognito.user_pool_client_id
     NEXT_PUBLIC_ENVIRONMENT          = var.environment
+    AMPLIFY_MONOREPO_APP_ROOT        = "frontend"
   }
 }

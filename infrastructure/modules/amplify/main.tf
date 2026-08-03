@@ -48,7 +48,8 @@ resource "aws_amplify_branch" "main" {
   enable_pull_request_preview = var.environment != "prod"
 
   environment_variables = merge(var.environment_variables, {
-    NEXT_PUBLIC_APP_ORIGIN = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
+    NEXT_PUBLIC_APP_ORIGIN    = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
+    AMPLIFY_MONOREPO_APP_ROOT = "frontend"
   })
 
   tags = {

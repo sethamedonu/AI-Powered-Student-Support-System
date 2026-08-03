@@ -6,7 +6,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { authApi } from "@/lib/api";
-import { getInitials, getFullName, logout } from "@/lib/auth";
+import { getInitials, getFullName, logout } from "@/lib/auth.client";
 import { formatDate } from "@/lib/utils";
 import type { User } from "@/lib/types";
 

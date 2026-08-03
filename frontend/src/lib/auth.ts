@@ -1,15 +1,20 @@
+/**
+ * auth.ts — server-side auth guards only.
+ *
+ * ONLY import this from:
+ *   - async Server Components
+ *   - Server Actions
+ *   - Route Handlers
+ *
+ * Do NOT import this from Client Components — it uses next/headers
+ * which is server-only. For client-side helpers use auth.client.ts.
+ */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { clearTokens, saveTokens, authApi } from "./api";
 import type { User } from "./types";
-
-// ─── Server-side guards ───────────────────────────────────────────────────────
-// These run in Server Components, Server Actions, or middleware.
-// They use next/headers cookies() — not available in Client Components.
 
 /**
  * Read the user object stored in the cookie set at login.
- * Call from async Server Components or Server Actions.
  */
 export async function getUserFromCookie(): Promise<User | null> {
   const cookieStore = await cookies();
@@ -23,12 +28,7 @@ export async function getUserFromCookie(): Promise<User | null> {
 }
 
 /**
- * Guard for protected pages.
- * Redirects to /auth/login if the accessToken cookie is missing.
- * Returns the authenticated user.
- *
- * Usage in async Server Components:
- *   const user = await requireAuth();
+ * Guard for protected pages — redirects to /auth/login if unauthenticated.
  */
 export async function requireAuth(returnPath?: string): Promise<User> {
   const cookieStore = await cookies();
@@ -50,7 +50,7 @@ export async function requireAuth(returnPath?: string): Promise<User> {
 }
 
 /**
- * Admin-only guard. Redirects non-admins to /dashboard.
+ * Admin-only guard — redirects non-admins to /dashboard.
  */
 export async function requireAdmin(): Promise<User> {
   const user = await requireAuth();
@@ -61,8 +61,7 @@ export async function requireAdmin(): Promise<User> {
 }
 
 /**
- * Guard for auth pages (login, register, etc.).
- * If already logged in, redirects to /dashboard or the ?redirect param.
+ * Guard for auth pages — redirects authenticated users to /dashboard.
  */
 export async function redirectIfAuthenticated(
   searchParams: Record<string, string | undefined>,
@@ -73,82 +72,4 @@ export async function redirectIfAuthenticated(
     const returnTo = searchParams["redirect"];
     redirect(returnTo ?? "/dashboard");
   }
-}
-
-// ─── Client-side helpers ──────────────────────────────────────────────────────
-// These are safe to call from Client Components (browser only).
-
-export function isAuthenticated(): boolean {
-  if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("accessToken");
-}
-
-export function getCurrentUser(): User | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem("user");
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as User;
-  } catch {
-    return null;
-  }
-}
-
-export function isAdmin(): boolean {
-  return getCurrentUser()?.role === "admin";
-}
-
-export function logout(): void {
-  clearTokens();
-  // Clear cookies too
-  const cookieNames = ["accessToken", "refreshToken", "user"];
-  cookieNames.forEach((name) => {
-    document.cookie = `${name}=; Max-Age=0; path=/`;
-  });
-  window.location.href = "/auth/login";
-}
-
-export async function refreshSession(): Promise<boolean> {
-  try {
-    const result = await authApi.refresh();
-    saveTokens({
-      accessToken: result.accessToken,
-      idToken: result.idToken,
-      refreshToken: localStorage.getItem("refreshToken") ?? "",
-    });
-    return true;
-  } catch {
-    clearTokens();
-    return false;
-  }
-}
-
-// ─── Display helpers ──────────────────────────────────────────────────────────
-
-export function getInitials(user: User): string {
-  return `${user.givenName[0] ?? ""}${user.familyName[0] ?? ""}`.toUpperCase();
-}
-
-export function getFullName(user: User): string {
-  return `${user.givenName} ${user.familyName}`;
-}
-
-/**
- * Read the user cookie on the client side (from document.cookie).
- * Used in Client Components where server cookies() is unavailable.
- */
-export function getUserFromClientCookie(): User | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = document.cookie
-      .split("; ")
-      .find((r) => r.startsWith("user="))
-      ?.split("=")
-      .slice(1)
-      .join("=");
-    if (raw) return JSON.parse(decodeURIComponent(raw)) as User;
-  } catch {
-    // fall through to localStorage
-  }
-  return getCurrentUser();
 }

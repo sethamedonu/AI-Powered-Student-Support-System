@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { DarkModeToggle } from "@/components/ui/DarkModeToggle";
-import { getInitials, getFullName, logout } from "@/lib/auth";
+import { getInitials, getFullName, logout } from "@/lib/auth.client";
 import type { User } from "@/lib/types";
 
 interface NavItem {

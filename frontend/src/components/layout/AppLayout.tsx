@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sidebar } from "./Sidebar";
-import { getUserFromClientCookie } from "@/lib/auth";
+import { getUserFromClientCookie } from "@/lib/auth.client";
 import type { User } from "@/lib/types";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {

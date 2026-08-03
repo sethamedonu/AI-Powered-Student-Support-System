@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { Spinner } from "@/components/ui/Spinner";
 import { conversationsApi } from "@/lib/api";
-import { getInitials } from "@/lib/auth";
+import { getInitials } from "@/lib/auth.client";
 import { formatDate, truncate } from "@/lib/utils";
 import type { Conversation, Message, User } from "@/lib/types";
 

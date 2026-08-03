@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { chatApi } from "@/lib/api";
-import { getInitials } from "@/lib/auth";
+import { getInitials } from "@/lib/auth.client";
 import { uid } from "@/lib/utils";
 import type { KnowledgeCategory, Message, User } from "@/lib/types";
 

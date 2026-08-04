@@ -107,6 +107,7 @@ module "lambda" {
   ses_from_email               = var.ses_from_email
   bedrock_region               = var.aws_region
   bedrock_guardrail_id         = module.bedrock.guardrail_id
+  bedrock_guardrail_version    = module.bedrock.guardrail_version
   cors_allowed_origins         = var.cors_allowed_origins
 }
 

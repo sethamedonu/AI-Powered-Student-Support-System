@@ -19,13 +19,14 @@ variable "ses_from_email" { type = string }
 variable "bedrock_region" { type = string }
 variable "bedrock_model_routine" {
   type    = string
-  default = "amazon.nova-lite-v1:0"
+  default = "us.amazon.nova-lite-v1:0"
 }
 variable "bedrock_model_complex" {
   type    = string
-  default = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  default = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 }
 variable "bedrock_guardrail_id" { type = string }
+variable "bedrock_guardrail_version" { type = string }
 variable "cors_allowed_origins" {
   type    = list(string)
   default = ["*"]

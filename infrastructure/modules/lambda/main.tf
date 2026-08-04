@@ -22,6 +22,7 @@ locals {
     BEDROCK_MODEL_ROUTINE        = var.bedrock_model_routine
     BEDROCK_MODEL_COMPLEX        = var.bedrock_model_complex
     BEDROCK_GUARDRAIL_ID         = var.bedrock_guardrail_id
+    BEDROCK_GUARDRAIL_VERSION    = var.bedrock_guardrail_version
     CORS_ALLOWED_ORIGINS         = var.cors_allowed_origins[0]
     LOG_LEVEL                    = var.environment == "prod" ? "info" : "debug"
   }

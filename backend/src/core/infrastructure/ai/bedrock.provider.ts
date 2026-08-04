@@ -71,7 +71,7 @@ export class BedrockProvider implements IAIProvider {
 
       return {
         content,
-        model: model.includes('nova') ? 'nova-lite' : 'claude-3-5-sonnet',
+        model: model.includes('nova') ? 'nova-lite' : 'claude-sonnet',
         tokensUsed,
         latencyMs,
         guardrailAction,

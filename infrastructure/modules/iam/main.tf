@@ -65,6 +65,7 @@ resource "aws_iam_role_policy" "lambda_dynamodb" {
           "dynamodb:BatchWriteItem",
           "dynamodb:TransactWriteItems",
           "dynamodb:TransactGetItems",
+          "dynamodb:DescribeTable",
         ]
         Resource = [
           "arn:aws:dynamodb:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/${local.prefix}-*",
@@ -91,8 +92,11 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
           "bedrock:ApplyGuardrail",
         ]
         Resource = [
+          # Nova Lite foundation model (direct)
           "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.nova-lite-v1:0",
-          "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+          # Cross-region inference profiles (us.*)
+          "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
+          # Guardrails
           "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:guardrail/*",
         ]
       }

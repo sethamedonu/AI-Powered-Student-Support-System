@@ -121,6 +121,16 @@ module "cloudwatch" {
   lambda_function_names = module.lambda.function_names
   queue_name            = module.sqs.chat_queue_name
   dlq_name              = module.sqs.chat_dlq_name
+
+  # DynamoDB table names — used for per-table capacity alarms
+  dynamodb_table_users         = module.dynamodb.table_users_name
+  dynamodb_table_conversations = module.dynamodb.table_conversations_name
+  dynamodb_table_messages      = module.dynamodb.table_messages_name
+  dynamodb_table_cache         = module.dynamodb.table_cache_name
+  dynamodb_table_analytics     = module.dynamodb.table_analytics_name
+  dynamodb_table_feedback      = module.dynamodb.table_feedback_name
+  dynamodb_table_audit         = module.dynamodb.table_audit_name
+  dynamodb_table_knowledge     = module.dynamodb.table_knowledge_name
 }
 
 module "amplify" {

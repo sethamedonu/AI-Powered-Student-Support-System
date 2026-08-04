@@ -195,6 +195,12 @@ export const adminApi = {
   listUsers: (limit = 20) =>
     request<PaginatedResult<User>>(`/admin/users?limit=${limit}`),
 
+  updateUser: (userId: string, updates: { role?: "student" | "admin"; isActive?: boolean }) =>
+    request<User>(`/admin/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    }),
+
   listFeedback: (limit = 20) =>
     request<
       PaginatedResult<{

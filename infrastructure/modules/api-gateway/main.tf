@@ -273,6 +273,27 @@ module "route_admin_users" {
   use_parent     = true
 }
 
+# ─── Admin user update route: PATCH /admin/users/{userId} ─────────────────────
+resource "aws_api_gateway_resource" "admin_user_id" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin_users.id
+  path_part   = "{userId}"
+}
+
+module "route_admin_user_update" {
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_user_id.id
+  path_part      = ""
+  http_method    = "PATCH"
+  lambda_arn     = var.lambda_functions["admin-users-update"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
+}
+
 module "route_admin_feedback" {
   source         = "./routes"
   rest_api_id    = aws_api_gateway_rest_api.main.id
@@ -395,6 +416,7 @@ resource "aws_api_gateway_deployment" "main" {
     module.route_analytics_get,
     module.route_admin_stats,
     module.route_admin_users,
+    module.route_admin_user_update,
     module.route_admin_feedback,
     module.route_admin_analytics,
     module.route_conversations_get,

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { registerAction } from "./actions";
 
 export function RegisterForm() {
@@ -29,8 +30,10 @@ export function RegisterForm() {
         studentId: (data.get("studentId") as string) || undefined,
       });
       if (result?.error) setError(result.error);
-      if (result && "fieldErrors" in result && result.fieldErrors) setFieldErrors(result.fieldErrors);
-      if (result && "redirectTo" in result && result.redirectTo) router.push(result.redirectTo);
+      if (result && "fieldErrors" in result && result.fieldErrors)
+        setFieldErrors(result.fieldErrors);
+      if (result && "redirectTo" in result && result.redirectTo)
+        router.push(result.redirectTo);
     });
   }
 
@@ -68,6 +71,7 @@ export function RegisterForm() {
             required
           />
         </div>
+
         <Input
           label="Email address"
           name="email"
@@ -77,6 +81,7 @@ export function RegisterForm() {
           error={fieldErrors["email"]}
           required
         />
+
         <Input
           label="Student ID"
           name="studentId"
@@ -84,16 +89,17 @@ export function RegisterForm() {
           placeholder="e.g. STU-2024-001 (optional)"
           error={fieldErrors["studentId"]}
         />
-        <Input
+
+        <PasswordInput
           label="Password"
           name="password"
-          type="password"
           autoComplete="new-password"
           placeholder="••••••••"
           hint="Min 8 chars, uppercase, number, and special character"
           error={fieldErrors["password"]}
           required
         />
+
         <Button type="submit" fullWidth loading={isPending}>
           Create account
         </Button>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { resetPasswordAction } from "./actions";
 
 export function ResetPasswordForm({ email }: { email: string }) {
@@ -28,8 +29,10 @@ export function ResetPasswordForm({ email }: { email: string }) {
         confirmPassword: data.get("confirmPassword") as string,
       });
       if (result?.error) setError(result.error);
-      if (result && "fieldErrors" in result && result.fieldErrors) setFieldErrors(result.fieldErrors);
-      if (result && "redirectTo" in result && result.redirectTo) router.push(result.redirectTo);
+      if (result && "fieldErrors" in result && result.fieldErrors)
+        setFieldErrors(result.fieldErrors);
+      if (result && "redirectTo" in result && result.redirectTo)
+        router.push(result.redirectTo);
     });
   }
 
@@ -61,25 +64,26 @@ export function ResetPasswordForm({ email }: { email: string }) {
           error={fieldErrors["code"]}
           required
         />
-        <Input
+
+        <PasswordInput
           label="New password"
           name="newPassword"
-          type="password"
           autoComplete="new-password"
           placeholder="••••••••"
           hint="Min 8 chars, uppercase, number, and special character"
           error={fieldErrors["newPassword"]}
           required
         />
-        <Input
+
+        <PasswordInput
           label="Confirm new password"
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           placeholder="••••••••"
           error={fieldErrors["confirmPassword"]}
           required
         />
+
         <Button type="submit" fullWidth loading={isPending}>
           Reset password
         </Button>

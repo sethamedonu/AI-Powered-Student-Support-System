@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { authApi } from "@/lib/api";
 import { getInitials, getFullName, logout } from "@/lib/auth.client";
 import { formatDate } from "@/lib/utils";
@@ -81,17 +81,15 @@ export function ProfileClient({ user }: { user: User }) {
           )}
           {!pwSuccess && (
             <>
-              <Input
+              <PasswordInput
                 label="New password"
-                type="password"
                 placeholder="••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 hint="Min 8 characters, uppercase, number, and special character"
               />
-              <Input
+              <PasswordInput
                 label="Confirm new password"
-                type="password"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

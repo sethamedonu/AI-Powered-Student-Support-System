@@ -41,11 +41,6 @@ variable "cors_allowed_origins" {
   default = ["http://localhost:5173"]
 }
 
-variable "bedrock_guardrail_id" {
-  type    = string
-  default = ""
-}
-
 variable "github_repository" {
   type    = string
   default = "https://github.com/sethamedonu/AI-Powered-Student-Support-System"

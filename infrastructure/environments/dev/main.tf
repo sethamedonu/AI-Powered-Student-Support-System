@@ -76,6 +76,12 @@ module "ses" {
   from_email  = var.ses_from_email
 }
 
+module "bedrock" {
+  source      = "../../modules/bedrock"
+  environment = var.environment
+  app_name    = var.app_name
+}
+
 module "lambda" {
   source                       = "../../modules/lambda"
   environment                  = var.environment
@@ -97,7 +103,7 @@ module "lambda" {
   sns_alerts_topic_arn         = module.sns.alerts_topic_arn
   ses_from_email               = var.ses_from_email
   bedrock_region               = var.aws_region
-  bedrock_guardrail_id         = var.bedrock_guardrail_id
+  bedrock_guardrail_id         = module.bedrock.guardrail_id
   cors_allowed_origins         = var.cors_allowed_origins
 }
 

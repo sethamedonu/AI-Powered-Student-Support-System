@@ -3,10 +3,13 @@
 # This import block runs once and is safe to keep in the codebase — Terraform
 # skips imports for resources already in state.
 
-import {
-  to = module.cloudwatch.aws_cloudwatch_metric_alarm.dynamodb_read["users"]
-  id = "aisss-DynamoDB-Users-ConsumedReadCapacityUnits"
-}
+# NOTE: AISSS-DynamoDB-Users-ConsumedReadCapacityUnits and
+# AISSS-DynamoDB-ResponseCache-ConsumedReadCapacityUnits were created manually
+# with an uppercase prefix. Terraform will recreate them under the consistent
+# lowercase naming (aisss-DynamoDB-*). The old uppercase alarms will be deleted
+# by this apply and replaced with the Terraform-managed versions below.
+#
+# All other 14 alarms match the Terraform naming exactly and are imported.
 
 import {
   to = module.cloudwatch.aws_cloudwatch_metric_alarm.dynamodb_read["conversations"]
@@ -16,11 +19,6 @@ import {
 import {
   to = module.cloudwatch.aws_cloudwatch_metric_alarm.dynamodb_read["messages"]
   id = "aisss-DynamoDB-Messages-ConsumedReadCapacityUnits"
-}
-
-import {
-  to = module.cloudwatch.aws_cloudwatch_metric_alarm.dynamodb_read["cache"]
-  id = "aisss-DynamoDB-ResponseCache-ConsumedReadCapacityUnits"
 }
 
 import {

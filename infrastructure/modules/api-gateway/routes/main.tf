@@ -3,7 +3,9 @@ resource "aws_lambda_permission" "apigw" {
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_arn
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:apigateway:${var.aws_region}::/restapis/${var.rest_api_id}/*/"
+  # execute-api ARN format is required — the apigateway management ARN format
+  # (arn:aws:apigateway:...::/restapis/...) does NOT work for invocation checks.
+  source_arn = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_id}:${var.rest_api_id}/*/*"
 }
 
 locals {

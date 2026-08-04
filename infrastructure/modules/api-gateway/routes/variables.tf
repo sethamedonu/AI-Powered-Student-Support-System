@@ -16,3 +16,8 @@ variable "create_options" {
   default     = true
   description = "Whether to create the CORS OPTIONS method for this route. Set false when another route on the same resource already creates it."
 }
+
+variable "aws_account_id" {
+  type        = string
+  description = "AWS account ID — required for execute-api ARN in Lambda permission SourceArn"
+}

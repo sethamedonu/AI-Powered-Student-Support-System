@@ -2,6 +2,8 @@ locals {
   prefix = "${var.app_name}-${var.environment}"
 }
 
+data "aws_caller_identity" "current" {}
+
 # ─── CloudWatch Logs Role for API Gateway ────────────────────────────────────
 resource "aws_iam_role" "api_gateway_cloudwatch" {
   name = "${local.prefix}-apigw-cloudwatch-role"
@@ -73,138 +75,149 @@ resource "aws_api_gateway_gateway_response" "default_5xx" {
 
 # ─── API Resources & Methods ──────────────────────────────────────────────────
 module "route_health" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_rest_api.main.root_resource_id
-  path_part     = "health"
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["health"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_rest_api.main.root_resource_id
+  path_part      = "health"
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["health"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_register" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "register"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-register"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "register"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-register"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_login" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "login"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-login"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "login"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-login"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_verify" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "verify"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-verify"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "verify"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-verify"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_forgot_password" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "forgot-password"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-forgot-password"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "forgot-password"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-forgot-password"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_reset_password" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "reset-password"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-reset-password"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "reset-password"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-reset-password"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_auth_refresh" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.auth.id
-  path_part     = "refresh"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["auth-refresh"]
-  aws_region    = var.aws_region
-  authorizer_id = ""
-  require_auth  = false
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.auth.id
+  path_part      = "refresh"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["auth-refresh"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = ""
+  require_auth   = false
 }
 
 module "route_chat_message" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.chat.id
-  path_part     = "message"
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["chat-send"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.chat.id
+  path_part      = "message"
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["chat-send"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
 }
 
 module "route_conversations_list" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.conversations.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["conversations-list"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.conversations.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["conversations-list"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_feedback_submit" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.feedback.id
-  path_part     = ""
-  http_method   = "POST"
-  lambda_arn    = var.lambda_functions["feedback-submit"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.feedback.id
+  path_part      = ""
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["feedback-submit"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_analytics_get" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.analytics.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["analytics-get"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.analytics.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["analytics-get"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────
@@ -233,55 +246,59 @@ resource "aws_api_gateway_resource" "admin_analytics" {
 }
 
 module "route_admin_stats" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.admin_stats.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["admin-stats"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_stats.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["admin-stats"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_admin_users" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.admin_users.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["admin-users-list"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_users.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["admin-users-list"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_admin_feedback" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.admin_feedback.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["admin-feedback-list"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_feedback.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["admin-feedback-list"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_admin_analytics" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.admin_analytics.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["admin-analytics"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_analytics.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["admin-analytics"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 resource "aws_api_gateway_resource" "conversation_id" {
@@ -291,16 +308,17 @@ resource "aws_api_gateway_resource" "conversation_id" {
 }
 
 module "route_conversations_get" {
-  source        = "./routes"
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  parent_id     = aws_api_gateway_resource.conversation_id.id
-  path_part     = ""
-  http_method   = "GET"
-  lambda_arn    = var.lambda_functions["conversations-get"]
-  aws_region    = var.aws_region
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-  require_auth  = true
-  use_parent    = true
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.conversation_id.id
+  path_part      = ""
+  http_method    = "GET"
+  lambda_arn     = var.lambda_functions["conversations-get"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
 }
 
 module "route_conversations_delete" {
@@ -311,6 +329,7 @@ module "route_conversations_delete" {
   http_method    = "DELETE"
   lambda_arn     = var.lambda_functions["conversations-delete"]
   aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
   authorizer_id  = aws_api_gateway_authorizer.cognito.id
   require_auth   = true
   use_parent     = true

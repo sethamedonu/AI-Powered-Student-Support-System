@@ -17,36 +17,36 @@ resource "aws_bedrock_guardrail" "main" {
   # HIGH strength on both input and output.
   content_policy_config {
     filters_config {
-      type             = "VIOLENCE"
-      input_strength   = "HIGH"
-      output_strength  = "HIGH"
+      type            = "VIOLENCE"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
     }
     filters_config {
-      type             = "HATE"
-      input_strength   = "HIGH"
-      output_strength  = "HIGH"
+      type            = "HATE"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
     }
     filters_config {
-      type             = "SEXUAL"
-      input_strength   = "HIGH"
-      output_strength  = "HIGH"
+      type            = "SEXUAL"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
     }
     filters_config {
-      type             = "INSULTS"
-      input_strength   = "HIGH"
-      output_strength  = "HIGH"
+      type            = "INSULTS"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
     }
     filters_config {
-      type             = "MISCONDUCT"
-      input_strength   = "HIGH"
-      output_strength  = "HIGH"
+      type            = "MISCONDUCT"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
     }
     filters_config {
       # Prompt injection / jailbreak attempts — NONE means detect but not block
       # at the model level; the guardrail still inspects and blocks via word policy
-      type             = "PROMPT_ATTACK"
-      input_strength   = "NONE"
-      output_strength  = "NONE"
+      type            = "PROMPT_ATTACK"
+      input_strength  = "NONE"
+      output_strength = "NONE"
     }
   }
 

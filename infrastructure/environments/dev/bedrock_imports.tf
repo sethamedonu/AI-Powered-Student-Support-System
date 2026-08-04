@@ -5,7 +5,7 @@
 
 import {
   to = module.bedrock.aws_bedrock_guardrail.main
-  id = "41o24dvt9a6q"
+  id = "41o24dvt9a6q,DRAFT"
 }
 
 # Note: the published version (aws_bedrock_guardrail_version.v1) did not exist

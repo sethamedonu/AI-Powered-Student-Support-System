@@ -173,7 +173,9 @@ resource "aws_cognito_user_group" "administrators" {
 }
 
 # ─── Cognito User Pool Domain ─────────────────────────────────────────────────
+# Domain must be globally unique across all AWS accounts.
+# Including the account ID ensures it doesn't clash when redeploying to a new account.
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "${local.prefix}-auth"
+  domain       = "${local.prefix}-${var.aws_account_id}-auth"
   user_pool_id = aws_cognito_user_pool.main.id
 }

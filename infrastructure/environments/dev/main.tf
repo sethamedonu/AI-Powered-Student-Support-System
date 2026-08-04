@@ -53,7 +53,10 @@ module "cognito" {
   ses_from_email = var.ses_from_email
   callback_urls  = var.cognito_callback_urls
   logout_urls    = var.cognito_logout_urls
+  aws_account_id = data.aws_caller_identity.current.account_id
 }
+
+data "aws_caller_identity" "current" {}
 
 module "sqs" {
   source      = "../../modules/sqs"

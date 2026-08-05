@@ -103,8 +103,7 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
           # Foundation model ARNs in ALL regions (cross-region profiles route to any US region)
           "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0",
           "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0",
-          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
-          # Cross-region inference profile ARNs
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*", # Cross-region inference profile ARNs
           "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
           "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
           # Guardrails

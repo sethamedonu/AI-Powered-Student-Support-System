@@ -70,6 +70,6 @@ variable "bedrock_knowledge_base_id" {
 
 variable "bedrock_knowledge_data_source_id" {
   type        = string
-  default     = "SYE8DOK5AS"
-  description = "Bedrock Knowledge Base Data Source ID"
+  default     = "PVWKMFHB11"
+  description = "Bedrock Knowledge Base Data Source ID (recreated with FM parsing + 300-token chunks)"
 }

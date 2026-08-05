@@ -7,6 +7,8 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { saveTokens, saveUser } from "@/lib/api";
+import type { User } from "@/lib/types";
 import { loginAction } from "./actions";
 
 interface LoginFormProps {
@@ -32,12 +34,23 @@ export function LoginForm({ verified, reset, redirectTo }: LoginFormProps) {
         data.get("password") as string,
         redirectTo,
       );
-      if (result?.error) {
+
+      if (!result.ok) {
         setError(result.error);
+        return;
       }
-      if (result?.redirectTo) {
-        router.push(result.redirectTo);
-      }
+
+      // Persist tokens + user to localStorage so client-side API calls
+      // can attach Authorization: Bearer <idToken> to every request.
+      // (The server action already set the cookies for SSR guards.)
+      saveTokens({
+        accessToken: result.tokens.accessToken,
+        idToken: result.tokens.idToken,
+        refreshToken: result.tokens.refreshToken,
+      });
+      saveUser(result.user as User);
+
+      router.push(result.redirectTo);
     });
   }
 

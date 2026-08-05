@@ -12,8 +12,8 @@ export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<A
   // When a Cognito Authorizer validates the token it strips it from the
   // Authorization header and injects the decoded claims into
   // requestContext.authorizer.claims. This is the production path.
-  const claims = event.requestContext?.authorizer?.claims as Record<string, string> | undefined;
-  if (claims?.sub) {
+  const claims = event.requestContext?.authorizer?.['claims'] as Record<string, string> | undefined;
+  if (claims?.['sub']) {
     const groups = claims['cognito:groups']
       ? claims['cognito:groups'].split(',').map((g) => g.trim())
       : [];

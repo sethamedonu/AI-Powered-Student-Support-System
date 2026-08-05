@@ -6,7 +6,6 @@ import {
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand,
   AdminAddUserToGroupCommand,
-  AdminRemoveUserFromGroupCommand,
   AdminListGroupsForUserCommand,
   AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';

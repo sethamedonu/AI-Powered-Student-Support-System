@@ -24,6 +24,8 @@ const FUNCTIONS = [
   { name: 'admin-users-update', entry: 'src/functions/admin/updateUser.ts' },
   { name: 'admin-feedback-list', entry: 'src/functions/admin/listFeedback.ts' },
   { name: 'admin-knowledge-upsert', entry: 'src/functions/admin/upsertKnowledge.ts' },
+  { name: 'admin-upload-document', entry: 'src/functions/admin/uploadDocument.ts' },
+  { name: 'admin-sync-knowledge',  entry: 'src/functions/admin/syncKnowledge.ts' },
 ];
 
 const outDir = path.join(__dirname, '..', 'dist');

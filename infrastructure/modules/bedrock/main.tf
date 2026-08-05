@@ -247,3 +247,20 @@ resource "aws_iam_role_policy" "bedrock_kb_s3vectors" {
 #   #    TF_VAR_bedrock_knowledge_base_id = <KB_ID>
 #   #    TF_VAR_bedrock_knowledge_data_source_id = <DATA_SOURCE_ID>
 #   #    TF_VAR_knowledge_docs_bucket = <BUCKET>
+
+
+# --- OpenSearch Serverless --- Vector Store for Bedrock KB -------------------
+# These resources were created manually via CLI and exist outside Terraform state
+# to avoid bootstrap ordering conflicts. They are documented here for reference.
+#
+# Collection:   aisss-dev-kb  (id: g7i64ouqqxc3h6a7fsm9)
+# Collection ARN: arn:aws:aoss:us-east-1:314175685812:collection/g7i64ouqqxc3h6a7fsm9
+# Vector index: bedrock-knowledge-base-default-index  (1024-dim, HNSW, faiss, l2)
+# KB ID:        86HYJUEMJL  (passed via var.bedrock_knowledge_base_id)
+# DS ID:        OTSDN45AJ7  (passed via var.bedrock_knowledge_data_source_id)
+# Embedding:    amazon.titan-embed-text-v2:0
+#
+# To recreate in a new environment run the commands in docs/kb-setup.md
+#
+# IAM policies for aoss:APIAccessAll are managed by the iam module.
+

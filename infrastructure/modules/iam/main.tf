@@ -103,8 +103,7 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
           # Foundation model ARNs in ALL regions (cross-region profiles route to any US region)
           "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0",
           "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0",
-          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
-          # Cross-region inference profile ARNs
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*", # Cross-region inference profile ARNs
           "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
           "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
           # Guardrails
@@ -233,6 +232,25 @@ resource "aws_iam_role_policy" "lambda_cognito" {
           "cognito-idp:ListUsers",
         ]
         Resource = "arn:aws:cognito-idp:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:userpool/*"
+      }
+    ]
+  })
+}
+
+# ─── OpenSearch Serverless Policy ────────────────────────────────────────────
+# Allows Lambda functions to query the Bedrock KB vector index directly
+# and allows the Bedrock KB role to read/write the OpenSearch collection.
+resource "aws_iam_role_policy" "lambda_aoss" {
+  name = "${local.prefix}-lambda-aoss-policy"
+  role = aws_iam_role.lambda_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["aoss:APIAccessAll"]
+        Resource = "arn:aws:aoss:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:collection/*"
       }
     ]
   })

@@ -39,10 +39,10 @@ export function ResetPasswordForm({ email }: { email: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+        <h2 className="font-display text-4xl font-bold text-slate-900 dark:text-white">
           Set new password
         </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-2 text-slate-500 dark:text-slate-400">
           Enter the code sent to{" "}
           <span className="font-medium text-slate-700 dark:text-slate-300">
             {email || "your email"}
@@ -50,9 +50,34 @@ export function ResetPasswordForm({ email }: { email: string }) {
         </p>
       </div>
 
-      {error && <Alert variant="error">{error}</Alert>}
+      {error && (
+        <Alert variant="error">
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9 3.75l-7.89 5.26A1.5 1.5 0 0112 18V6a1.5 1.5 0 00-2.25-1.333L3 9.75V18h18z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.878 9.878l4.242 4.242m0 0L12 16.242m4.122-4.122L12 7.758m4.122 4.122z"
+              />
+            </svg>
+            <span>{error}</span>
+          </div>
+        </Alert>
+      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <Input
           label="Reset code"
           name="code"
@@ -84,7 +109,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
           required
         />
 
-        <Button type="submit" fullWidth loading={isPending}>
+        <Button type="submit" fullWidth loading={isPending} size="lg">
           Reset password
         </Button>
       </form>
@@ -93,7 +118,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
         Remember your password?{" "}
         <Link
           href="/auth/login"
-          className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+          className="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
         >
           Sign in
         </Link>

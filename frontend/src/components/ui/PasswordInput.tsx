@@ -30,12 +30,13 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             id={inputId}
             type={show ? "text" : "password"}
             className={[
-              "w-full rounded-xl border px-4 py-2.5 pr-10 text-sm outline-none transition-all",
-              "bg-white text-slate-900 placeholder:text-slate-400",
-              "dark:bg-slate-800/60 dark:text-slate-100 dark:placeholder:text-slate-500",
+              "w-full rounded-xl border px-4 py-3 pr-12 text-sm outline-none transition-all duration-300",
+              "placeholder:text-slate-400 dark:placeholder:text-slate-500",
+              "focus:ring-2 focus:ring-offset-0",
+              "bg-white text-slate-900 dark:bg-slate-800/60 dark:text-slate-100",
               error
-                ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900/40"
-                : "border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-slate-700 dark:focus:ring-primary-900/40",
+                ? "border-red-300 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900/40"
+                : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100 dark:border-slate-700 dark:focus:ring-indigo-900/40 dark:focus:border-indigo-400",
               className,
             ]
               .filter(Boolean)
@@ -47,7 +48,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             tabIndex={-1}
             onClick={() => setShow((v) => !v)}
             aria-label={show ? "Hide password" : "Show password"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition-all duration-300 hover:scale-110 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700/50 dark:hover:text-slate-300"
           >
             {show ? (
               /* Eye open */

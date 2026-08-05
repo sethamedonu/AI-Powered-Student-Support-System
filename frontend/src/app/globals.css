@@ -84,4 +84,16 @@
       radial-gradient(at 60% 80%, #1e1b4b 0px, transparent 55%),
       radial-gradient(at 10% 90%, #4f46e5 0px, transparent 45%);
   }
+
+  /* Enhanced gradient backgrounds */
+  .gradient-indoor {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%);
+  }
+
+  /* Smooth transitions for all interactive elements */
+  .transition-smooth {
+    transition-property: background-color, border-color, color, box-shadow, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }

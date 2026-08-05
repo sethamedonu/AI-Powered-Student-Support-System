@@ -53,10 +53,10 @@ export function ProfileClient({ user }: { user: User }) {
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-6 dark:border-slate-800">
           {[
-            { label: "Role", value: user.role },
+            { label: "Role", value: user.role ?? "student" },
             { label: "Student ID", value: user.studentId ?? "Not set" },
-            { label: "Account status", value: user.isActive ? "Active" : "Inactive" },
-            { label: "Member since", value: formatDate(user.createdAt) },
+            { label: "Account status", value: user.isActive !== false ? "Active" : "Inactive" },
+            { label: "Member since", value: user.createdAt ? formatDate(user.createdAt) : "—" },
           ].map(({ label, value }) => (
             <div key={label}>
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>

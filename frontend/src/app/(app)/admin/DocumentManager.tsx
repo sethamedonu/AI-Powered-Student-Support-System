@@ -283,9 +283,9 @@ export function DocumentManager() {
           </summary>
           <div className="mt-2 rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400 space-y-1">
             <p>1. Your file uploads directly to S3 (never through the Lambda).</p>
-            <p>2. Click <strong>Sync Knowledge Base</strong> — Bedrock reads the file, splits it into 512-token chunks, and embeds each one using Titan V2.</p>
-            <p>3. Vectors are stored in S3 Vectors — no OpenSearch, no minimum hourly cost.</p>
-            <p>4. Students&apos; questions are now matched against your documents by meaning, not just keywords.</p>
+            <p>2. Click <strong>Sync Knowledge Base</strong> — Bedrock reads the file, splits it into 512-token chunks, and embeds each one using Titan Embed V2.</p>
+            <p>3. Vectors are stored in OpenSearch Serverless — queries match by semantic meaning, not just keywords.</p>
+            <p>4. Students&apos; questions are now answered using your institutional documents as context.</p>
             <p className="pt-1 text-slate-400">Indexing typically takes 1–5 minutes depending on file size.</p>
           </div>
         </details>

@@ -239,8 +239,8 @@ export function AdminClient() {
                     <div key={u.userId} className="flex items-center gap-3 px-5 py-3">
                       {/* Avatar */}
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700 dark:bg-primary-950 dark:text-primary-300">
-                        {u.givenName[0]}
-                        {u.familyName[0]}
+                        {(u.givenName?.[0] ?? u.email[0] ?? "?").toUpperCase()}
+                        {(u.familyName?.[0] ?? "").toUpperCase()}
                       </div>
 
                       {/* Name + email */}

@@ -112,8 +112,8 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
           retrievalConfiguration: {
             vectorSearchConfiguration: {
               numberOfResults: 5,
-              // Only return chunks that are genuinely relevant
-              overrideSearchType: 'HYBRID',
+              // S3 Vectors only supports SEMANTIC search (not HYBRID)
+              overrideSearchType: 'SEMANTIC',
             },
           },
         }));

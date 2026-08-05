@@ -85,7 +85,9 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
     Version = "2012-10-17"
     Statement = [
       {
-        # Invoke AI models (Nova Lite, Claude Sonnet via cross-region profile)
+        # Invoke AI models (Nova Lite, Claude Sonnet via cross-region inference profiles)
+        # Cross-region profiles (us.amazon.nova-lite-v1:0) route to multiple US regions,
+        # so we must allow the foundation model ARN in all regions (*) plus the profile ARN.
         Effect = "Allow"
         Action = [
           "bedrock:InvokeModel",
@@ -93,9 +95,19 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
           "bedrock:ApplyGuardrail",
         ]
         Resource = [
+          # Direct model ARNs (us-east-1 for direct invocation)
           "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.nova-lite-v1:0",
+          "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.nova-pro-v1:0",
+          "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/anthropic.claude-*",
           "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.titan-embed-text-v2:0",
+          # Foundation model ARNs in ALL regions (cross-region profiles route to any US region)
+          "arn:aws:bedrock:*::foundation-model/amazon.nova-lite-v1:0",
+          "arn:aws:bedrock:*::foundation-model/amazon.nova-pro-v1:0",
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
+          # Cross-region inference profile ARNs
           "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
+          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/us.*",
+          # Guardrails
           "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:guardrail/*",
         ]
       },

@@ -137,7 +137,7 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
       } catch (error) {
         // Fall through to keyword search if KB is unavailable
         const logger = (await import('../../../shared/utils/logger.js')).createLogger('knowledge-repo');
-        logger.warn('Bedrock KB retrieve failed, falling back to keyword search', error);
+        logger.warn('Bedrock KB retrieve failed, falling back to keyword search', { error: String(error) });
       }
     }
 

@@ -54,7 +54,7 @@ export const handler = createHandler(
       } catch (error) {
         // Non-fatal: the entry is saved in DynamoDB; ingestion will retry
         // on the next upsert or can be triggered manually in the console.
-        logger.warn('Failed to start Bedrock KB ingestion job', error);
+        logger.warn('Failed to start Bedrock KB ingestion job', { error: String(error) });
       }
     }
 

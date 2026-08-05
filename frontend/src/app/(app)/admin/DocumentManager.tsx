@@ -39,6 +39,7 @@ export function DocumentManager() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState<UploadStatus>("idle");
+  const [progress, setProgress] = useState(0);
   const [folder, setFolder] = useState("uploads");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");

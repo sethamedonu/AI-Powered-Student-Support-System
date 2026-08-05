@@ -25,10 +25,11 @@ export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<A
     let tokenUse = 'id';
     if (tokenParts.length === 3) {
       try {
-        const rawPayload = tokenParts[1];
+        const rawPayload = tokenParts[1] ?? '';
         const pad = 4 - (rawPayload.length % 4);
         const padded = pad !== 4 ? rawPayload + '='.repeat(pad) : rawPayload;
-        const unverified = JSON.parse(Buffer.from(padded, 'base64').toString('utf8')) as Record<string, unknown>;
+        const decoded = Buffer.from(padded, 'base64' as BufferEncoding).toString('utf8');
+        const unverified = JSON.parse(decoded) as Record<string, unknown>;
         tokenUse = (unverified['token_use'] as string) ?? 'id';
       } catch {
         // ignore — fall back to id token verification

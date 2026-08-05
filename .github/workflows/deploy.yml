@@ -44,7 +44,9 @@ jobs:
             echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
             echo "tf_action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
+            # main branch deploys to dev until a separate prod environment is provisioned
+            # To deploy to prod: use workflow_dispatch with environment=prod
+            echo "environment=dev" >> $GITHUB_OUTPUT
             echo "tf_action=apply" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT

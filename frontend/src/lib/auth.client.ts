@@ -52,11 +52,14 @@ export async function refreshSession(): Promise<boolean> {
 }
 
 export function getInitials(user: User): string {
-  return `${user.givenName[0] ?? ""}${user.familyName[0] ?? ""}`.toUpperCase();
+  const g = user.givenName?.[0] ?? "";
+  const f = user.familyName?.[0] ?? "";
+  return (g + f).toUpperCase() || (user.email?.[0] ?? "?").toUpperCase();
 }
 
 export function getFullName(user: User): string {
-  return `${user.givenName} ${user.familyName}`;
+  const parts = [user.givenName, user.familyName].filter(Boolean);
+  return parts.length > 0 ? parts.join(" ") : user.email ?? "";
 }
 
 /**

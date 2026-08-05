@@ -26,7 +26,7 @@ locals {
     BEDROCK_KNOWLEDGE_BASE_ID        = var.bedrock_knowledge_base_id
     BEDROCK_KNOWLEDGE_DATA_SOURCE_ID = var.bedrock_knowledge_data_source_id
     KNOWLEDGE_DOCS_BUCKET            = var.knowledge_docs_bucket
-    CORS_ALLOWED_ORIGINS             = var.cors_allowed_origins[0]
+    CORS_ALLOWED_ORIGINS             = join(",", var.cors_allowed_origins)
     LOG_LEVEL                        = var.environment == "prod" ? "info" : "debug"
   }
 

@@ -28,17 +28,17 @@ variable "alert_email" {
 
 variable "cognito_callback_urls" {
   type    = list(string)
-  default = ["http://localhost:5173/auth/callback"]
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com/auth/callback", "http://localhost:3000/auth/callback"]
 }
 
 variable "cognito_logout_urls" {
   type    = list(string)
-  default = ["http://localhost:5173/auth/logout"]
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com/auth/logout", "http://localhost:3000/auth/logout"]
 }
 
 variable "cors_allowed_origins" {
   type    = list(string)
-  default = ["http://localhost:5173"]
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com", "http://localhost:3000"]
 }
 
 variable "github_repository" {

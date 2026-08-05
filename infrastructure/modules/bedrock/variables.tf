@@ -30,3 +30,8 @@ variable "bedrock_knowledge_data_source_id" {
   default     = ""
   description = "Bedrock Data Source ID — set after manually creating the data source via CLI"
 }
+
+variable "lambda_execution_role_arn" {
+  type        = string
+  description = "ARN of the Lambda execution role — added to the OpenSearch Serverless data access policy"
+}

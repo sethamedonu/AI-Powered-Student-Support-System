@@ -247,3 +247,86 @@ resource "aws_iam_role_policy" "bedrock_kb_s3vectors" {
 #   #    TF_VAR_bedrock_knowledge_base_id = <KB_ID>
 #   #    TF_VAR_bedrock_knowledge_data_source_id = <DATA_SOURCE_ID>
 #   #    TF_VAR_knowledge_docs_bucket = <BUCKET>
+
+# ─── OpenSearch Serverless — Vector Store for Bedrock KB ─────────────────────
+# Migrated from S3 Vectors (had 2048-byte filterable metadata limit that caused
+# all ingestion jobs to fail). OpenSearch Serverless has no such constraint.
+#
+# Collection:  aisss-dev-kb  (id: g7i64ouqqxc3h6a7fsm9)
+# Vector index: bedrock-knowledge-base-default-index  (1024-dim, HNSW, faiss)
+# KB ID:       86HYJUEMJL  (passed in via var.bedrock_knowledge_base_id)
+# DS ID:       OTSDN45AJ7  (passed in via var.bedrock_knowledge_data_source_id)
+
+resource "aws_opensearchserverless_security_policy" "kb_enc" {
+  name        = "${local.prefix}-kb-enc"
+  type        = "encryption"
+  description = "Encryption policy for Bedrock KB vector collection"
+  policy = jsonencode({
+    Rules = [{
+      ResourceType = "collection"
+      Resource     = ["collection/${local.prefix}-kb"]
+    }]
+    AWSOwnedKey = true
+  })
+}
+
+resource "aws_opensearchserverless_security_policy" "kb_net" {
+  name        = "${local.prefix}-kb-net"
+  type        = "network"
+  description = "Network policy — public access for Bedrock KB collection"
+  policy = jsonencode([{
+    Rules = [
+      { ResourceType = "collection", Resource = ["collection/${local.prefix}-kb"] },
+      { ResourceType = "dashboard", Resource = ["collection/${local.prefix}-kb"] },
+    ]
+    AllowFromPublic = true
+  }])
+}
+
+resource "aws_opensearchserverless_collection" "kb" {
+  name        = "${local.prefix}-kb"
+  type        = "VECTORSEARCH"
+  description = "Bedrock Knowledge Base vector store for AISSS"
+
+  depends_on = [
+    aws_opensearchserverless_security_policy.kb_enc,
+    aws_opensearchserverless_security_policy.kb_net,
+  ]
+}
+
+resource "aws_opensearchserverless_access_policy" "kb_access" {
+  name        = "${local.prefix}-kb-access"
+  type        = "data"
+  description = "Data access — Bedrock KB role and Lambda execution role"
+  policy = jsonencode([{
+    Rules = [
+      {
+        ResourceType = "collection"
+        Resource     = ["collection/${local.prefix}-kb"]
+        Permission = [
+          "aoss:CreateCollectionItems",
+          "aoss:DeleteCollectionItems",
+          "aoss:UpdateCollectionItems",
+          "aoss:DescribeCollectionItems",
+        ]
+      },
+      {
+        ResourceType = "index"
+        Resource     = ["index/${local.prefix}-kb/*"]
+        Permission = [
+          "aoss:CreateIndex",
+          "aoss:DeleteIndex",
+          "aoss:UpdateIndex",
+          "aoss:DescribeIndex",
+          "aoss:ReadDocument",
+          "aoss:WriteDocument",
+        ]
+      },
+    ]
+    Principal = [
+      aws_iam_role.bedrock_kb.arn,
+      var.lambda_execution_role_arn,
+    ]
+    Description = "Bedrock KB and Lambda access"
+  }])
+}

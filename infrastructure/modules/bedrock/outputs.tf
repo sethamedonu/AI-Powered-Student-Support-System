@@ -38,3 +38,13 @@ output "knowledge_data_source_id" {
   description = "Bedrock Data Source ID (set via var.bedrock_knowledge_data_source_id after manual creation)"
   value       = var.bedrock_knowledge_data_source_id
 }
+
+output "opensearch_collection_arn" {
+  description = "OpenSearch Serverless collection ARN used as KB vector store"
+  value       = aws_opensearchserverless_collection.kb.arn
+}
+
+output "opensearch_collection_endpoint" {
+  description = "OpenSearch Serverless collection endpoint"
+  value       = aws_opensearchserverless_collection.kb.collection_endpoint
+}

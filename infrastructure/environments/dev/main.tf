@@ -86,6 +86,7 @@ module "bedrock" {
   s3_vectors_index_arn             = var.s3_vectors_index_arn
   bedrock_knowledge_base_id        = var.bedrock_knowledge_base_id
   bedrock_knowledge_data_source_id = var.bedrock_knowledge_data_source_id
+  lambda_execution_role_arn        = module.iam.lambda_execution_role_arn
 }
 
 module "lambda" {

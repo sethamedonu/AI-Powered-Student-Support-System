@@ -58,18 +58,18 @@ variable "domain" {
 
 variable "s3_vectors_index_arn" {
   type        = string
-  default     = "arn:aws:s3vectors:us-east-1:314175685812:bucket/aisss-dev-kb-vectors/index/aisss-dev-kb-index"
-  description = "ARN of the S3 Vectors index used by Bedrock Knowledge Base"
+  default     = ""
+  description = "ARN of the S3 Vectors index (no longer used — migrated to OpenSearch Serverless)"
 }
 
 variable "bedrock_knowledge_base_id" {
   type        = string
-  default     = "S5JEZ4X9IG"
-  description = "Bedrock Knowledge Base ID (created via CLI — S3 Vectors storage)"
+  default     = "86HYJUEMJL"
+  description = "Bedrock Knowledge Base ID — OpenSearch Serverless backend (collection aisss-dev-kb / g7i64ouqqxc3h6a7fsm9)"
 }
 
 variable "bedrock_knowledge_data_source_id" {
   type        = string
-  default     = "PVWKMFHB11"
-  description = "Bedrock Knowledge Base Data Source ID (recreated with FM parsing + 300-token chunks)"
+  default     = "OTSDN45AJ7"
+  description = "Bedrock Knowledge Base Data Source ID — S3 bucket aisss-dev-knowledge-docs-314175685812"
 }

@@ -8,6 +8,27 @@ const JWKS_URL = `https://cognito-idp.${env.AWS_REGION}.amazonaws.com/${env.COGN
 const JWKS = createRemoteJWKSet(new URL(JWKS_URL));
 
 export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<AuthContext> {
+  // ── Path 1: API Gateway Cognito Authorizer ─────────────────────────────────
+  // When a Cognito Authorizer validates the token it strips it from the
+  // Authorization header and injects the decoded claims into
+  // requestContext.authorizer.claims. This is the production path.
+  const claims = event.requestContext?.authorizer?.claims as Record<string, string> | undefined;
+  if (claims?.sub) {
+    const groups = claims['cognito:groups']
+      ? claims['cognito:groups'].split(',').map((g) => g.trim())
+      : [];
+    const role: UserRole = groups.includes('Administrators') ? 'admin' : 'student';
+    return {
+      userId: claims['sub'],
+      email: claims['email'] ?? '',
+      role,
+      groups,
+    };
+  }
+
+  // ── Path 2: Direct JWT verification (local dev / test-invoke without authorizer)
+  // Used when calling Lambda directly or in local development where no
+  // API Gateway Cognito Authorizer sits in front.
   const authHeader =
     event.headers['Authorization'] ?? event.headers['authorization'];
 
@@ -18,8 +39,6 @@ export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<A
   const token = authHeader.slice(7);
 
   try {
-    // API Gateway Cognito Authorizer passes through the ID token (has aud = client_id).
-    // We also support access tokens for flexibility (e.g. direct Lambda testing).
     // Detect token type from the unverified payload and set audience accordingly.
     const tokenParts = token.split('.');
     let tokenUse = 'id';
@@ -39,7 +58,6 @@ export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<A
     const verifyOptions = tokenUse === 'access'
       ? {
           issuer: `https://cognito-idp.${env.AWS_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
-          // access tokens use client_id claim not aud — skip audience check
         }
       : {
           issuer: `https://cognito-idp.${env.AWS_REGION}.amazonaws.com/${env.COGNITO_USER_POOL_ID}`,
@@ -50,9 +68,7 @@ export async function extractAuthContext(event: APIGatewayProxyEvent): Promise<A
 
     const groups = (payload['cognito:groups'] as string[] | undefined) ?? [];
     const role: UserRole = groups.includes('Administrators') ? 'admin' : 'student';
-
-    // email is present in id token; for access token fall back to sub
-    const email = (payload['email'] as string | undefined) ?? (payload['username'] as string | undefined) ?? '';
+    const email = (payload['email'] as string | undefined) ?? '';
 
     return {
       userId: payload['sub'] as string,

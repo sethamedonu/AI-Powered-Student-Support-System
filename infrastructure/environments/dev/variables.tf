@@ -58,18 +58,18 @@ variable "domain" {
 
 variable "s3_vectors_index_arn" {
   type        = string
-  default     = ""
-  description = "ARN of the manually-created S3 Vectors index. Leave empty until the index is created via CLI."
+  default     = "arn:aws:s3vectors:us-east-1:314175685812:bucket/aisss-dev-kb-vectors/index/aisss-dev-kb-index"
+  description = "ARN of the S3 Vectors index used by Bedrock Knowledge Base"
 }
 
 variable "bedrock_knowledge_base_id" {
   type        = string
-  default     = ""
-  description = "Set after manually creating the Bedrock Knowledge Base via CLI"
+  default     = "S5JEZ4X9IG"
+  description = "Bedrock Knowledge Base ID (created via CLI — S3 Vectors storage)"
 }
 
 variable "bedrock_knowledge_data_source_id" {
   type        = string
-  default     = ""
-  description = "Set after manually creating the Bedrock Data Source via CLI"
+  default     = "SYE8DOK5AS"
+  description = "Bedrock Knowledge Base Data Source ID"
 }

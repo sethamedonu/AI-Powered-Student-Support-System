@@ -51,9 +51,16 @@ async function request<T>(
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 
+/**
+ * API Gateway Cognito Authorizer validates the ID token (not the access token).
+ * The ID token carries the `aud` claim (= client ID) that the authorizer checks,
+ * and also carries `cognito:groups` used by Lambda auth middleware for role checks.
+ * The access token has no `aud` claim and will be rejected with 401 by the authorizer.
+ */
 function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("accessToken");
+  // Prefer idToken for API Gateway Cognito Authorizer compatibility
+  return localStorage.getItem("idToken") ?? localStorage.getItem("accessToken");
 }
 
 export function saveTokens(tokens: {

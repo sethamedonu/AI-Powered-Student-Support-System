@@ -41,10 +41,10 @@ output "knowledge_data_source_id" {
 
 output "opensearch_collection_arn" {
   description = "OpenSearch Serverless collection ARN used as KB vector store"
-  value       = aws_opensearchserverless_collection.kb.arn
+  value       = "arn:aws:aoss:us-east-1:314175685812:collection/g7i64ouqqxc3h6a7fsm9"
 }
 
 output "opensearch_collection_endpoint" {
   description = "OpenSearch Serverless collection endpoint"
-  value       = aws_opensearchserverless_collection.kb.collection_endpoint
+  value       = "https://g7i64ouqqxc3h6a7fsm9.us-east-1.aoss.amazonaws.com"
 }

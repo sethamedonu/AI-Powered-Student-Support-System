@@ -27,6 +27,8 @@ const FUNCTIONS = [
   'admin-users-update',
   'admin-feedback-list',
   'admin-knowledge-upsert',
+  'admin-upload-document',
+  'admin-sync-knowledge',
 ];
 
 const lambda = new LambdaClient({ region: REGION });

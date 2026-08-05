@@ -100,7 +100,7 @@ export class BedrockProvider implements IAIProvider {
         content: [{ text: m.content }],
       })),
       inferenceConfig: {
-        maxNewTokens: request.maxTokens ?? 1024,
+        maxTokens: request.maxTokens ?? 1024,
         temperature: request.temperature ?? 0.3,
       },
     };

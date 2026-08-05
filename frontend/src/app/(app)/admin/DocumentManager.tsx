@@ -37,9 +37,8 @@ const FOLDER_OPTIONS = [
 
 export function DocumentManager() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [status, setStatus] = useState<UploadStatus>("idle");
-  const [progress, setProgress] = useState(0);
   const [folder, setFolder] = useState("uploads");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -140,7 +139,6 @@ export function DocumentManager() {
     });
   }
 
-  const isDragging = useRef(false);
   const [dragOver, setDragOver] = useState(false);
 
   return (

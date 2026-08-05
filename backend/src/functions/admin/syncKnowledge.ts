@@ -12,7 +12,6 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import {
   BedrockAgentClient,
   StartIngestionJobCommand,
-  GetIngestionJobCommand,
 } from '@aws-sdk/client-bedrock-agent';
 import { createHandler } from '../../shared/middleware/handler.js';
 import { successResponse } from '../../shared/utils/response.js';

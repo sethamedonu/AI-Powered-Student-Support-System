@@ -2,29 +2,32 @@ locals {
   prefix = "${var.app_name}-${var.environment}"
 
   common_env = {
-    NODE_ENV                     = var.environment == "prod" ? "production" : var.environment == "dev" ? "development" : var.environment
-    APP_NAME                     = "AI-Powered Student Support System"
-    AWS_ACCOUNT_ID               = data.aws_caller_identity.current.account_id
-    DYNAMODB_TABLE_USERS         = var.dynamodb_table_users
-    DYNAMODB_TABLE_CONVERSATIONS = var.dynamodb_table_conversations
-    DYNAMODB_TABLE_MESSAGES      = var.dynamodb_table_messages
-    DYNAMODB_TABLE_CACHE         = var.dynamodb_table_cache
-    DYNAMODB_TABLE_ANALYTICS     = var.dynamodb_table_analytics
-    DYNAMODB_TABLE_FEEDBACK      = var.dynamodb_table_feedback
-    DYNAMODB_TABLE_AUDIT         = var.dynamodb_table_audit
-    DYNAMODB_TABLE_KNOWLEDGE     = var.dynamodb_table_knowledge
-    COGNITO_USER_POOL_ID         = var.cognito_user_pool_id
-    COGNITO_CLIENT_ID            = var.cognito_client_id
-    SQS_CHAT_QUEUE_URL           = var.sqs_chat_queue_url
-    SNS_ALERTS_TOPIC_ARN         = var.sns_alerts_topic_arn
-    SES_FROM_EMAIL               = var.ses_from_email
-    BEDROCK_REGION               = var.bedrock_region
-    BEDROCK_MODEL_ROUTINE        = var.bedrock_model_routine
-    BEDROCK_MODEL_COMPLEX        = var.bedrock_model_complex
-    BEDROCK_GUARDRAIL_ID         = var.bedrock_guardrail_id
-    BEDROCK_GUARDRAIL_VERSION    = var.bedrock_guardrail_version
-    CORS_ALLOWED_ORIGINS         = var.cors_allowed_origins[0]
-    LOG_LEVEL                    = var.environment == "prod" ? "info" : "debug"
+    NODE_ENV                         = var.environment == "prod" ? "production" : var.environment == "dev" ? "development" : var.environment
+    APP_NAME                         = "AI-Powered Student Support System"
+    AWS_ACCOUNT_ID                   = data.aws_caller_identity.current.account_id
+    DYNAMODB_TABLE_USERS             = var.dynamodb_table_users
+    DYNAMODB_TABLE_CONVERSATIONS     = var.dynamodb_table_conversations
+    DYNAMODB_TABLE_MESSAGES          = var.dynamodb_table_messages
+    DYNAMODB_TABLE_CACHE             = var.dynamodb_table_cache
+    DYNAMODB_TABLE_ANALYTICS         = var.dynamodb_table_analytics
+    DYNAMODB_TABLE_FEEDBACK          = var.dynamodb_table_feedback
+    DYNAMODB_TABLE_AUDIT             = var.dynamodb_table_audit
+    DYNAMODB_TABLE_KNOWLEDGE         = var.dynamodb_table_knowledge
+    COGNITO_USER_POOL_ID             = var.cognito_user_pool_id
+    COGNITO_CLIENT_ID                = var.cognito_client_id
+    SQS_CHAT_QUEUE_URL               = var.sqs_chat_queue_url
+    SNS_ALERTS_TOPIC_ARN             = var.sns_alerts_topic_arn
+    SES_FROM_EMAIL                   = var.ses_from_email
+    BEDROCK_REGION                   = var.bedrock_region
+    BEDROCK_MODEL_ROUTINE            = var.bedrock_model_routine
+    BEDROCK_MODEL_COMPLEX            = var.bedrock_model_complex
+    BEDROCK_GUARDRAIL_ID             = var.bedrock_guardrail_id
+    BEDROCK_GUARDRAIL_VERSION        = var.bedrock_guardrail_version
+    BEDROCK_KNOWLEDGE_BASE_ID        = var.bedrock_knowledge_base_id
+    BEDROCK_KNOWLEDGE_DATA_SOURCE_ID = var.bedrock_knowledge_data_source_id
+    KNOWLEDGE_DOCS_BUCKET            = var.knowledge_docs_bucket
+    CORS_ALLOWED_ORIGINS             = var.cors_allowed_origins[0]
+    LOG_LEVEL                        = var.environment == "prod" ? "info" : "debug"
   }
 
   functions = {
@@ -144,8 +147,20 @@ locals {
     }
     admin-knowledge-upsert = {
       handler     = "index.handler"
-      description = "Create or update knowledge base entry (admin only)"
+      description = "Create or update knowledge base entry and trigger KB ingestion"
+      timeout     = 60
+      memory      = 256
+    }
+    admin-upload-document = {
+      handler     = "index.handler"
+      description = "Generate pre-signed S3 URL for document upload to Knowledge Base"
       timeout     = 30
+      memory      = 256
+    }
+    admin-sync-knowledge = {
+      handler     = "index.handler"
+      description = "Trigger Bedrock Knowledge Base ingestion job"
+      timeout     = 60
       memory      = 256
     }
   }

@@ -6,6 +6,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Spinner } from "@/components/ui/Spinner";
 import { adminApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
+import { DocumentManager } from "./DocumentManager";
 import type { User, UserRole } from "@/lib/types";
 
 interface AdminStats {
@@ -217,8 +218,7 @@ export function AdminClient() {
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Users table with role management */}
-            <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     User management
@@ -320,6 +320,9 @@ export function AdminClient() {
               </div>
             </div>
           </div>
+
+          {/* Knowledge Base document management */}
+          <DocumentManager />
         </>
       )}
     </div>

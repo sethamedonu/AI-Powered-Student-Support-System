@@ -201,6 +201,26 @@ export const adminApi = {
       body: JSON.stringify(updates),
     }),
 
+  // ─── Document / Knowledge Base management ──────────────────────────────────
+
+  /** Get a pre-signed S3 URL to upload a document directly from the browser */
+  getUploadUrl: (body: {
+    fileName: string;
+    contentType: string;
+    folder?: string;
+  }) =>
+    request<{ uploadUrl: string; s3Key: string; bucket: string; message: string }>(
+      "/admin/documents/upload",
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+
+  /** Trigger Bedrock Knowledge Base ingestion after one or more uploads */
+  syncKnowledge: () =>
+    request<{ jobId: string; status: string; message: string }>(
+      "/admin/documents/sync",
+      { method: "POST", body: "{}" },
+    ),
+
   listFeedback: (limit = 20) =>
     request<
       PaginatedResult<{

@@ -27,6 +27,9 @@ variable "bedrock_model_complex" {
 }
 variable "bedrock_guardrail_id" { type = string }
 variable "bedrock_guardrail_version" { type = string }
+variable "bedrock_knowledge_base_id" { type = string }
+variable "bedrock_knowledge_data_source_id" { type = string }
+variable "knowledge_docs_bucket" { type = string }
 variable "cors_allowed_origins" {
   type    = list(string)
   default = ["*"]

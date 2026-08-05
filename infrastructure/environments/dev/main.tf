@@ -80,35 +80,41 @@ module "ses" {
 }
 
 module "bedrock" {
-  source      = "../../modules/bedrock"
-  environment = var.environment
-  app_name    = var.app_name
+  source                           = "../../modules/bedrock"
+  environment                      = var.environment
+  app_name                         = var.app_name
+  s3_vectors_index_arn             = var.s3_vectors_index_arn
+  bedrock_knowledge_base_id        = var.bedrock_knowledge_base_id
+  bedrock_knowledge_data_source_id = var.bedrock_knowledge_data_source_id
 }
 
 module "lambda" {
-  source                       = "../../modules/lambda"
-  environment                  = var.environment
-  app_name                     = var.app_name
-  aws_region                   = var.aws_region
-  lambda_execution_role_arn    = module.iam.lambda_execution_role_arn
-  dynamodb_table_users         = module.dynamodb.table_users_name
-  dynamodb_table_conversations = module.dynamodb.table_conversations_name
-  dynamodb_table_messages      = module.dynamodb.table_messages_name
-  dynamodb_table_cache         = module.dynamodb.table_cache_name
-  dynamodb_table_analytics     = module.dynamodb.table_analytics_name
-  dynamodb_table_feedback      = module.dynamodb.table_feedback_name
-  dynamodb_table_audit         = module.dynamodb.table_audit_name
-  dynamodb_table_knowledge     = module.dynamodb.table_knowledge_name
-  cognito_user_pool_id         = module.cognito.user_pool_id
-  cognito_client_id            = module.cognito.user_pool_client_id
-  sqs_chat_queue_url           = module.sqs.chat_queue_url
-  sqs_chat_queue_arn           = module.sqs.chat_queue_arn
-  sns_alerts_topic_arn         = module.sns.alerts_topic_arn
-  ses_from_email               = var.ses_from_email
-  bedrock_region               = var.aws_region
-  bedrock_guardrail_id         = module.bedrock.guardrail_id
-  bedrock_guardrail_version    = module.bedrock.guardrail_version
-  cors_allowed_origins         = var.cors_allowed_origins
+  source                           = "../../modules/lambda"
+  environment                      = var.environment
+  app_name                         = var.app_name
+  aws_region                       = var.aws_region
+  lambda_execution_role_arn        = module.iam.lambda_execution_role_arn
+  dynamodb_table_users             = module.dynamodb.table_users_name
+  dynamodb_table_conversations     = module.dynamodb.table_conversations_name
+  dynamodb_table_messages          = module.dynamodb.table_messages_name
+  dynamodb_table_cache             = module.dynamodb.table_cache_name
+  dynamodb_table_analytics         = module.dynamodb.table_analytics_name
+  dynamodb_table_feedback          = module.dynamodb.table_feedback_name
+  dynamodb_table_audit             = module.dynamodb.table_audit_name
+  dynamodb_table_knowledge         = module.dynamodb.table_knowledge_name
+  cognito_user_pool_id             = module.cognito.user_pool_id
+  cognito_client_id                = module.cognito.user_pool_client_id
+  sqs_chat_queue_url               = module.sqs.chat_queue_url
+  sqs_chat_queue_arn               = module.sqs.chat_queue_arn
+  sns_alerts_topic_arn             = module.sns.alerts_topic_arn
+  ses_from_email                   = var.ses_from_email
+  bedrock_region                   = var.aws_region
+  bedrock_guardrail_id             = module.bedrock.guardrail_id
+  bedrock_guardrail_version        = module.bedrock.guardrail_version
+  bedrock_knowledge_base_id        = module.bedrock.knowledge_base_id
+  bedrock_knowledge_data_source_id = module.bedrock.knowledge_data_source_id
+  knowledge_docs_bucket            = module.bedrock.knowledge_docs_bucket
+  cors_allowed_origins             = var.cors_allowed_origins
 }
 
 module "api_gateway" {

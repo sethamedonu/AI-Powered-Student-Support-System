@@ -55,3 +55,21 @@ variable "domain" {
   type    = string
   default = ""
 }
+
+variable "s3_vectors_index_arn" {
+  type        = string
+  default     = ""
+  description = "ARN of the manually-created S3 Vectors index. Leave empty until the index is created via CLI."
+}
+
+variable "bedrock_knowledge_base_id" {
+  type        = string
+  default     = ""
+  description = "Set after manually creating the Bedrock Knowledge Base via CLI"
+}
+
+variable "bedrock_knowledge_data_source_id" {
+  type        = string
+  default     = ""
+  description = "Set after manually creating the Bedrock Data Source via CLI"
+}

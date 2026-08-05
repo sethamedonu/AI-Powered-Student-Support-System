@@ -98,6 +98,50 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
   }
 
   async search(query: string): Promise<KnowledgeEntry[]> {
+    // ── Bedrock Knowledge Base semantic search (primary path) ─────────────────
+    // Uses the Retrieve API to find the most relevant document chunks
+    // via vector similarity in S3 Vectors.
+    if (env.BEDROCK_KNOWLEDGE_BASE_ID) {
+      try {
+        const { BedrockAgentRuntimeClient, RetrieveCommand } = await import('@aws-sdk/client-bedrock-agent-runtime');
+        const kbClient = new BedrockAgentRuntimeClient({ region: env.BEDROCK_REGION });
+
+        const result = await kbClient.send(new RetrieveCommand({
+          knowledgeBaseId: env.BEDROCK_KNOWLEDGE_BASE_ID,
+          retrievalQuery: { text: query },
+          retrievalConfiguration: {
+            vectorSearchConfiguration: {
+              numberOfResults: 5,
+              // Only return chunks that are genuinely relevant
+              overrideSearchType: 'HYBRID',
+            },
+          },
+        }));
+
+        const chunks = result.retrievalResults ?? [];
+
+        if (chunks.length === 0) return [];
+
+        // Map Bedrock retrieval results to KnowledgeEntry shape
+        // so the orchestrator context injection works without any changes
+        return chunks.map((chunk, i) => ({
+          knowledgeId: `kb-${i}`,
+          title: chunk.location?.s3Location?.uri?.split('/').pop()?.replace(/\.[^.]+$/, '') ?? 'Document',
+          content: chunk.content?.text ?? '',
+          category: 'general' as const,
+          keywords: [],
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        // Fall through to keyword search if KB is unavailable
+        const logger = (await import('../../../shared/utils/logger.js')).createLogger('knowledge-repo');
+        logger.warn('Bedrock KB retrieve failed, falling back to keyword search', error);
+      }
+    }
+
+    // ── Keyword search fallback (used when KB is not yet configured) ──────────
     const terms = query.toLowerCase().split(' ').filter(Boolean);
     const result = await docClient.send(
       new ScanCommand({

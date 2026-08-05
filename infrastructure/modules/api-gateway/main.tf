@@ -245,6 +245,53 @@ resource "aws_api_gateway_resource" "admin_analytics" {
   path_part   = "analytics"
 }
 
+# ─── Admin document upload routes ─────────────────────────────────────────────
+resource "aws_api_gateway_resource" "admin_documents" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin.id
+  path_part   = "documents"
+}
+
+resource "aws_api_gateway_resource" "admin_documents_upload" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin_documents.id
+  path_part   = "upload"
+}
+
+resource "aws_api_gateway_resource" "admin_documents_sync" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.admin_documents.id
+  path_part   = "sync"
+}
+
+module "route_admin_upload_document" {
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_documents_upload.id
+  path_part      = ""
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["admin-upload-document"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
+}
+
+module "route_admin_sync_knowledge" {
+  source         = "./routes"
+  rest_api_id    = aws_api_gateway_rest_api.main.id
+  parent_id      = aws_api_gateway_resource.admin_documents_sync.id
+  path_part      = ""
+  http_method    = "POST"
+  lambda_arn     = var.lambda_functions["admin-sync-knowledge"]
+  aws_region     = var.aws_region
+  aws_account_id = data.aws_caller_identity.current.account_id
+  authorizer_id  = aws_api_gateway_authorizer.cognito.id
+  require_auth   = true
+  use_parent     = true
+}
+
 module "route_admin_stats" {
   source         = "./routes"
   rest_api_id    = aws_api_gateway_rest_api.main.id
@@ -417,6 +464,8 @@ resource "aws_api_gateway_deployment" "main" {
     module.route_admin_stats,
     module.route_admin_users,
     module.route_admin_user_update,
+    module.route_admin_upload_document,
+    module.route_admin_sync_knowledge,
     module.route_admin_feedback,
     module.route_admin_analytics,
     module.route_conversations_get,

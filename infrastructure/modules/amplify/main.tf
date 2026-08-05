@@ -1,5 +1,6 @@
 locals {
-  prefix = "${var.app_name}-${var.environment}"
+  prefix      = "${var.app_name}-${var.environment}"
+  branch_name = var.environment == "prod" ? "main" : var.environment
 }
 
 resource "aws_amplify_app" "main" {
@@ -7,39 +8,28 @@ resource "aws_amplify_app" "main" {
   repository   = var.github_repository
   access_token = var.github_access_token
 
-  build_spec = <<-EOT
-    version: 1
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - cd frontend
-            - npm ci
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: frontend/dist
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - frontend/node_modules/**/*
-  EOT
+  # WEB_COMPUTE enables the Node.js SSR runtime (required for Next.js)
+  platform = "WEB_COMPUTE"
+
+  enable_branch_auto_build    = true
+  enable_branch_auto_deletion = true
+
+  auto_branch_creation_config {
+    enable_auto_build           = true
+    enable_pull_request_preview = var.environment != "prod"
+    framework                   = "Next.js - SSR"
+    stage                       = var.environment == "prod" ? "PRODUCTION" : "DEVELOPMENT"
+  }
+
+  auto_branch_creation_patterns = [
+    var.environment == "prod" ? "main" : "${var.environment}*",
+    "feature/*",
+  ]
+
+  # Build config lives in amplify.yml at the repo root.
+  # Amplify picks that file up automatically — no build_spec override needed.
 
   environment_variables = var.environment_variables
-
-  custom_rule {
-    source = "/<*>"
-    status = "404"
-    target = "/index.html"
-  }
-
-  custom_rule {
-    source = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json)$)([^.]+$)/>"
-    status = "200"
-    target = "/index.html"
-  }
 
   tags = {
     Name = "${local.prefix}-frontend"
@@ -47,13 +37,22 @@ resource "aws_amplify_app" "main" {
 }
 
 resource "aws_amplify_branch" "main" {
-  app_id      = aws_amplify_app.main.id
-  branch_name = var.environment == "prod" ? "main" : var.environment
+  app_id       = aws_amplify_app.main.id
+  branch_name  = local.branch_name
+  display_name = local.branch_name
 
-  enable_auto_build            = true
-  enable_pull_request_preview  = var.environment != "prod"
+  framework = "Next.js - SSR"
+  stage     = var.environment == "prod" ? "PRODUCTION" : "DEVELOPMENT"
+
+  enable_auto_build           = true
+  enable_pull_request_preview = var.environment != "prod"
+
+  environment_variables = merge(var.environment_variables, {
+    NEXT_PUBLIC_APP_ORIGIN    = "https://${local.branch_name}.${aws_amplify_app.main.default_domain}"
+    AMPLIFY_MONOREPO_APP_ROOT = "frontend"
+  })
 
   tags = {
-    Name = "${local.prefix}-branch-${var.environment}"
+    Name = "${local.prefix}-branch-${local.branch_name}"
   }
 }

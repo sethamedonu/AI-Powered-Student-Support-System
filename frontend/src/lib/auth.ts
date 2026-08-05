@@ -1,54 +1,75 @@
-import { authApi, clearTokens, getStoredUser, saveTokens } from './api';
-import type { User } from './types';
+/**
+ * auth.ts — server-side auth guards only.
+ *
+ * ONLY import this from:
+ *   - async Server Components
+ *   - Server Actions
+ *   - Route Handlers
+ *
+ * Do NOT import this from Client Components — it uses next/headers
+ * which is server-only. For client-side helpers use auth.client.ts.
+ */
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import type { User } from "./types";
 
-export function isAuthenticated(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('accessToken');
-}
-
-export function getCurrentUser(): User | null {
-  return getStoredUser();
-}
-
-export function isAdmin(): boolean {
-  return getCurrentUser()?.role === 'admin';
-}
-
-export async function logout(): Promise<void> {
-  clearTokens();
-  window.location.href = '/auth/login';
-}
-
-export async function refreshSession(): Promise<boolean> {
+/**
+ * Read the user object stored in the cookie set at login.
+ */
+export async function getUserFromCookie(): Promise<User | null> {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get("user")?.value;
+  if (!raw) return null;
   try {
-    const result = await authApi.refresh();
-    saveTokens({
-      accessToken: result.accessToken,
-      idToken: result.idToken,
-      refreshToken: localStorage.getItem('refreshToken') ?? '',
-    });
-    return true;
+    return JSON.parse(decodeURIComponent(raw)) as User;
   } catch {
-    clearTokens();
-    return false;
+    return null;
   }
 }
 
-/** Redirect to login if not authenticated. Call in routeLoader$. */
-export function requireAuth(url: URL): Response | null {
-  // Server-side: check cookie or header — for now handled client-side
-  return null;
+/**
+ * Guard for protected pages — redirects to /auth/login if unauthenticated.
+ */
+export async function requireAuth(returnPath?: string): Promise<User> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+
+  if (!token) {
+    const redirectTo = returnPath
+      ? `/auth/login?redirect=${encodeURIComponent(returnPath)}`
+      : "/auth/login";
+    redirect(redirectTo);
+  }
+
+  const user = await getUserFromCookie();
+  if (!user) {
+    redirect("/auth/login");
+  }
+
+  return user;
 }
 
-/** Redirect to dashboard if already authenticated. */
-export function redirectIfAuthenticated(url: URL): Response | null {
-  return null;
+/**
+ * Admin-only guard — redirects non-admins to /dashboard.
+ */
+export async function requireAdmin(): Promise<User> {
+  const user = await requireAuth();
+  if (user.role !== "admin") {
+    redirect("/dashboard");
+  }
+  return user;
 }
 
-export function getInitials(user: User): string {
-  return `${user.givenName[0] ?? ''}${user.familyName[0] ?? ''}`.toUpperCase();
-}
-
-export function getFullName(user: User): string {
-  return `${user.givenName} ${user.familyName}`;
+/**
+ * Guard for auth pages — redirects authenticated users to /dashboard.
+ */
+export async function redirectIfAuthenticated(
+  searchParams: Record<string, string | undefined>,
+): Promise<void> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+  if (token) {
+    const returnTo = searchParams["redirect"];
+    redirect(returnTo ?? "/dashboard");
+  }
 }

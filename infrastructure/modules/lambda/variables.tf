@@ -17,4 +17,20 @@ variable "sqs_chat_queue_arn" { type = string }
 variable "sns_alerts_topic_arn" { type = string }
 variable "ses_from_email" { type = string }
 variable "bedrock_region" { type = string }
+variable "bedrock_model_routine" {
+  type    = string
+  default = "us.amazon.nova-lite-v1:0"
+}
+variable "bedrock_model_complex" {
+  type    = string
+  default = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+}
 variable "bedrock_guardrail_id" { type = string }
+variable "bedrock_guardrail_version" { type = string }
+variable "bedrock_knowledge_base_id" { type = string }
+variable "bedrock_knowledge_data_source_id" { type = string }
+variable "knowledge_docs_bucket" { type = string }
+variable "cors_allowed_origins" {
+  type    = list(string)
+  default = ["*"]
+}

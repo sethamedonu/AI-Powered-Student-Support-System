@@ -13,11 +13,6 @@ output "cognito_client_id" {
   value       = module.cognito.user_pool_client_id
 }
 
-output "amplify_app_url" {
-  description = "Amplify hosted frontend URL"
-  value       = module.amplify.app_default_domain
-}
-
 output "dynamodb_table_names" {
   description = "All DynamoDB table names"
   value = {
@@ -40,4 +35,24 @@ output "sqs_chat_queue_url" {
 output "sns_alerts_topic_arn" {
   description = "SNS alerts topic ARN"
   value       = module.sns.alerts_topic_arn
+}
+
+output "amplify_app_id" {
+  description = "Amplify app ID"
+  value       = module.amplify.app_id
+}
+
+output "amplify_default_domain" {
+  description = "Amplify default domain"
+  value       = module.amplify.app_default_domain
+}
+
+output "cloudfront_domain" {
+  description = "CloudFront distribution domain (legacy)"
+  value       = "https://d1056g6ybpps7o.cloudfront.net"
+}
+
+output "cloudfront_arn" {
+  description = "CloudFront distribution ARN (legacy)"
+  value       = "arn:aws:cloudfront::646966486144:distribution/E1PTK0MXNGRETB"
 }

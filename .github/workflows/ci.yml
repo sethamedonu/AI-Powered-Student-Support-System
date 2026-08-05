@@ -2,9 +2,9 @@ name: CI — Lint, Test & Build
 
 on:
   push:
-    branches: [main, dev, staging]
+    branches: [main, dev]
   pull_request:
-    branches: [main, dev, staging]
+    branches: [main, dev]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -70,11 +70,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
-        working-directory: frontend
 
       - name: Lint
         run: npm run lint
@@ -92,10 +91,10 @@ jobs:
         run: npm run build
         working-directory: frontend
         env:
-          VITE_API_URL: https://api.placeholder.com
-          VITE_COGNITO_REGION: us-east-1
-          VITE_COGNITO_USER_POOL_ID: placeholder
-          VITE_COGNITO_CLIENT_ID: placeholder
+          NEXT_PUBLIC_API_URL: https://api.placeholder.com
+          NEXT_PUBLIC_COGNITO_REGION: us-east-1
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: placeholder
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: placeholder
 
   # ─── Terraform Validate ─────────────────────────────────────────────────────
   terraform:
@@ -135,6 +134,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
 
     steps:
       - name: Checkout

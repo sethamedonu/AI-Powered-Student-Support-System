@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "aisss-terraform-state-646966486144"
+    bucket         = "aisss-terraform-state-314175685812"
     key            = "dev/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "aisss-terraform-locks"
@@ -34,79 +34,89 @@ provider "aws" {
   }
 }
 
-# ─── IAM Module ──────────────────────────────────────────────────────────────
 module "iam" {
   source      = "../../modules/iam"
   environment = var.environment
   app_name    = var.app_name
 }
 
-# ─── DynamoDB Module ─────────────────────────────────────────────────────────
 module "dynamodb" {
   source      = "../../modules/dynamodb"
   environment = var.environment
   app_name    = var.app_name
 }
 
-# ─── Cognito Module ───────────────────────────────────────────────────────────
 module "cognito" {
-  source            = "../../modules/cognito"
-  environment       = var.environment
-  app_name          = var.app_name
-  ses_from_email    = var.ses_from_email
-  callback_urls     = var.cognito_callback_urls
-  logout_urls       = var.cognito_logout_urls
+  source         = "../../modules/cognito"
+  environment    = var.environment
+  app_name       = var.app_name
+  ses_from_email = var.ses_from_email
+  callback_urls  = var.cognito_callback_urls
+  logout_urls    = var.cognito_logout_urls
+  aws_account_id = data.aws_caller_identity.current.account_id
 }
 
-# ─── SQS Module ───────────────────────────────────────────────────────────────
+data "aws_caller_identity" "current" {}
+
 module "sqs" {
   source      = "../../modules/sqs"
   environment = var.environment
   app_name    = var.app_name
 }
 
-# ─── SNS Module ───────────────────────────────────────────────────────────────
 module "sns" {
-  source            = "../../modules/sns"
-  environment       = var.environment
-  app_name          = var.app_name
-  alert_email       = var.alert_email
+  source      = "../../modules/sns"
+  environment = var.environment
+  app_name    = var.app_name
+  alert_email = var.alert_email
 }
 
-# ─── SES Module ───────────────────────────────────────────────────────────────
 module "ses" {
-  source         = "../../modules/ses"
-  environment    = var.environment
-  app_name       = var.app_name
-  domain         = var.domain
-  from_email     = var.ses_from_email
+  source      = "../../modules/ses"
+  environment = var.environment
+  app_name    = var.app_name
+  domain      = var.ses_from_email
+  from_email  = var.ses_from_email
 }
 
-# ─── Lambda Module ────────────────────────────────────────────────────────────
+module "bedrock" {
+  source                           = "../../modules/bedrock"
+  environment                      = var.environment
+  app_name                         = var.app_name
+  s3_vectors_index_arn             = var.s3_vectors_index_arn
+  bedrock_knowledge_base_id        = var.bedrock_knowledge_base_id
+  bedrock_knowledge_data_source_id = var.bedrock_knowledge_data_source_id
+}
+
 module "lambda" {
-  source                    = "../../modules/lambda"
-  environment               = var.environment
-  app_name                  = var.app_name
-  aws_region                = var.aws_region
-  lambda_execution_role_arn = module.iam.lambda_execution_role_arn
-  dynamodb_table_users      = module.dynamodb.table_users_name
-  dynamodb_table_conversations = module.dynamodb.table_conversations_name
-  dynamodb_table_messages   = module.dynamodb.table_messages_name
-  dynamodb_table_cache      = module.dynamodb.table_cache_name
-  dynamodb_table_analytics  = module.dynamodb.table_analytics_name
-  dynamodb_table_feedback   = module.dynamodb.table_feedback_name
-  dynamodb_table_audit      = module.dynamodb.table_audit_name
-  dynamodb_table_knowledge  = module.dynamodb.table_knowledge_name
-  cognito_user_pool_id      = module.cognito.user_pool_id
-  cognito_client_id         = module.cognito.user_pool_client_id
-  sqs_chat_queue_url        = module.sqs.chat_queue_url
-  sns_alerts_topic_arn      = module.sns.alerts_topic_arn
-  ses_from_email            = var.ses_from_email
-  bedrock_region            = var.aws_region
-  bedrock_guardrail_id      = var.bedrock_guardrail_id
+  source                           = "../../modules/lambda"
+  environment                      = var.environment
+  app_name                         = var.app_name
+  aws_region                       = var.aws_region
+  lambda_execution_role_arn        = module.iam.lambda_execution_role_arn
+  dynamodb_table_users             = module.dynamodb.table_users_name
+  dynamodb_table_conversations     = module.dynamodb.table_conversations_name
+  dynamodb_table_messages          = module.dynamodb.table_messages_name
+  dynamodb_table_cache             = module.dynamodb.table_cache_name
+  dynamodb_table_analytics         = module.dynamodb.table_analytics_name
+  dynamodb_table_feedback          = module.dynamodb.table_feedback_name
+  dynamodb_table_audit             = module.dynamodb.table_audit_name
+  dynamodb_table_knowledge         = module.dynamodb.table_knowledge_name
+  cognito_user_pool_id             = module.cognito.user_pool_id
+  cognito_client_id                = module.cognito.user_pool_client_id
+  sqs_chat_queue_url               = module.sqs.chat_queue_url
+  sqs_chat_queue_arn               = module.sqs.chat_queue_arn
+  sns_alerts_topic_arn             = module.sns.alerts_topic_arn
+  ses_from_email                   = var.ses_from_email
+  bedrock_region                   = var.aws_region
+  bedrock_guardrail_id             = module.bedrock.guardrail_id
+  bedrock_guardrail_version        = module.bedrock.guardrail_version
+  bedrock_knowledge_base_id        = module.bedrock.knowledge_base_id
+  bedrock_knowledge_data_source_id = module.bedrock.knowledge_data_source_id
+  knowledge_docs_bucket            = module.bedrock.knowledge_docs_bucket
+  cors_allowed_origins             = var.cors_allowed_origins
 }
 
-# ─── API Gateway Module ───────────────────────────────────────────────────────
 module "api_gateway" {
   source                = "../../modules/api-gateway"
   environment           = var.environment
@@ -117,36 +127,28 @@ module "api_gateway" {
   cors_allowed_origins  = var.cors_allowed_origins
 }
 
-# ─── CloudWatch Module ────────────────────────────────────────────────────────
 module "cloudwatch" {
-  source               = "../../modules/cloudwatch"
-  environment          = var.environment
-  app_name             = var.app_name
-  sns_alerts_topic_arn = module.sns.alerts_topic_arn
-  api_gateway_id       = module.api_gateway.rest_api_id
+  source                = "../../modules/cloudwatch"
+  environment           = var.environment
+  app_name              = var.app_name
+  aws_region            = var.aws_region
+  sns_alerts_topic_arn  = module.sns.alerts_topic_arn
+  api_gateway_id        = module.api_gateway.rest_api_id
   lambda_function_names = module.lambda.function_names
+  queue_name            = module.sqs.chat_queue_name
+  dlq_name              = module.sqs.chat_dlq_name
+
+  # DynamoDB table names — used for per-table capacity alarms
+  dynamodb_table_users         = module.dynamodb.table_users_name
+  dynamodb_table_conversations = module.dynamodb.table_conversations_name
+  dynamodb_table_messages      = module.dynamodb.table_messages_name
+  dynamodb_table_cache         = module.dynamodb.table_cache_name
+  dynamodb_table_analytics     = module.dynamodb.table_analytics_name
+  dynamodb_table_feedback      = module.dynamodb.table_feedback_name
+  dynamodb_table_audit         = module.dynamodb.table_audit_name
+  dynamodb_table_knowledge     = module.dynamodb.table_knowledge_name
 }
 
-# ─── ACM Module ───────────────────────────────────────────────────────────────
-module "acm" {
-  source      = "../../modules/acm"
-  environment = var.environment
-  app_name    = var.app_name
-  domain      = var.domain
-}
-
-# ─── Route53 Module ───────────────────────────────────────────────────────────
-module "route53" {
-  source              = "../../modules/route53"
-  environment         = var.environment
-  app_name            = var.app_name
-  domain              = var.domain
-  amplify_app_domain  = module.amplify.app_default_domain
-  api_gateway_domain  = module.api_gateway.custom_domain_name
-  acm_certificate_arn = module.acm.certificate_arn
-}
-
-# ─── Amplify Module ───────────────────────────────────────────────────────────
 module "amplify" {
   source              = "../../modules/amplify"
   environment         = var.environment
@@ -154,12 +156,13 @@ module "amplify" {
   github_repository   = var.github_repository
   github_access_token = var.github_access_token
   domain              = var.domain
-  acm_certificate_arn = module.acm.certificate_arn
+  acm_certificate_arn = ""
   environment_variables = {
-    VITE_API_URL                = module.api_gateway.invoke_url
-    VITE_COGNITO_REGION         = var.aws_region
-    VITE_COGNITO_USER_POOL_ID   = module.cognito.user_pool_id
-    VITE_COGNITO_CLIENT_ID      = module.cognito.user_pool_client_id
-    VITE_APP_NAME               = var.app_name
+    NEXT_PUBLIC_API_URL              = module.api_gateway.invoke_url
+    NEXT_PUBLIC_COGNITO_REGION       = var.aws_region
+    NEXT_PUBLIC_COGNITO_USER_POOL_ID = module.cognito.user_pool_id
+    NEXT_PUBLIC_COGNITO_CLIENT_ID    = module.cognito.user_pool_client_id
+    NEXT_PUBLIC_ENVIRONMENT          = var.environment
+    AMPLIFY_MONOREPO_APP_ROOT        = "frontend"
   }
 }

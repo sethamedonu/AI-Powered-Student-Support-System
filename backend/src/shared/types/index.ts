@@ -4,7 +4,7 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type AIProvider = 'bedrock' | 'openai' | 'gemini' | 'deepseek';
 
-export type AIModel = 'nova-lite' | 'claude-3-5-sonnet';
+export type AIModel = 'nova-lite' | 'claude-3-5-sonnet' | 'claude-sonnet';
 
 export type RequestComplexity = 'simple' | 'complex';
 

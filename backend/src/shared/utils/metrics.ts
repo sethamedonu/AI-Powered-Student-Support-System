@@ -49,6 +49,7 @@ export function publishMetrics(
   };
 
   // EMF requires stdout — CloudWatch Logs agent picks it up automatically
+  // eslint-disable-next-line no-console
   console.log(JSON.stringify(payload));
 }
 

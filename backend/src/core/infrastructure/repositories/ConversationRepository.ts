@@ -27,7 +27,7 @@ export class DynamoConversationRepository implements IConversationRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { userId, conversationId } }),
     );
-    return (result.Item as Conversation) ?? null;
+    return (result.Item ?? null) as Conversation | null;
   }
 
   async listByUser(userId: string, params: PaginationParams): Promise<PaginatedResult<Conversation>> {
@@ -38,12 +38,12 @@ export class DynamoConversationRepository implements IConversationRepository {
         ExpressionAttributeValues: { ':userId': userId },
         ScanIndexForward: false,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as Conversation[]) ?? [],
+      items: (result.Items ?? []) as Conversation[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -92,7 +92,7 @@ export class DynamoMessageRepository implements IMessageRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { conversationId, messageId } }),
     );
-    return (result.Item as Message) ?? null;
+    return (result.Item ?? null) as Message | null;
   }
 
   async listByConversation(
@@ -106,12 +106,12 @@ export class DynamoMessageRepository implements IMessageRepository {
         ExpressionAttributeValues: { ':cid': conversationId },
         ScanIndexForward: true,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as Message[]) ?? [],
+      items: (result.Items ?? []) as Message[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };

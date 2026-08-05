@@ -22,7 +22,7 @@ import type {
   AnalyticsEvent,
 } from '../../domain/entities/index.js';
 import type { PaginatedResult, PaginationParams, KnowledgeCategory } from '../../../shared/types/index.js';
-import { generateId, nowIso, ttlDays, ttlHours } from '../../../shared/utils/helpers.js';
+import { generateId, nowIso, ttlDays } from '../../../shared/utils/helpers.js';
 import { env } from '../../../shared/types/env.js';
 
 // ─── Cache Repository ─────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ export class DynamoCacheRepository implements ICacheRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { cacheKey } }),
     );
-    return (result.Item as ResponseCache) ?? null;
+    return (result.Item ?? null) as ResponseCache | null;
   }
 
   async set(cache: Omit<ResponseCache, 'hitCount' | 'createdAt' | 'updatedAt'>): Promise<void> {
@@ -72,7 +72,7 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
     const result = await docClient.send(
       new GetCommand({ TableName: this.table, Key: { knowledgeId } }),
     );
-    return (result.Item as KnowledgeEntry) ?? null;
+    return (result.Item ?? null) as KnowledgeEntry | null;
   }
 
   async listByCategory(
@@ -86,18 +86,62 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
         KeyConditionExpression: 'category = :cat',
         ExpressionAttributeValues: { ':cat': category },
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as KnowledgeEntry[]) ?? [],
+      items: (result.Items ?? []) as KnowledgeEntry[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
   }
 
   async search(query: string): Promise<KnowledgeEntry[]> {
+    // ── Bedrock Knowledge Base semantic search (primary path) ─────────────────
+    // Uses the Retrieve API to find the most relevant document chunks
+    // via vector similarity in S3 Vectors.
+    if (env.BEDROCK_KNOWLEDGE_BASE_ID) {
+      try {
+        const { BedrockAgentRuntimeClient, RetrieveCommand } = await import('@aws-sdk/client-bedrock-agent-runtime');
+        const kbClient = new BedrockAgentRuntimeClient({ region: env.BEDROCK_REGION });
+
+        const result = await kbClient.send(new RetrieveCommand({
+          knowledgeBaseId: env.BEDROCK_KNOWLEDGE_BASE_ID,
+          retrievalQuery: { text: query },
+          retrievalConfiguration: {
+            vectorSearchConfiguration: {
+              numberOfResults: 5,
+              // S3 Vectors only supports SEMANTIC search (not HYBRID)
+              overrideSearchType: 'SEMANTIC',
+            },
+          },
+        }));
+
+        const chunks = result.retrievalResults ?? [];
+
+        if (chunks.length === 0) return [];
+
+        // Map Bedrock retrieval results to KnowledgeEntry shape
+        // so the orchestrator context injection works without any changes
+        return chunks.map((chunk, i) => ({
+          knowledgeId: `kb-${i}`,
+          title: chunk.location?.s3Location?.uri?.split('/').pop()?.replace(/\.[^.]+$/, '') ?? 'Document',
+          content: chunk.content?.text ?? '',
+          category: 'general' as const,
+          keywords: [],
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        // Fall through to keyword search if KB is unavailable
+        const logger = (await import('../../../shared/utils/logger.js')).createLogger('knowledge-repo');
+        logger.warn('Bedrock KB retrieve failed, falling back to keyword search', { error: String(error) });
+      }
+    }
+
+    // ── Keyword search fallback (used when KB is not yet configured) ──────────
     const terms = query.toLowerCase().split(' ').filter(Boolean);
     const result = await docClient.send(
       new ScanCommand({
@@ -107,7 +151,7 @@ export class DynamoKnowledgeRepository implements IKnowledgeRepository {
       }),
     );
 
-    const entries = (result.Items as KnowledgeEntry[]) ?? [];
+    const entries = (result.Items ?? []) as KnowledgeEntry[];
     return entries.filter((entry) => {
       const searchable = `${entry.title} ${entry.content} ${entry.keywords.join(' ')}`.toLowerCase();
       return terms.some((term) => searchable.includes(term));
@@ -152,12 +196,12 @@ export class DynamoFeedbackRepository implements IFeedbackRepository {
         ExpressionAttributeValues: { ':uid': userId },
         ScanIndexForward: false,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as Feedback[]) ?? [],
+      items: (result.Items ?? []) as Feedback[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -187,12 +231,12 @@ export class DynamoAuditRepository implements IAuditRepository {
         ExpressionAttributeValues: { ':uid': userId },
         ScanIndexForward: false,
         Limit: params.limit,
-        ExclusiveStartKey: params.lastEvaluatedKey as Record<string, unknown> | undefined,
+        ExclusiveStartKey: params.lastEvaluatedKey,
       }),
     );
 
     return {
-      items: (result.Items as AuditLog[]) ?? [],
+      items: (result.Items ?? []) as AuditLog[],
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };
@@ -223,6 +267,6 @@ export class DynamoAnalyticsRepository implements IAnalyticsRepository {
         ExpressionAttributeValues: { ':type': metricType, ':from': from, ':to': to },
       }),
     );
-    return (result.Items as AnalyticsEvent[]) ?? [];
+    return (result.Items ?? []) as AnalyticsEvent[];
   }
 }

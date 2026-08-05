@@ -1,9 +1,9 @@
 /** Format ISO date string to readable format */
 export function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(new Date(iso));
 }
 
@@ -11,7 +11,7 @@ export function formatDate(iso: string): string {
 export function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
+  if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
@@ -32,10 +32,7 @@ export function capitalize(str: string): string {
 
 /** Format category label for display */
 export function formatCategory(category: string): string {
-  return category
-    .split('-')
-    .map(capitalize)
-    .join(' ');
+  return category.split("-").map(capitalize).join(" ");
 }
 
 /** Clamp a number between min and max */

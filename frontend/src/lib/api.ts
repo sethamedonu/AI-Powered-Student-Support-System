@@ -6,18 +6,21 @@ import type {
   Message,
   PaginatedResult,
   User,
-} from './types';
+} from "./types";
 
-const API_BASE = import.meta.env.PUBLIC_API_URL as string ?? 'http://localhost:3000';
+// NEXT_PUBLIC_API_URL is set by Amplify environment variables.
+// Falls back to localhost for local development.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(
     public readonly code: string,
     message: string,
     public readonly status: number,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -27,18 +30,18 @@ async function request<T>(
 ): Promise<T> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   const json = (await res.json()) as ApiResponse<T>;
 
   if (!res.ok || !json.success) {
     throw new ApiError(
-      json.error?.code ?? 'UNKNOWN_ERROR',
-      json.error?.message ?? 'An unexpected error occurred',
+      json.error?.code ?? "UNKNOWN_ERROR",
+      json.error?.message ?? "An unexpected error occurred",
       res.status,
     );
   }
@@ -47,9 +50,17 @@ async function request<T>(
 }
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
+
+/**
+ * API Gateway Cognito Authorizer validates the ID token (not the access token).
+ * The ID token carries the `aud` claim (= client ID) that the authorizer checks,
+ * and also carries `cognito:groups` used by Lambda auth middleware for role checks.
+ * The access token has no `aud` claim and will be rejected with 401 by the authorizer.
+ */
 function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('accessToken');
+  if (typeof window === "undefined") return null;
+  // Prefer idToken for API Gateway Cognito Authorizer compatibility
+  return localStorage.getItem("idToken") ?? localStorage.getItem("accessToken");
 }
 
 export function saveTokens(tokens: {
@@ -57,25 +68,25 @@ export function saveTokens(tokens: {
   idToken: string;
   refreshToken: string;
 }): void {
-  localStorage.setItem('accessToken', tokens.accessToken);
-  localStorage.setItem('idToken', tokens.idToken);
-  localStorage.setItem('refreshToken', tokens.refreshToken);
+  localStorage.setItem("accessToken", tokens.accessToken);
+  localStorage.setItem("idToken", tokens.idToken);
+  localStorage.setItem("refreshToken", tokens.refreshToken);
 }
 
 export function clearTokens(): void {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('idToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("idToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
 }
 
 export function saveUser(user: User): void {
-  localStorage.setItem('user', JSON.stringify(user));
+  localStorage.setItem("user", JSON.stringify(user));
 }
 
 export function getStoredUser(): User | null {
-  if (typeof window === 'undefined') return null;
-  const raw = localStorage.getItem('user');
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem("user");
   if (!raw) return null;
   try {
     return JSON.parse(raw) as User;
@@ -85,6 +96,7 @@ export function getStoredUser(): User | null {
 }
 
 // ─── Auth API ─────────────────────────────────────────────────────────────────
+
 export const authApi = {
   register: (body: {
     email: string;
@@ -92,72 +104,90 @@ export const authApi = {
     givenName: string;
     familyName: string;
     studentId?: string;
-  }) => request<{ userId: string; email: string }>('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  }),
+  }) =>
+    request<{ userId: string; email: string }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
   login: (body: { email: string; password: string }) =>
-    request<LoginResponse>('/auth/login', {
-      method: 'POST',
+    request<LoginResponse>("/auth/login", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 
   verify: (body: { email: string; code: string }) =>
-    request<{ verified: boolean }>('/auth/verify', {
-      method: 'POST',
+    request<{ verified: boolean }>("/auth/verify", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 
   forgotPassword: (body: { email: string }) =>
-    request<{ message: string }>('/auth/forgot-password', {
-      method: 'POST',
+    request<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 
-  resetPassword: (body: { email: string; code: string; newPassword: string }) =>
-    request<{ reset: boolean }>('/auth/reset-password', {
-      method: 'POST',
+  resetPassword: (body: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }) =>
+    request<{ reset: boolean }>("/auth/reset-password", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 
-  refresh: () =>
-    request<{ accessToken: string; idToken: string; expiresIn: number }>(
-      '/auth/refresh',
-      { method: 'POST', body: JSON.stringify({ refreshToken: localStorage.getItem('refreshToken') }) },
-    ),
+  refresh: () => {
+    const refreshToken =
+      typeof window !== "undefined"
+        ? localStorage.getItem("refreshToken")
+        : null;
+    return request<{ accessToken: string; idToken: string; expiresIn: number }>(
+      "/auth/refresh",
+      {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      },
+    );
+  },
 };
 
 // ─── Chat API ─────────────────────────────────────────────────────────────────
+
 export const chatApi = {
   sendMessage: (body: {
     message: string;
     conversationId?: string;
     category?: string;
-  }) => request<SendMessageResponse>('/chat/message', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  }),
+  }) =>
+    request<SendMessageResponse>("/chat/message", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
 
 // ─── Conversations API ────────────────────────────────────────────────────────
+
 export const conversationsApi = {
   list: (limit = 20) =>
     request<PaginatedResult<Conversation>>(`/conversations?limit=${limit}`),
 
   get: (conversationId: string, limit = 50) =>
-    request<{ conversation: Conversation; messages: PaginatedResult<Message> }>(
-      `/conversations/${conversationId}?limit=${limit}`,
-    ),
+    request<{
+      conversation: Conversation;
+      messages: PaginatedResult<Message>;
+    }>(`/conversations/${conversationId}?limit=${limit}`),
 
   delete: (conversationId: string) =>
     request<{ deleted: boolean; conversationId: string }>(
       `/conversations/${conversationId}`,
-      { method: 'DELETE' },
+      { method: "DELETE" },
     ),
 };
 
-// ─── Admin API ───────────────────────────────────────────────────────────────
+// ─── Admin API ────────────────────────────────────────────────────────────────
+
 export const adminApi = {
   getStats: () =>
     request<{
@@ -167,30 +197,64 @@ export const adminApi = {
       cacheHitRate: number;
       avgLatencyMs: number;
       activeToday: number;
-    }>('/admin/stats'),
+    }>("/admin/stats"),
 
   listUsers: (limit = 20) =>
     request<PaginatedResult<User>>(`/admin/users?limit=${limit}`),
 
-  listFeedback: (limit = 20) =>
-    request<PaginatedResult<{
-      feedbackId: string;
-      rating: number;
-      category: string;
-      comment: string;
-      createdAt: string;
-    }>>(`/admin/feedback?limit=${limit}`),
+  updateUser: (userId: string, updates: { role?: "student" | "admin"; isActive?: boolean }) =>
+    request<User>(`/admin/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    }),
 
-  getAnalytics: (period: 'day' | 'week' | 'month' = 'week') =>
+  // ─── Document / Knowledge Base management ──────────────────────────────────
+
+  /** Get a pre-signed S3 URL to upload a document directly from the browser */
+  getUploadUrl: (body: {
+    fileName: string;
+    contentType: string;
+    folder?: string;
+  }) =>
+    request<{ uploadUrl: string; s3Key: string; bucket: string; message: string }>(
+      "/admin/documents/upload",
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+
+  /** Trigger Bedrock Knowledge Base ingestion after one or more uploads */
+  syncKnowledge: () =>
+    request<{ jobId: string; status: string; message: string }>(
+      "/admin/documents/sync",
+      { method: "POST", body: "{}" },
+    ),
+
+  listFeedback: (limit = 20) =>
+    request<
+      PaginatedResult<{
+        feedbackId: string;
+        rating: number;
+        category: string;
+        comment: string;
+        createdAt: string;
+      }>
+    >(`/admin/feedback?limit=${limit}`),
+
+  getAnalytics: (period: "day" | "week" | "month" = "week") =>
     request<{
       period: string;
-      metrics: { date: string; messages: number; cacheHits: number; aiCalls: number }[];
+      metrics: {
+        date: string;
+        messages: number;
+        cacheHits: number;
+        aiCalls: number;
+      }[];
       topCategories: { category: string; count: number }[];
       modelUsage: { model: string; count: number }[];
     }>(`/admin/analytics?period=${period}`),
 };
 
-// ─── Feedback API ────────────────────────────────────────────────────────────
+// ─── Feedback API ─────────────────────────────────────────────────────────────
+
 export const feedbackApi = {
   submit: (body: {
     rating: number;
@@ -198,10 +262,8 @@ export const feedbackApi = {
     comment: string;
     conversationId?: string;
   }) =>
-    request<{ feedbackId: string }>('/feedback', {
-      method: 'POST',
+    request<{ feedbackId: string }>("/feedback", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 };
-
-export { ApiError };

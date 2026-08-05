@@ -6,8 +6,7 @@ import {
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand,
   AdminAddUserToGroupCommand,
-  AdminGetUserCommand,
-  GetUserCommand,
+  AdminListGroupsForUserCommand,
   AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
 import type { IUserRepository } from '../../domain/repositories/index.js';
@@ -80,6 +79,20 @@ export class AuthService {
         throw new ConflictError('An account with this email already exists');
       }
       throw new ValidationError(msg);
+    }
+
+    // Add new student to the Students Cognito group so JWT carries the correct group claim
+    try {
+      await this.cognito.send(
+        new AdminAddUserToGroupCommand({
+          UserPoolId: env.COGNITO_USER_POOL_ID,
+          Username: dto.email,
+          GroupName: 'Students',
+        }),
+      );
+    } catch (groupError) {
+      // Non-fatal — log but don't fail registration
+      logger.warn('Failed to add user to Students group', { email: dto.email, error: String(groupError) });
     }
 
     await this.userRepo.create({
@@ -186,6 +199,37 @@ export class AuthService {
     if (!user) throw new UnauthorizedError('User account not found');
     if (!user.isActive) throw new UnauthorizedError('Your account has been deactivated');
 
+    // Derive the authoritative role from Cognito group membership.
+    // This is the single source of truth — Cognito groups control access.
+    // If DynamoDB is out of sync (e.g. user was added to Administrators group
+    // manually in the console), we fix it here transparently.
+    let authorativeRole: 'student' | 'admin' = 'student';
+    try {
+      const groupsResult = await this.cognito.send(
+        new AdminListGroupsForUserCommand({
+          UserPoolId: env.COGNITO_USER_POOL_ID,
+          Username: dto.email,
+        }),
+      );
+      const groupNames = (groupsResult.Groups ?? []).map((g) => g.GroupName ?? '');
+      authorativeRole = groupNames.includes('Administrators') ? 'admin' : 'student';
+    } catch (groupError) {
+      // If we can't read groups, fall back to DynamoDB role — non-fatal
+      logger.warn('Could not read Cognito groups, falling back to DynamoDB role', { email: dto.email, error: String(groupError) });
+      authorativeRole = user.role;
+    }
+
+    // Sync DynamoDB if role has drifted from Cognito group membership
+    if (user.role !== authorativeRole) {
+      logger.info('Syncing DynamoDB role from Cognito groups', {
+        userId: user.userId,
+        oldRole: user.role,
+        newRole: authorativeRole,
+      });
+      await this.userRepo.update(user.userId, { role: authorativeRole });
+      user.role = authorativeRole;
+    }
+
     await this.auditRepo.log({
       userId: user.userId,
       action: 'USER_LOGIN',
@@ -194,7 +238,7 @@ export class AuthService {
       ipAddress,
     });
 
-    logger.info('User logged in', { userId: user.userId });
+    logger.info('User logged in', { userId: user.userId, role: authorativeRole });
 
     return {
       tokens,
@@ -203,7 +247,7 @@ export class AuthService {
         email: user.email,
         givenName: user.givenName,
         familyName: user.familyName,
-        role: user.role,
+        role: authorativeRole,
       },
     };
   }

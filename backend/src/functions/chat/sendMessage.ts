@@ -2,7 +2,7 @@ import type { APIGatewayProxyResult } from 'aws-lambda';
 import { createHandler } from '../../shared/middleware/handler.js';
 import { validateBody } from '../../shared/utils/validation.js';
 import { successResponse } from '../../shared/utils/response.js';
-import { SendMessageSchema, type SendMessageInput } from '../../core/application/dtos/chat.dto.js';
+import { SendMessageSchema } from '../../core/application/dtos/chat.dto.js';
 import { ChatService } from '../../core/application/services/chat.service.js';
 import { DynamoConversationRepository } from '../../core/infrastructure/repositories/conversation.repository.js';
 import { DynamoMessageRepository } from '../../core/infrastructure/repositories/message.repository.js';
@@ -25,7 +25,7 @@ const chatService = new ChatService(
 
 export const handler = createHandler(
   async ({ event, auth, requestId }): Promise<APIGatewayProxyResult> => {
-    const input = validateBody(SendMessageSchema, event.body) as SendMessageInput;
+    const input = validateBody(SendMessageSchema, event.body);
     const result = await chatService.sendMessage(auth!.userId, input);
     return successResponse(result, 200, requestId);
   },

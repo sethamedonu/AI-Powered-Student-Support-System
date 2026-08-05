@@ -26,9 +26,10 @@ export interface KnowledgeEntry {
 export interface Feedback {
   feedbackId: string;
   userId: string;
-  conversationId: string;
-  messageId: string;
+  conversationId?: string;
+  messageId?: string;
   rating: 1 | 2 | 3 | 4 | 5;
+  category?: string;
   comment?: string;
   createdAt: string;
 }

@@ -72,3 +72,9 @@ Thumbs.db
 docs/~$*
 docs/*.tmp
 *.tmp
+
+# AI Chat Artifacts (Amazon Q, Cursor, etc.)
+*.ai-chats.*
+ai_chat_*
+AiChat*
+.ai-chats/

@@ -26,10 +26,14 @@ const envSchema = z.object({
   BEDROCK_MODEL_COMPLEX: z.string().default('anthropic.claude-3-5-sonnet-20241022-v2:0'),
   BEDROCK_GUARDRAIL_ID: z.string().optional(),
   BEDROCK_GUARDRAIL_VERSION: z.string().default('DRAFT'),
+  BEDROCK_KNOWLEDGE_BASE_ID: z.string().optional(),
+  BEDROCK_KNOWLEDGE_DATA_SOURCE_ID: z.string().optional(),
+  KNOWLEDGE_DOCS_BUCKET: z.string().optional(),
 
   DYNAMODB_ENDPOINT: z.string().url().optional(),
   COGNITO_ENDPOINT: z.string().url().optional(),
   SQS_ENDPOINT: z.string().url().optional(),
+  SES_ENDPOINT: z.string().url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -1,9 +1,8 @@
 import type { IConversationRepository, IMessageRepository } from '../../domain/repositories/index.js';
 import type { AIOrchestrator } from '../../infrastructure/ai/orchestrator.js';
 import type { SendMessageInput, SendMessageResponse } from '../dtos/chat.dto.js';
-import { generateId, nowIso, ttlDays } from '../../../shared/utils/helpers.js';
+import { generateId, nowIso } from '../../../shared/utils/helpers.js';
 import { createLogger } from '../../../shared/utils/logger.js';
-import type { KnowledgeCategory } from '../../../shared/types/index.js';
 
 const logger = createLogger('chat-service');
 
@@ -58,7 +57,7 @@ export class ChatService {
     const result = await this.orchestrator.process({
       question: input.message,
       conversationHistory,
-      category: input.category as KnowledgeCategory | undefined,
+      category: input.category,
       userId,
     });
 

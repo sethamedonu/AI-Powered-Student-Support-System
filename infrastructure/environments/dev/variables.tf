@@ -1,13 +1,11 @@
 variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
+  type    = string
+  default = "us-east-1"
 }
 
 variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
-  type        = string
-  default     = "dev"
+  type    = string
+  default = "dev"
 
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
@@ -16,57 +14,62 @@ variable "environment" {
 }
 
 variable "app_name" {
-  description = "Application name used for resource naming"
-  type        = string
-  default     = "aisss"
-}
-
-variable "domain" {
-  description = "Root domain name for the application"
-  type        = string
+  type    = string
+  default = "aisss"
 }
 
 variable "ses_from_email" {
-  description = "Verified SES email address used as sender"
-  type        = string
+  type = string
 }
 
 variable "alert_email" {
-  description = "Email address to receive SNS infrastructure alerts"
-  type        = string
+  type = string
 }
 
 variable "cognito_callback_urls" {
-  description = "List of allowed callback URLs for Cognito OAuth"
-  type        = list(string)
-  default     = ["http://localhost:5173/auth/callback"]
+  type    = list(string)
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com/auth/callback", "http://localhost:3000/auth/callback"]
 }
 
 variable "cognito_logout_urls" {
-  description = "List of allowed logout URLs for Cognito OAuth"
-  type        = list(string)
-  default     = ["http://localhost:5173/auth/logout"]
+  type    = list(string)
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com/auth/logout", "http://localhost:3000/auth/logout"]
 }
 
 variable "cors_allowed_origins" {
-  description = "List of allowed CORS origins for API Gateway"
-  type        = list(string)
-  default     = ["http://localhost:5173"]
+  type    = list(string)
+  default = ["https://dev.dwfkamikpgffo.amplifyapp.com", "http://localhost:3000"]
 }
 
 variable "github_repository" {
-  description = "GitHub repository URL for Amplify CI/CD (e.g. https://github.com/owner/repo)"
-  type        = string
+  type    = string
+  default = "https://github.com/sethamedonu/AI-Powered-Student-Support-System"
 }
 
 variable "github_access_token" {
-  description = "GitHub personal access token for Amplify to access the repository"
-  type        = string
-  sensitive   = true
+  type      = string
+  sensitive = true
 }
 
-variable "bedrock_guardrail_id" {
-  description = "Amazon Bedrock Guardrail ID for content filtering"
+variable "domain" {
+  type    = string
+  default = ""
+}
+
+variable "s3_vectors_index_arn" {
   type        = string
-  default     = ""
+  default     = "arn:aws:s3vectors:us-east-1:314175685812:bucket/aisss-dev-kb-vectors/index/aisss-dev-kb-index"
+  description = "ARN of the S3 Vectors index used by Bedrock Knowledge Base"
+}
+
+variable "bedrock_knowledge_base_id" {
+  type        = string
+  default     = "S5JEZ4X9IG"
+  description = "Bedrock Knowledge Base ID (created via CLI — S3 Vectors storage)"
+}
+
+variable "bedrock_knowledge_data_source_id" {
+  type        = string
+  default     = "SYE8DOK5AS"
+  description = "Bedrock Knowledge Base Data Source ID"
 }

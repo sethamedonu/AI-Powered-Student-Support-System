@@ -17,3 +17,8 @@ variable "callback_urls" {
 variable "logout_urls" {
   type = list(string)
 }
+
+variable "aws_account_id" {
+  type        = string
+  description = "AWS account ID — used to make Cognito domain globally unique"
+}

@@ -85,7 +85,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - PUBLIC_API_URL=http://localhost:3000
+      - VITE_API_URL=http://localhost:3000
       - VITE_COGNITO_REGION=us-east-1
       - VITE_COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID:-us-east-1_localstack}
       - VITE_COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID:-localstackclientid}

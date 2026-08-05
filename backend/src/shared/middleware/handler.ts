@@ -4,7 +4,7 @@ import type {
   Context,
 } from 'aws-lambda';
 import { isAppError } from '../errors/index.js';
-import { errorResponse, optionsResponse } from '../utils/response.js';
+import { errorResponse, optionsResponse, setRequestOrigin } from '../utils/response.js';
 import { createLogger } from '../utils/logger.js';
 import { emitColdStart } from '../utils/metrics.js';
 import type { AuthContext } from '../types/index.js';
@@ -37,6 +37,11 @@ export function createHandler(
     context: Context,
   ): Promise<APIGatewayProxyResult> => {
     const requestId = context.awsRequestId;
+
+    // Capture the incoming Origin header so all response builders can reflect
+    // the correct Access-Control-Allow-Origin for this invocation.
+    setRequestOrigin(event.headers?.['origin'] ?? event.headers?.['Origin']);
+
     const log = logger.withContext({
       requestId,
       path: event.path,

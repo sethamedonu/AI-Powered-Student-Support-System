@@ -9,10 +9,9 @@ import type { ApiResponse } from '../types/index.js';
 const RAW_ORIGINS = process.env['CORS_ALLOWED_ORIGINS'] ?? '*';
 
 /**
- * Per-invocation request origin.
- * Set by the handler middleware at the start of each Lambda invocation so
- * that successResponse/errorResponse can reflect the correct origin without
- * every call-site needing to pass the event.
+ * Per-invocation request origin. Set by the handler middleware at the start
+ * of each Lambda invocation so all response builders reflect the correct
+ * Access-Control-Allow-Origin without per-handler changes.
  *
  * Lambda execution contexts are single-threaded so this is safe.
  */
@@ -22,12 +21,6 @@ export function setRequestOrigin(origin: string | undefined): void {
   _currentOrigin = origin;
 }
 
-/**
- * Resolve the Access-Control-Allow-Origin header value.
- * - '*' env var → return '*' (wildcard, no credentials)
- * - Otherwise reflect the request origin if it's in the allowed list,
- *   or fall back to the first allowed origin.
- */
 function resolveOrigin(): string {
   if (RAW_ORIGINS === '*') return '*';
 
@@ -37,22 +30,24 @@ function resolveOrigin(): string {
     return _currentOrigin;
   }
 
+  // Fallback to first allowed origin; browser will block if origin doesn't match
   return allowedList[0] ?? '*';
 }
 
-function buildHeaders() {
+function buildHeaders(): Record<string, string> {
   const origin = resolveOrigin();
-  return {
+  const headers: Record<string, string> = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Amz-Date,X-Api-Key',
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    // Only add Vary + credentials header when not using wildcard
-    ...(origin !== '*' && {
-      'Access-Control-Allow-Credentials': 'true',
-      'Vary': 'Origin',
-    }),
     'Content-Type': 'application/json',
   };
+  // Credentials + Vary only when using a specific origin (not wildcard)
+  if (origin !== '*') {
+    headers['Access-Control-Allow-Credentials'] = 'true';
+    headers['Vary'] = 'Origin';
+  }
+  return headers;
 }
 
 export function successResponse<T>(

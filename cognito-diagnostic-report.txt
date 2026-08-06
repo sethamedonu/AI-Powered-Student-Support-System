@@ -1,0 +1,43 @@
+﻿COGNITO DIAGNOSTIC REPORT
+Generated: 2026-08-06 14:44:51
+
+User Pool ID: us-east-1_PXvI63Kwg
+
+GROUPS:
+  - Administrators
+  - Students
+
+
+USERS:
+  Username: 44c8b4a8-00a1-7087-dce0-39f41c30a3a7
+  Email: setnetnetworks@gmail.com
+  Status: CONFIRMED
+
+  Username: 345854c8-7011-709e-7801-e0140ed711ba
+  Email: fred.testing.app@gmail.com
+  Status: CONFIRMED
+
+  Username: 64387418-b001-70ce-8c97-436b0fe92431
+  Email: setnet.test@zohomail.com
+  Status: CONFIRMED
+
+  Username: d488f428-30f1-7079-314a-e911398e42ed
+  Email: domprehdoreenappiah@gmail.com
+  Status: CONFIRMED
+
+  Username: d4484428-e001-7075-a746-568a914df98a
+  Email: sethkelvin3@gmail.com
+  Status: CONFIRMED
+
+
+
+USERNAME FORMAT:
+  UUID (sub)
+
+ISSUES FOUND:
+  - Username format mismatch (Lambda expects email, Cognito uses UUID)
+
+
+RECOMMENDED FIXES:
+  - Update Lambda to use userId (sub) instead of email
+

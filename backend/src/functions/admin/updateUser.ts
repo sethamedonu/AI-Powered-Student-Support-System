@@ -48,40 +48,41 @@ export const handler = createHandler(
 
     // Sync Cognito group membership whenever the role changes
     if (updates.role && updates.role !== existing.role) {
-      const username = existing.email; // Cognito uses email as username
+      // Cognito uses the user's sub (userId) as the Username, not the email
+      const cognitoUsername = existing.userId;
       const newGroup = updates.role === 'admin' ? 'Administrators' : 'Students';
       const oldGroup = existing.role === 'admin' ? 'Administrators' : 'Students';
 
       logger.info('Role change detected', {
         userId,
-        username,
+        cognitoUsername,
         oldRole: existing.role,
         newRole: updates.role,
         oldGroup,
         newGroup,
       });
 
-      // First, verify the user exists in Cognito
+      // Verify the user exists in Cognito
       try {
         const getUserResult = await cognito.send(
           new AdminGetUserCommand({
             UserPoolId: env.COGNITO_USER_POOL_ID,
-            Username: username,
+            Username: cognitoUsername,
           }),
         );
         logger.info('Cognito user verified', {
           userId,
-          username,
+          cognitoUsername,
           cognitoStatus: getUserResult.UserStatus,
         });
       } catch (err) {
         logger.error('Failed to verify Cognito user', {
           userId,
-          username,
+          cognitoUsername,
           error: String(err),
         });
         throw new ValidationError(
-          `Cannot update role: User ${username} not found in Cognito`,
+          `Cannot update role: User ${cognitoUsername} not found in Cognito`,
         );
       }
 
@@ -90,19 +91,19 @@ export const handler = createHandler(
         await cognito.send(
           new AdminAddUserToGroupCommand({
             UserPoolId: env.COGNITO_USER_POOL_ID,
-            Username: username,
+            Username: cognitoUsername,
             GroupName: newGroup,
           }),
         );
         logger.info('Added user to Cognito group', {
           userId,
-          username,
+          cognitoUsername,
           group: newGroup,
         });
       } catch (err) {
         logger.error('Failed to add user to Cognito group', {
           userId,
-          username,
+          cognitoUsername,
           group: newGroup,
           error: String(err),
         });
@@ -114,19 +115,19 @@ export const handler = createHandler(
         await cognito.send(
           new AdminRemoveUserFromGroupCommand({
             UserPoolId: env.COGNITO_USER_POOL_ID,
-            Username: username,
+            Username: cognitoUsername,
             GroupName: oldGroup,
           }),
         );
         logger.info('Removed user from Cognito group', {
           userId,
-          username,
+          cognitoUsername,
           group: oldGroup,
         });
       } catch (err) {
         logger.warn('Failed to remove user from Cognito group', {
           userId,
-          username,
+          cognitoUsername,
           group: oldGroup,
           error: String(err),
         });

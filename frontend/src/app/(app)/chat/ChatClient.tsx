@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import { chatApi } from "@/lib/api";
+import { chatApi, conversationsApi } from "@/lib/api";
 import { getInitials } from "@/lib/auth.client";
 import { uid } from "@/lib/utils";
 import type { KnowledgeCategory, Message, User } from "@/lib/types";
@@ -34,15 +35,53 @@ export function ChatClient({
   user: User;
   initialCategory: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [conversationId, setConversationId] = useState<string | undefined>();
+  const [conversationId, setConversationId] = useState<string | undefined>(
+    searchParams.get("id") ?? undefined,
+  );
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [category, setCategory] = useState<KnowledgeCategory>(
     (initialCategory as KnowledgeCategory) ?? "general",
   );
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation messages on mount if conversationId exists
+  useEffect(() => {
+    const loadConversation = async () => {
+      const id = searchParams.get("id");
+      if (!id) return;
+
+      setIsLoading(true);
+      setError("");
+      try {
+        const result = await conversationsApi.get(id);
+        setMessages(result.messages.items);
+        setConversationId(id);
+        // Extract category from conversation metadata if available
+        if (result.conversation.metadata?.category) {
+          setCategory(result.conversation.metadata.category as KnowledgeCategory);
+        }
+      } catch (e) {
+        console.error("Failed to load conversation:", e);
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Failed to load conversation. Starting a new one.",
+        );
+        // Clear invalid conversation ID from URL
+        router.replace("/chat");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadConversation();
+  }, [searchParams, router]);
 
   const scrollToBottom = () =>
     setTimeout(
@@ -75,7 +114,13 @@ export function ChatClient({
         conversationId,
         category,
       });
-      setConversationId(result.conversationId);
+
+      // Update URL with conversationId if this is a new conversation
+      if (!conversationId) {
+        setConversationId(result.conversationId);
+        router.replace(`/chat?id=${result.conversationId}&category=${category}`);
+      }
+
       const assistantMsg: Message = {
         conversationId: result.conversationId,
         messageId: result.messageId,
@@ -107,7 +152,7 @@ export function ChatClient({
   };
 
   const initials = getInitials(user);
-  const isEmpty = messages.length === 0;
+  const isEmpty = messages.length === 0 && !isLoading;
 
   return (
     <div className="flex h-full flex-col animate-fade-in">
@@ -120,7 +165,12 @@ export function ChatClient({
         {conversationId && (
           <button
             type="button"
-            onClick={() => { setMessages([]); setConversationId(undefined); setError(""); }}
+            onClick={() => { 
+              setMessages([]); 
+              setConversationId(undefined); 
+              setError(""); 
+              router.replace("/chat");
+            }}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-primary-300 hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 dark:border-white/10 dark:hover:border-primary-700 dark:hover:text-primary-400"
           >
             + New conversation
@@ -152,7 +202,33 @@ export function ChatClient({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        {isEmpty ? (
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="flex items-center gap-3 text-slate-500">
+              <svg
+                className="h-5 w-5 animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              <span className="text-sm">Loading conversation...</span>
+            </div>
+          </div>
+        ) : isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center text-center animate-fade-in">
             {/* Animated icon */}
             <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-primary-50 to-purple-50 shadow-sm dark:from-primary-950/60 dark:to-purple-950/60">

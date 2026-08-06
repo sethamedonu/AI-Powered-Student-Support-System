@@ -49,9 +49,22 @@ export class ChatService {
 
     // Fetch recent history for context (last 6 messages = 3 turns)
     const history = await this.messageRepo.listByConversation(conversationId, { limit: 6 });
-    const conversationHistory = history.items
+    
+    // Build conversation history, ensuring it starts with a user message
+    let conversationHistory = history.items
       .filter(m => m.messageId !== userMessageId)
       .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+    
+    // Bedrock requires the first message to be from 'user'
+    // If history starts with 'assistant', remove messages until we find a 'user' message
+    while (conversationHistory.length > 0 && conversationHistory[0].role !== 'user') {
+      conversationHistory.shift();
+    }
+    
+    logger.debug('Conversation history prepared', { 
+      historyLength: conversationHistory.length,
+      firstRole: conversationHistory[0]?.role 
+    });
 
     // Process through AI orchestrator
     const result = await this.orchestrator.process({

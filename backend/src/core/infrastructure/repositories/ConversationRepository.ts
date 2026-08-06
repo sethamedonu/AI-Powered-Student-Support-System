@@ -42,8 +42,16 @@ export class DynamoConversationRepository implements IConversationRepository {
       }),
     );
 
+    // Sort by lastMessageAt descending to show most recent conversations first
+    const items = (result.Items ?? []) as Conversation[];
+    items.sort((a, b) => {
+      const timeA = new Date(a.lastMessageAt).getTime();
+      const timeB = new Date(b.lastMessageAt).getTime();
+      return timeB - timeA; // Descending order (newest first)
+    });
+
     return {
-      items: (result.Items ?? []) as Conversation[],
+      items,
       count: result.Count ?? 0,
       lastEvaluatedKey: result.LastEvaluatedKey as Record<string, unknown> | undefined,
     };

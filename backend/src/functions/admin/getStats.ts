@@ -7,9 +7,9 @@ import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 const repo = new DynamoAnalyticsRepository();
 const dynamoClient = new DynamoDBClient({ region: process.env['AWS_REGION'] });
 
-const USERS_TABLE = process.env['USERS_TABLE'] ?? '';
-const CONVERSATIONS_TABLE = process.env['CONVERSATIONS_TABLE'] ?? '';
-const MESSAGES_TABLE = process.env['MESSAGES_TABLE'] ?? '';
+const USERS_TABLE = process.env['DYNAMODB_TABLE_USERS'] ?? '';
+const CONVERSATIONS_TABLE = process.env['DYNAMODB_TABLE_CONVERSATIONS'] ?? '';
+const MESSAGES_TABLE = process.env['DYNAMODB_TABLE_MESSAGES'] ?? '';
 
 export const handler = createHandler(
   async ({ requestId }): Promise<APIGatewayProxyResult> => {

@@ -16,6 +16,8 @@
     "deploy:dev": "node scripts/deploy.js dev",
     "deploy:staging": "node scripts/deploy.js staging",
     "deploy:prod": "node scripts/deploy.js prod",
+    "seed:kb": "node --loader ts-node/esm --no-warnings scripts/seed-knowledge-base.ts",
+    "seed:kb:dry-run": "node --loader ts-node/esm --no-warnings scripts/seed-knowledge-base.ts --dry-run",
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
@@ -26,18 +28,18 @@
     "@aws-sdk/client-dynamodb": "^3.717.0",
     "@aws-sdk/client-lambda": "^3.717.0",
     "@aws-sdk/client-s3": "^3.717.0",
-    "@aws-sdk/s3-request-presigner": "^3.717.0",
     "@aws-sdk/client-ses": "^3.717.0",
     "@aws-sdk/client-sns": "^3.717.0",
     "@aws-sdk/client-sqs": "^3.717.0",
     "@aws-sdk/lib-dynamodb": "^3.717.0",
+    "@aws-sdk/s3-request-presigner": "^3.717.0",
     "@aws-sdk/util-dynamodb": "^3.717.0",
     "jose": "^5.9.6",
+    "pdf-lib": "^1.17.1",
     "uuid": "^11.0.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "ts-node": "^10.9.2",
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.10.5",
     "@types/uuid": "^10.0.0",
@@ -47,6 +49,7 @@
     "esbuild": "^0.24.2",
     "eslint": "^9.17.0",
     "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"
   },

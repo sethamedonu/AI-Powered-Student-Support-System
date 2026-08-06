@@ -5,8 +5,10 @@ import type { ApiResponse } from '../types/index.js';
  * Allowed origins stored as a comma-separated env var.
  * Example:
  *   CORS_ALLOWED_ORIGINS=https://dev.dwfkamikpgffo.amplifyapp.com,http://localhost:3000
+ * 
+ * TEMPORARY FIX: Hardcoded to Amplify URL until deploy pipeline is fixed
  */
-const RAW_ORIGINS = process.env['CORS_ALLOWED_ORIGINS'] ?? '*';
+const RAW_ORIGINS = process.env['CORS_ALLOWED_ORIGINS'] ?? 'https://dev.dwfkamikpgffo.amplifyapp.com,http://localhost:3000';
 
 /**
  * Per-invocation request origin. Set by the handler middleware at the start

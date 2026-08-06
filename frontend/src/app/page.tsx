@@ -347,7 +347,7 @@ export default function HomePage() {
                 </div>
 
                 <p className="mt-4 text-slate-600 dark:text-slate-300">
-                  "{review.review}"
+                  &ldquo;{review.review}&rdquo;
                 </p>
               </div>
             ))}
@@ -364,13 +364,13 @@ export default function HomePage() {
               About AI Student Support
             </h2>
             <p className="mt-6 text-lg leading-8 text-indigo-100">
-              We're revolutionizing how students access academic information. Built on cutting-edge 
+              We&apos;re revolutionizing how students access academic information. Built on cutting-edge 
               AI technology from Amazon Bedrock, our platform provides instant, accurate answers 
               to all your university questions.
             </p>
             <p className="mt-6 text-lg leading-8 text-indigo-100">
-              Whether you're a prospective student exploring admissions, a current student managing 
-              your courses, or preparing for graduation, we're here to help you succeed every step 
+              Whether you&apos;re a prospective student exploring admissions, a current student managing 
+              your courses, or preparing for graduation, we&apos;re here to help you succeed every step 
               of the way.
             </p>
 

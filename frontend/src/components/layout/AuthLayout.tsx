@@ -167,7 +167,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
                 ))}
               </div>
               <p className="text-base leading-relaxed text-white/95">
-                "This AI saved me hours of searching through handbooks! Got my registration question answered at 2 AM when no one else was available."
+                &ldquo;This AI saved me hours of searching through handbooks! Got my registration question answered at 2 AM when no one else was available.&rdquo;
               </p>
               <div className="mt-5 flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30">

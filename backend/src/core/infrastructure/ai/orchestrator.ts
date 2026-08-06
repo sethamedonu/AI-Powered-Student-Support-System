@@ -40,7 +40,10 @@ export class AIOrchestrator {
     if (cached) {
       logger.info('Cache hit', { cacheKey });
       await this.cacheRepo.incrementHitCount(cacheKey);
-      await this.recordAnalytics('cache_hit', request.userId);
+      await this.recordAnalytics('cache_hit', request.userId, {
+        category: cached.category,
+        model: cached.model,
+      });
       return {
         answer: cached.answer,
         model: cached.model,
@@ -103,6 +106,7 @@ export class AIOrchestrator {
       model: aiResponse.model,
       tokensUsed: aiResponse.tokensUsed,
       complexity,
+      category,
     });
 
     return {
@@ -135,8 +139,10 @@ export class AIOrchestrator {
         value: 1,
         metadata: { userId, ...metadata },
       });
-    } catch {
+      logger.debug('Analytics event recorded', { metricType, metadata });
+    } catch (error) {
       // analytics failures must never break the main flow
+      logger.warn('Failed to record analytics', { metricType, error: String(error) });
     }
   }
 }

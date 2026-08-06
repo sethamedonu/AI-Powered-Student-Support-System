@@ -21,12 +21,62 @@ const CATEGORIES: { label: string; value: KnowledgeCategory; icon: string }[] = 
   { label: "Campus", value: "campus-services", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
 ];
 
-const SUGGESTIONS: { text: string; icon: string }[] = [
-  { text: "What are the admission requirements?", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-  { text: "How do I register for courses?", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
-  { text: "When is the tuition payment deadline?", icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-  { text: "What scholarships are available?", icon: "M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" },
-];
+const CATEGORY_SUGGESTIONS: Record<KnowledgeCategory, string[]> = {
+  general: [
+    "How do I contact student services?",
+    "Where can I find campus maps?",
+    "What resources are available for students?",
+    "How do I access the student portal?",
+  ],
+  admissions: [
+    "What are the admission requirements?",
+    "When is the application deadline?",
+    "How do I submit my transcripts?",
+    "What documents do I need for admission?",
+  ],
+  registration: [
+    "How do I register for courses?",
+    "When does registration open?",
+    "How do I drop or add a class?",
+    "What if a course is full?",
+  ],
+  tuition: [
+    "When is the tuition payment deadline?",
+    "What payment methods are accepted?",
+    "How do I set up a payment plan?",
+    "Can I get a tuition refund?",
+  ],
+  examinations: [
+    "When are final exams?",
+    "Where do I find my exam schedule?",
+    "What do I do if I miss an exam?",
+    "How do I request exam accommodations?",
+  ],
+  calendar: [
+    "When does the semester start?",
+    "What are the important academic dates?",
+    "When is spring break?",
+    "When do grades get posted?",
+  ],
+  graduation: [
+    "What are the graduation requirements?",
+    "How do I apply for graduation?",
+    "When is the graduation ceremony?",
+    "How do I order my diploma?",
+  ],
+  scholarships: [
+    "What scholarships are available?",
+    "How do I apply for financial aid?",
+    "When is the scholarship deadline?",
+    "What are the scholarship requirements?",
+  ],
+  "campus-services": [
+    "Where is the library located?",
+    "What dining options are available?",
+    "How do I access campus WiFi?",
+    "Where can I park on campus?",
+  ],
+};
 
 export function ChatClient({
   user,
@@ -48,7 +98,16 @@ export function ChatClient({
   const [category, setCategory] = useState<KnowledgeCategory>(
     (initialCategory as KnowledgeCategory) ?? "general",
   );
+  const [categoryNotification, setCategoryNotification] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Auto-dismiss category notification after 3 seconds
+  useEffect(() => {
+    if (categoryNotification) {
+      const timer = setTimeout(() => setCategoryNotification(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [categoryNotification]);
 
   // Load conversation messages on mount if conversationId exists
   useEffect(() => {
@@ -84,6 +143,12 @@ export function ChatClient({
       () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
       50,
     );
+
+  const handleCategoryChange = (newCategory: KnowledgeCategory) => {
+    setCategory(newCategory);
+    const categoryLabel = CATEGORIES.find((c) => c.value === newCategory)?.label || newCategory;
+    setCategoryNotification(`Category changed to ${categoryLabel}`);
+  };
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -175,25 +240,39 @@ export function ChatClient({
       </div>
 
       {/* Category selector */}
-      <div className="flex gap-2 overflow-x-auto border-b border-slate-100 bg-white px-6 py-3 scrollbar-none dark:border-white/5 dark:bg-slate-900">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.value}
-            type="button"
-            onClick={() => setCategory(cat.value)}
-            className={[
-              "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400",
-              category === cat.value
-                ? "bg-primary-600 text-white shadow-sm shadow-primary-600/25"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10",
-            ].join(" ")}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d={cat.icon} />
-            </svg>
-            {cat.label}
-          </button>
-        ))}
+      <div className="border-b border-slate-100 bg-white dark:border-white/5 dark:bg-slate-900">
+        <div className="flex gap-2 overflow-x-auto px-6 py-3 scrollbar-none">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.value}
+              type="button"
+              onClick={() => handleCategoryChange(cat.value)}
+              className={[
+                "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400",
+                category === cat.value
+                  ? "bg-primary-600 text-white shadow-sm shadow-primary-600/25 scale-105"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:scale-105 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10",
+              ].join(" ")}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={cat.icon} />
+              </svg>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Category notification */}
+        {categoryNotification && (
+          <div className="animate-fade-in px-6 pb-3">
+            <div className="flex items-center gap-2 rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-700 dark:bg-primary-950/30 dark:text-primary-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-medium">{categoryNotification}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages */}
@@ -230,29 +309,31 @@ export function ChatClient({
             <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-primary-50 to-purple-50 shadow-sm dark:from-primary-950/60 dark:to-purple-950/60">
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary-100/50 to-purple-100/50 animate-pulse dark:from-primary-900/30 dark:to-purple-900/30" />
               <svg xmlns="http://www.w3.org/2000/svg" className="relative h-9 w-9 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d={CATEGORIES.find((c) => c.value === category)?.icon || "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"} />
               </svg>
             </div>
-            <h2 className="mt-5 font-display text-xl font-bold text-slate-800 dark:text-white">How can I help you?</h2>
+            <h2 className="mt-5 font-display text-xl font-bold text-slate-800 dark:text-white">
+              Ask me anything about {CATEGORIES.find((c) => c.value === category)?.label.toLowerCase()}
+            </h2>
             <p className="mt-2 max-w-sm text-sm text-slate-500">
-              Ask me anything about admissions, courses, tuition, exams, or campus services.
+              Here are some questions you can ask to get started.
             </p>
 
             {/* Suggestion chips with icons */}
             <div className="mt-8 grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {SUGGESTIONS.map((s) => (
+              {CATEGORY_SUGGESTIONS[category].map((suggestion) => (
                 <button
-                  key={s.text}
+                  key={suggestion}
                   type="button"
-                  onClick={() => sendMessage(s.text)}
+                  onClick={() => sendMessage(suggestion)}
                   className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-left text-sm text-slate-600 transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-primary-700 dark:hover:text-primary-300"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 transition-colors group-hover:bg-primary-100 dark:bg-primary-950/60 dark:text-primary-400 dark:group-hover:bg-primary-900/60">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={s.icon} />
+                      <path strokeLinecap="round" strokeLinejoin="round" d={CATEGORIES.find((c) => c.value === category)?.icon || ""} />
                     </svg>
                   </span>
-                  <span className="font-medium leading-snug">{s.text}</span>
+                  <span className="font-medium leading-snug">{suggestion}</span>
                 </button>
               ))}
             </div>

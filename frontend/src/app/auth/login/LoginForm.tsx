@@ -55,13 +55,13 @@ export function LoginForm({ verified, reset, redirectTo }: LoginFormProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 rounded-3xl border border-slate-200/80 bg-white/90 p-10 shadow-2xl shadow-slate-900/10 backdrop-blur-sm animate-fade-in dark:border-slate-800/80 dark:bg-slate-900/90 dark:shadow-black/30">
       <div className="text-center lg:text-left">
-        <h2 className="font-display text-4xl font-bold text-slate-900 dark:text-white">
+        <h2 className="font-display text-3xl font-bold text-slate-900 dark:text-white">
           Welcome back
         </h2>
-        <p className="mt-2 text-slate-500 dark:text-slate-400">
-          Sign in to your student account
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
+          Sign in to continue your academic journey
         </p>
       </div>
 

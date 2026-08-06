@@ -21,22 +21,22 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="relative flex min-h-dvh font-sans overflow-hidden">
+    <div className="fixed inset-0 flex font-sans overflow-hidden">
       {/* Animated background gradient for the entire page (subtle on the form side) */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 dark:from-slate-950 dark:via-slate-950 dark:to-indigo-950" />
 
       {/* Left branding panel */}
-      <div className="relative hidden w-[500px] shrink-0 overflow-hidden lg:flex lg:flex-col justify-between p-12 text-white">
-        {/* Primary gradient background */}
+      <div className="relative hidden w-[540px] shrink-0 overflow-hidden lg:flex lg:flex-col justify-between p-12 text-white">
+        {/* Primary gradient background - more vibrant */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              radial-gradient(at 15% 25%, theme('colors.indigo.400') 0px, transparent 50%),
-              radial-gradient(at 85% 15%, theme('colors.purple.400') 0px, transparent 45%),
-              radial-gradient(at 65% 80%, theme('colors.indigo.500') 0px, transparent 55%),
-              radial-gradient(at 5% 90%, theme('colors.slate.700') 0px, transparent 40%),
-              linear-gradient(165deg, rgba(30, 27, 75, 0.9) 0%, rgba(63, 58, 174, 0.9) 100%)
+              radial-gradient(at 20% 30%, rgba(99, 102, 241, 0.4) 0px, transparent 50%),
+              radial-gradient(at 80% 20%, rgba(168, 85, 247, 0.4) 0px, transparent 50%),
+              radial-gradient(at 60% 80%, rgba(79, 70, 229, 0.3) 0px, transparent 55%),
+              radial-gradient(at 10% 90%, rgba(59, 130, 246, 0.3) 0px, transparent 45%),
+              linear-gradient(135deg, #667eea 0%, #764ba2 100%)
             `,
           }}
         />
@@ -99,71 +99,83 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </span>
         </div>
 
-        {/* Hero copy */}
+        {/* Hero copy - enhanced */}
         <div className="relative z-10 space-y-10">
           <div>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200 backdrop-blur-sm">
+              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              </svg>
               Powered by Amazon Bedrock
             </p>
-            <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
+            <h1 className="font-display text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
               <span className="block">Your academic</span>
-              <span className="block">questions,</span>
-              <span className="block bg-gradient-to-r from-indigo-300 via-purple-300 to-indigo-200 bg-clip-text text-transparent">
-                answered instantly.
+              <span className="block">journey,</span>
+              <span className="block bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                simplified.
               </span>
             </h1>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-indigo-200">
-              Get accurate answers about admissions, courses, tuition, exams,
-              and more — available 24/7.
+            <p className="mt-6 max-w-md text-lg leading-relaxed text-indigo-100">
+              Get instant, accurate answers about admissions, courses, tuition, exams,
+              and campus life — available 24/7 with AI-powered intelligence.
             </p>
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {[
-              { text: "Admissions & enrollment guidance", icon: "graduation" },
-              { text: "Course registration support", icon: "registration" },
-              { text: "Tuition & scholarship information", icon: "money" },
-              { text: "Exam schedules & academic calendar", icon: "calendar" },
+              { text: "Instant admission & enrollment guidance", icon: "M12 14l9-5-9-5-9 5 9 5z" },
+              { text: "Course registration made simple", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+              { text: "Clear tuition & scholarship info", icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { text: "Exam schedules & important dates", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
             ].map((item) => (
               <li
                 key={item.text}
-                className="group flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 hover:translate-x-1 hover:bg-white/5"
+                className="group flex items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300 hover:translate-x-1 hover:bg-white/10"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-400/20 ring-1 ring-indigo-400/30 transition-all duration-300 group-hover:bg-indigo-400/30 group-hover:ring-indigo-400/50">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 transition-all duration-300 group-hover:bg-white/20 group-hover:ring-white/30 group-hover:shadow-lg group-hover:shadow-white/10">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3.5 w-3.5 text-indigo-200"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    className="h-4 w-4 text-indigo-100"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                   </svg>
                 </div>
-                <span className="text-sm text-indigo-50 transition-colors duration-300 group-hover:text-indigo-100">
+                <span className="text-sm font-medium text-indigo-50 transition-colors duration-300 group-hover:text-white">
                   {item.text}
                 </span>
               </li>
             ))}
           </ul>
 
-          <div className="relative rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-xl shadow-black/20 backdrop-blur-[12px]">
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 transition-opacity duration-500" />
+          <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-br from-white/10 to-white/5 p-7 shadow-2xl shadow-black/20 backdrop-blur-md">
+            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 blur-3xl" />
             <div className="relative">
-              <p className="text-sm leading-relaxed text-indigo-100/90">
-                &ldquo;Got my registration question answered in seconds. This is
-                exactly what students needed.&rdquo;
+              <div className="mb-4 flex gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <svg
+                    key={i}
+                    className="h-4 w-4 text-yellow-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-base leading-relaxed text-white/95">
+                "This AI saved me hours of searching through handbooks! Got my registration question answered at 2 AM when no one else was available."
               </p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/30 text-xs font-bold text-white ring-1 ring-indigo-300/30">
+              <div className="mt-5 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/30">
                   SM
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-white">Sarah M.</p>
-                  <p className="text-xs text-indigo-300">
+                  <p className="text-sm font-semibold text-white">Sarah M.</p>
+                  <p className="text-xs text-indigo-200">
                     3rd Year, Computer Science
                   </p>
                 </div>
@@ -178,7 +190,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Right form panel */}
-      <div className="relative flex flex-1 flex-col items-center justify-center bg-white px-6 py-12 dark:bg-slate-950 lg:px-16">
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-y-auto bg-white px-6 py-12 dark:bg-slate-950 lg:px-16">
         {/* Subtle pattern behind form */}
         <div className="absolute inset-0 opacity-[0.015]" style={{
           backgroundImage:
@@ -210,7 +222,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </span>
         </div>
 
-        <div className="relative z-10 w-full max-w-md rounded-2xl bg-white/60 p-8 shadow-xl shadow-black/5 animate-fade-in dark:bg-slate-900/60 dark:shadow-black/20">
+        <div className="relative z-10 w-full max-w-md">
           {children}
         </div>
       </div>

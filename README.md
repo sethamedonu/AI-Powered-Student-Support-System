@@ -356,6 +356,295 @@ Student Question
 
 ---
 
+## 📄 Document Upload & Knowledge Base System
+
+### Complete Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ADMIN DOCUMENT UPLOAD FLOW                     │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────────┐     ① Request           ┌──────────────────┐
+│              │     Upload URL           │                  │
+│   Admin UI   │─────────────────────────▶│  Lambda          │
+│ (Browser)    │                          │  uploadDocument  │
+│              │◀─────────────────────────│                  │
+└──────────────┘     ② Pre-signed URL     └──────────────────┘
+       │                                            │
+       │ ③ PUT file directly                       │ Generates
+       │   (bypasses Lambda)                       │ signed URL
+       │                                            ▼
+       ▼                                   ┌──────────────────┐
+┌──────────────┐                          │   S3 Bucket      │
+│  S3 Bucket   │                          │  (Knowledge      │
+│  admissions/ │◀─────────────────────────│   Docs)          │
+│  tuition/    │   File stored            └──────────────────┘
+│  uploads/    │
+└──────────────┘
+       │
+       │ ④ Admin clicks "Sync Knowledge Base"
+       │
+       ▼
+┌──────────────┐     ⑤ POST              ┌──────────────────┐
+│   Admin UI   │     /admin/sync         │  Lambda          │
+│              │─────────────────────────▶│  syncKnowledge   │
+│              │                          │                  │
+└──────────────┘                          └──────────────────┘
+                                                    │
+                                          ⑥ Triggers ingestion
+                                                    │
+                                                    ▼
+                                          ┌──────────────────┐
+                                          │  Bedrock Agent   │
+                                          │  StartIngestion  │
+                                          │  Job             │
+                                          └──────────────────┘
+                                                    │
+                              ┌─────────────────────┴─────────────────────┐
+                              │                                           │
+                              ▼                                           ▼
+                    ┌──────────────────┐                      ┌──────────────────┐
+                    │  Bedrock KB      │                      │  Bedrock KB      │
+                    │  Reads S3 files  │                      │  Chunking        │
+                    │                  │                      │  (512 tokens)    │
+                    └──────────────────┘                      └──────────────────┘
+                              │                                           │
+                              └─────────────────────┬─────────────────────┘
+                                                    │
+                                                    ▼
+                                          ┌──────────────────┐
+                                          │  Titan Embed V2  │
+                                          │  Generates       │
+                                          │  Embeddings      │
+                                          └──────────────────┘
+                                                    │
+                                                    ▼
+                                          ┌──────────────────┐
+                                          │  OpenSearch      │
+                                          │  Serverless      │
+                                          │  (Vector Store)  │
+                                          └──────────────────┘
+                                                    │
+                              ┌─────────────────────┴─────────────────────┐
+                              │     Documents now searchable!             │
+                              │     Students can ask questions            │
+                              └───────────────────────────────────────────┘
+```
+
+### Step-by-Step Breakdown
+
+#### **Step 1: Admin Requests Upload URL**
+```typescript
+// Frontend calls:
+POST /admin/documents/upload
+{
+  "fileName": "admission-policy-2026.pdf",
+  "contentType": "application/pdf",
+  "folder": "admissions"
+}
+```
+
+**Backend Lambda (`uploadDocument.ts`):**
+- Validates file type (PDF, DOC, DOCX, TXT, MD)
+- Validates file name (no special characters)
+- Generates S3 key: `admissions/1786012345-admission-policy-2026.pdf`
+- Creates **pre-signed URL** (valid for 5 minutes)
+- Returns URL to frontend
+
+**Response:**
+```json
+{
+  "uploadUrl": "https://s3.amazonaws.com/bucket/admissions/file.pdf?X-Amz-Signature=...",
+  "s3Key": "admissions/1786012345-admission-policy-2026.pdf",
+  "bucket": "aisss-dev-knowledge-docs"
+}
+```
+
+#### **Step 2: Frontend Uploads File Directly to S3**
+```javascript
+// Browser sends file directly to S3 (no Lambda involved)
+const xhr = new XMLHttpRequest();
+xhr.open("PUT", uploadUrl);
+xhr.setRequestHeader("Content-Type", "application/pdf");
+xhr.send(pdfFile); // File binary data
+
+// Progress tracking
+xhr.upload.onprogress = (e) => {
+  const progress = (e.loaded / e.total) * 100;
+  // Show progress bar: 30%, 50%, 75%, 100%
+};
+```
+
+**Why direct upload?**
+- **No Lambda 6MB payload limit** — can upload 50MB files
+- **Faster** — browser → S3 direct connection
+- **Cheaper** — no Lambda execution time
+- **Progress tracking** — real-time upload progress
+
+#### **Step 3: File Stored in S3**
+```
+S3 Bucket: aisss-dev-knowledge-docs
+├── admissions/
+│   ├── 1786012345-admission-policy-2026.pdf  ← New file
+│   └── 1785998765-requirements.pdf
+├── tuition/
+│   └── 1785995432-fee-schedule.pdf
+└── uploads/
+    └── 1785990123-general-info.pdf
+```
+
+**S3 Object Metadata:**
+```json
+{
+  "original-name": "admission-policy-2026.pdf",
+  "uploaded-at": "2026-08-06T10:15:32.000Z"
+}
+```
+
+#### **Step 4: Admin Clicks "Sync Knowledge Base"**
+**Why manual sync?**
+- **Cost control** — ingestion jobs cost money, batch multiple uploads
+- **Control** — admin decides when to make documents searchable
+- **Validation** — admin can review uploaded files before indexing
+
+#### **Step 5: Trigger Bedrock Ingestion**
+```typescript
+// Frontend calls:
+POST /admin/documents/sync
+{}
+
+// Backend Lambda (syncKnowledge.ts):
+const client = new BedrockAgentClient({ region: 'us-east-1' });
+const response = await client.send(new StartIngestionJobCommand({
+  knowledgeBaseId: 'ABCD1234',
+  dataSourceId: 'WXYZ5678'
+}));
+
+// Returns:
+{
+  "jobId": "WUAOD4RIXD",
+  "status": "STARTING",
+  "message": "Knowledge base ingestion started. Documents will be searchable within 1–5 minutes."
+}
+```
+
+#### **Step 6: Bedrock Processes Documents**
+
+**6a. Read S3 Files**
+- Bedrock reads **all files** in the S3 bucket
+- Supports: PDF, DOC, DOCX, TXT, MD, HTML
+- Max file size: 50MB per document
+
+**6b. Chunking**
+- Splits documents into **512-token chunks** with **20% overlap**
+- Example PDF with 5000 words → ~10-12 chunks
+- Preserves context by overlapping chunks
+
+**Example chunks:**
+```
+Chunk 1: "Admission Requirements...eligibility criteria...minimum GPA of 3.0..."
+Chunk 2: "...minimum GPA of 3.0...application process...submit transcripts..." (overlap)
+Chunk 3: "...submit transcripts...deadline is March 15...international students..."
+```
+
+**6c. Embedding with Titan**
+- Each chunk → **Titan Embed Text V2** model
+- Generates **1024-dimensional vector** per chunk
+- Vector represents semantic meaning
+
+**Example:**
+```
+"What is the minimum GPA?" 
+→ [0.234, -0.567, 0.891, ..., 0.123] (1024 numbers)
+
+Chunk: "minimum GPA of 3.0"
+→ [0.241, -0.554, 0.887, ..., 0.119] (similar vector!)
+```
+
+**6d. Store in OpenSearch Serverless**
+- Vectors stored in **OpenSearch Serverless index**
+- Metadata stored: file name, chunk number, S3 key, timestamp
+- No minimum cluster size — pay per query
+
+#### **Step 7: Documents Are Now Searchable**
+
+When a student asks a question:
+
+```typescript
+// Student sends message:
+"What are the admission requirements?"
+
+// Chat Lambda (sendMessage.ts):
+1. Retrieves relevant chunks from Knowledge Base
+   const kbResponse = await bedrock.retrieve({
+     query: "What are the admission requirements?",
+     knowledgeBaseId: 'ABCD1234'
+   });
+   // Returns top 5 most similar chunks
+
+2. Constructs prompt with context:
+   "You are a university assistant. Use the following documents to answer:
+    
+    [Chunk 1]: Admission Requirements...minimum GPA of 3.0...
+    [Chunk 2]: Application process...submit transcripts by March 15...
+    [Chunk 3]: International students must also provide...
+    
+    Student question: What are the admission requirements?
+    
+    Answer:"
+
+3. Sends to Claude/Nova
+   const response = await bedrock.invokeModel({
+     model: 'anthropic.claude-3-sonnet',
+     prompt: constructedPrompt
+   });
+
+4. Returns grounded answer to student
+   "To be eligible for admission, you need:
+    - Minimum GPA of 3.0
+    - Submit official transcripts by March 15
+    - International students must provide..."
+```
+
+### Key Features
+
+✅ **Direct S3 Upload** — Bypasses Lambda 6MB limit  
+✅ **Pre-signed URLs** — Secure, time-limited (5 min)  
+✅ **Folder Organization** — Admissions, Tuition, Exams, etc.  
+✅ **File Type Validation** — PDF, DOC, DOCX, TXT, MD  
+✅ **Size Limits** — 50MB per file (Bedrock limit)  
+✅ **Progress Tracking** — Real-time upload progress bar  
+✅ **Batch Sync** — Upload multiple files, sync once  
+✅ **Admin-Only** — Requires `role: "admin"` and valid JWT  
+
+### AWS Services Used
+
+| Service | Purpose |
+|---------|---------|
+| **S3** | Store uploaded documents |
+| **Lambda** | Generate pre-signed URLs, trigger ingestion |
+| **Bedrock Knowledge Base** | Manage document indexing and retrieval |
+| **Bedrock Agent** | Orchestrate ingestion jobs |
+| **Titan Embed V2** | Generate vector embeddings |
+| **OpenSearch Serverless** | Store and query vectors |
+| **Claude 3 Sonnet** | Generate answers using retrieved context |
+
+### Cost Breakdown
+
+| Operation | Cost (Approximate) |
+|-----------|-------------------|
+| Upload 1MB file to S3 | $0.000005 (negligible) |
+| S3 storage (1GB/month) | $0.023 |
+| Bedrock KB ingestion (1000 chunks) | $0.10 |
+| Titan Embed (1000 chunks) | $0.0001/token → ~$0.10 |
+| OpenSearch index storage (1GB) | $0.24/month |
+| Claude query with context (5 chunks) | $0.003/1k tokens → ~$0.015/query |
+
+**Total for 100 documents + 1000 queries/month: ~$30-50**
+
+---
+
 ## 📄 License
 
 MIT — Built for educational institutions.

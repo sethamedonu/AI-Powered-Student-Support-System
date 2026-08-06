@@ -62,10 +62,6 @@ export function ChatClient({
         const result = await conversationsApi.get(id);
         setMessages(result.messages.items);
         setConversationId(id);
-        // Extract category from conversation metadata if available
-        if (result.conversation.metadata?.category) {
-          setCategory(result.conversation.metadata.category as KnowledgeCategory);
-        }
       } catch (e) {
         console.error("Failed to load conversation:", e);
         setError(

@@ -72,11 +72,11 @@ export const handler = createHandler(
       metricsByDate.set(date, existing);
 
       // Track categories
-      const category = (event.metadata?.category as string) ?? 'general';
+      const category = (event.metadata?.['category'] as string) ?? 'general';
       categoryCount.set(category, (categoryCount.get(category) ?? 0) + 1);
 
       // Track model usage
-      const model = (event.metadata?.model as string) ?? 'unknown';
+      const model = (event.metadata?.['model'] as string) ?? 'unknown';
       modelCount.set(model, (modelCount.get(model) ?? 0) + 1);
     }
 
@@ -95,7 +95,7 @@ export const handler = createHandler(
       metricsByDate.set(date, existing);
 
       // Track categories for cache hits too
-      const category = (event.metadata?.category as string) ?? 'general';
+      const category = (event.metadata?.['category'] as string) ?? 'general';
       categoryCount.set(category, (categoryCount.get(category) ?? 0) + 1);
     }
 

@@ -272,6 +272,26 @@ terraform apply
 
 Push to `dev` branch to trigger the full CI/CD pipeline automatically.
 
+### Step 4 — Seed Knowledge Base
+
+The knowledge base is initially empty. Populate it with sample UCC (University of Cape Coast) content:
+
+```bash
+cd backend
+npm install  # Installs pdf-lib for PDF generation
+npm run seed:kb
+```
+
+This script:
+- ✅ Creates 9 PDF documents with student information
+- ✅ Uploads to S3 (`aisss-dev-knowledge-docs` bucket)
+- ✅ Saves structured Q&A to DynamoDB
+- ✅ Triggers Bedrock ingestion (wait 2-5 minutes)
+
+**Content included:** Admissions, Registration, Tuition, Exams, Calendar, Graduation, Scholarships, Campus Services, General Information
+
+**For detailed setup:** See [`RUN-SEED-SCRIPT.md`](./RUN-SEED-SCRIPT.md) and [`KNOWLEDGE-BASE-SETUP.md`](./KNOWLEDGE-BASE-SETUP.md)
+
 ---
 
 ## 🧠 AI Response Strategy

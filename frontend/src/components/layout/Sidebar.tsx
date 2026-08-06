@@ -41,6 +41,9 @@ const NAV_ITEMS: NavItem[] = [
     label: "Feedback",
     icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
   },
+];
+
+const ADMIN_NAV_ITEMS: NavItem[] = [
   {
     href: "/admin",
     label: "Admin",
@@ -63,78 +66,88 @@ export function Sidebar({ user, isDark }: SidebarProps) {
       ? pathname === "/dashboard" || pathname === "/dashboard/"
       : pathname.startsWith(href);
 
-  const navLink = (item: NavItem) => (
-    <Link
-      key={item.href}
-      href={item.href}
-      onClick={() => setIsOpen(false)}
-      className={[
-        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-        isActive(item.href)
-          ? "bg-primary-600 text-white shadow-sm shadow-primary-600/30"
-          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200",
-      ].join(" ")}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-[18px] w-[18px] shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.75}
+  const navLink = (item: NavItem) => {
+    const active = isActive(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={() => setIsOpen(false)}
+        className={[
+          "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400",
+          active
+            ? "bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-300"
+            : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200",
+        ].join(" ")}
       >
-        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-      </svg>
-      {item.label}
-    </Link>
-  );
+        {/* Left accent bar for active item */}
+        {active && (
+          <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary-600" />
+        )}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`h-[18px] w-[18px] shrink-0 transition-colors ${active ? "text-primary-600 dark:text-primary-400" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={active ? 2 : 1.75}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+        </svg>
+        {item.label}
+      </Link>
+    );
+  };
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 shadow-sm shadow-primary-600/40">
+        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-md shadow-primary-600/30">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 to-transparent" />
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-white"
+            className="relative h-5 w-5 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={1.75}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 14l9-5-9-5-9 5 9 5z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 14l6.16-3.422A12.083 12.083 0 0121 13c0 5.523-4.477 10-10 10S1 18.523 1 13c0-.85.1-1.678.29-2.472L12 14z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422A12.083 12.083 0 0121 13c0 5.523-4.477 10-10 10S1 18.523 1 13c0-.85.1-1.678.29-2.472L12 14z" />
           </svg>
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-tight">
             AI Student
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide">
             Support System
           </p>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-0.5 px-3">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600">
-          Navigation
-        </p>
-        {NAV_ITEMS.filter(
-          (i) => !i.adminOnly || user?.role === "admin",
-        ).map(navLink)}
+      {/* Main Nav */}
+      <nav className="flex-1 px-3">
+        <div className="space-y-0.5">
+          {NAV_ITEMS.map(navLink)}
+        </div>
+
+        {/* Admin section — only shown for admins */}
+        {user?.role === "admin" && (
+          <>
+            <div className="my-3 border-t border-slate-100 dark:border-white/5" />
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-600">
+              Admin
+            </p>
+            <div className="space-y-0.5">
+              {ADMIN_NAV_ITEMS.map(navLink)}
+            </div>
+          </>
+        )}
       </nav>
 
-      {/* Bottom */}
+      {/* Bottom user row */}
       <div className="border-t border-slate-100 p-3 dark:border-white/5">
         <div className="flex items-center justify-between gap-2">
           {user && (
@@ -155,7 +168,7 @@ export function Sidebar({ user, isDark }: SidebarProps) {
             <button
               type="button"
               onClick={logout}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 dark:hover:bg-red-950/40"
               aria-label="Sign out"
             >
               <svg
@@ -184,61 +197,28 @@ export function Sidebar({ user, isDark }: SidebarProps) {
       {/* Mobile top bar */}
       <header className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3 dark:border-white/5 dark:bg-slate-900 lg:hidden">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.75}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 14l9-5-9-5-9 5 9 5z"
-              />
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-sm shadow-primary-600/30">
+            <svg xmlns="http://www.w3.org/2000/svg" className="relative h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
             </svg>
           </div>
-          <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
             AI Student Support
           </span>
         </div>
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 dark:hover:bg-white/5"
           aria-label="Toggle menu"
         >
           {isOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
         </button>

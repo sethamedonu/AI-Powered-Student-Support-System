@@ -36,38 +36,45 @@ export function ProfileClient({ user }: { user: User }) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-6">
+    <div className="mx-auto max-w-2xl space-y-6 p-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Profile</h1>
+        <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Profile</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your account information</p>
       </div>
 
       {/* Profile card */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-center gap-4">
           <Avatar initials={getInitials(user)} size="lg" />
           <div>
             <p className="text-lg font-semibold text-slate-900 dark:text-white">{getFullName(user)}</p>
             <p className="text-sm text-slate-500 dark:text-slate-400">{user.email}</p>
+            <span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+              user.role === "admin"
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                : "bg-primary-50 text-primary-700 dark:bg-primary-950/60 dark:text-primary-300"
+            }`}>
+              {user.role ?? "student"}
+            </span>
           </div>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-6 dark:border-slate-800">
           {[
-            { label: "Role", value: user.role ?? "student" },
             { label: "Student ID", value: user.studentId ?? "Not set" },
             { label: "Account status", value: user.isActive !== false ? "Active" : "Inactive" },
             { label: "Member since", value: user.createdAt ? formatDate(user.createdAt) : "—" },
+            { label: "Email", value: user.email },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-              <p className="mt-1 text-sm font-medium capitalize text-slate-700 dark:text-slate-300">{value}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</p>
+              <p className="mt-1 text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{value}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Change password */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <h2 className="text-base font-semibold text-slate-900 dark:text-white">Change Password</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           A reset code will be sent to your email address.
@@ -107,7 +114,7 @@ export function ProfileClient({ user }: { user: User }) {
       </div>
 
       {/* Danger zone */}
-      <div className="rounded-xl border border-red-200 bg-white p-6 dark:border-red-900 dark:bg-slate-900">
+      <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm dark:border-red-900 dark:bg-slate-900">
         <h2 className="text-base font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign out of your account on this device.</p>
         <div className="mt-4">

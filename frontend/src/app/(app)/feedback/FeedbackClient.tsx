@@ -29,6 +29,7 @@ export function FeedbackClient() {
   const [error, setError] = useState("");
 
   const ratingLabels = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
+  const ratingColors = ["", "text-red-500", "text-orange-500", "text-yellow-500", "text-lime-500", "text-emerald-500"];
 
   function handleSubmit() {
     if (rating === 0) { setError("Please select a star rating."); return; }
@@ -49,34 +50,40 @@ export function FeedbackClient() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-6">
+    <div className="mx-auto max-w-2xl space-y-6 p-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Share Feedback</h1>
+        <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Share Feedback</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Help us improve the AI Student Support System
         </p>
       </div>
 
       {success ? (
-        <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center dark:border-green-800 dark:bg-green-950">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="flex flex-col items-center rounded-2xl border border-emerald-200 bg-emerald-50 p-12 text-center dark:border-emerald-800 dark:bg-emerald-950/30">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="mt-4 text-lg font-semibold text-green-800 dark:text-green-200">Thank you for your feedback!</h2>
-          <p className="mt-1 text-sm text-green-600 dark:text-green-400">Your response helps us improve the experience for all students.</p>
-          <Button variant="secondary" className="mt-6" onClick={() => setSuccess(false)}>Submit another</Button>
+          <h2 className="mt-5 font-display text-xl font-bold text-emerald-800 dark:text-emerald-200">
+            Thank you for your feedback!
+          </h2>
+          <p className="mt-2 max-w-sm text-sm text-emerald-600 dark:text-emerald-400">
+            Your response helps us improve the experience for all students.
+          </p>
+          <Button variant="secondary" className="mt-7" onClick={() => setSuccess(false)}>
+            Submit another
+          </Button>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
           <div className="space-y-6">
             {error && <Alert variant="error">{error}</Alert>}
 
             {/* Star rating */}
             <div>
-              <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Overall rating</p>
-              <div className="flex items-center gap-1">
+              <p className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Overall rating</p>
+              <div className="flex items-center gap-1.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
@@ -85,11 +92,11 @@ export function FeedbackClient() {
                     onMouseEnter={() => setHovered(star)}
                     onMouseLeave={() => setHovered(0)}
                     aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
-                    className="transition-transform hover:scale-110 focus:outline-none"
+                    className="transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className={`h-8 w-8 transition-colors ${(hovered || rating) >= star ? "text-yellow-400" : "text-slate-200 dark:text-slate-700"}`}
+                      className={`h-9 w-9 transition-colors ${(hovered || rating) >= star ? "text-yellow-400" : "text-slate-200 dark:text-slate-700"}`}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -98,7 +105,7 @@ export function FeedbackClient() {
                   </button>
                 ))}
                 {(hovered || rating) > 0 && (
-                  <span className="ml-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <span className={`ml-2 text-sm font-semibold ${ratingColors[hovered || rating]}`}>
                     {ratingLabels[hovered || rating]}
                   </span>
                 )}

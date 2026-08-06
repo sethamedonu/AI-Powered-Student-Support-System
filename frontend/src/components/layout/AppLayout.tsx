@@ -24,7 +24,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
       <Sidebar user={user} isDark={isDark} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto animate-fade-in">{children}</main>
       </div>
     </div>
   );

@@ -210,7 +210,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </span>
         </div>
 
-        <div className="relative z-10 w-full max-w-md rounded-2xl bg-white/60 p-8 shadow-xl shadow-black/5 dark:bg-slate-900/60 dark:shadow-black/20">
+        <div className="relative z-10 w-full max-w-md rounded-2xl bg-white/60 p-8 shadow-xl shadow-black/5 animate-fade-in dark:bg-slate-900/60 dark:shadow-black/20">
           {children}
         </div>
       </div>

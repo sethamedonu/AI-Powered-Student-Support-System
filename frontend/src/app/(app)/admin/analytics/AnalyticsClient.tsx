@@ -51,14 +51,14 @@ export function AnalyticsClient() {
   const totalModelUsage = data?.modelUsage.reduce((s, m) => s + m.count, 0) ?? 1;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-6">
+    <div className="mx-auto max-w-5xl space-y-8 p-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Link href="/admin" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <Link href="/admin" className="rounded-lg text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 dark:hover:text-slate-200">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </Link>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Analytics</h1>
+            <h1 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Analytics</h1>
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Usage metrics and AI performance</p>
         </div>
@@ -68,7 +68,7 @@ export function AnalyticsClient() {
               key={p.value}
               type="button"
               onClick={() => setPeriod(p.value)}
-              className={["rounded-md px-3 py-1.5 text-xs font-medium transition-colors", period === p.value ? "bg-primary-600 text-white" : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"].join(" ")}
+              className={["rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400", period === p.value ? "bg-primary-600 text-white" : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"].join(" ")}
             >
               {p.label}
             </button>
@@ -76,7 +76,14 @@ export function AnalyticsClient() {
         </div>
       </div>
 
-      {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">{error}</div>}
+      {error && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950 dark:text-red-400">
+          <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>

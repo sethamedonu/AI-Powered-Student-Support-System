@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
@@ -9,8 +12,7 @@ interface ChatMessageProps {
   userInitials: string;
 }
 
-// Custom renderers so we control exactly how each markdown element looks
-// without needing @tailwindcss/typography
+// Custom renderers — no @tailwindcss/typography dependency needed
 const markdownComponents: Components = {
   p: ({ children }) => (
     <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>
@@ -40,7 +42,6 @@ const markdownComponents: Components = {
     <h3 className="mb-1 mt-2 text-sm font-semibold text-slate-800 dark:text-slate-200 first:mt-0">{children}</h3>
   ),
   code: ({ children, className }) => {
-    // Fenced code block (has a language class)
     const isBlock = className?.includes("language-");
     if (isBlock) {
       return (
@@ -49,7 +50,6 @@ const markdownComponents: Components = {
         </pre>
       );
     }
-    // Inline code
     return (
       <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-mono text-primary-700 dark:bg-slate-700 dark:text-primary-300">
         {children}
@@ -74,18 +74,51 @@ const markdownComponents: Components = {
   ),
 };
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard not available
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label="Copy message"
+      className="flex h-6 w-6 items-center justify-center rounded-md text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 dark:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+    >
+      {copied ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 export function ChatMessage({ message, userInitials }: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={`group flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {/* Avatar */}
       <div
         className={[
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold",
           isUser
             ? "bg-primary-600 text-white shadow-sm shadow-primary-600/30"
-            : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
+            : "bg-gradient-to-br from-indigo-100 to-purple-100 text-primary-600 dark:from-indigo-900/60 dark:to-purple-900/60 dark:text-primary-300",
         ].join(" ")}
       >
         {isUser ? (
@@ -109,9 +142,7 @@ export function ChatMessage({ message, userInitials }: ChatMessageProps) {
       </div>
 
       {/* Bubble */}
-      <div
-        className={`max-w-[75%] space-y-1.5 flex flex-col ${isUser ? "items-end" : "items-start"}`}
-      >
+      <div className={`max-w-[78%] space-y-1.5 flex flex-col ${isUser ? "items-end" : "items-start"}`}>
         <div
           className={[
             "rounded-2xl px-4 py-3 text-sm leading-relaxed",
@@ -121,10 +152,8 @@ export function ChatMessage({ message, userInitials }: ChatMessageProps) {
           ].join(" ")}
         >
           {isUser ? (
-            // User messages: plain text
-            <span>{message.content}</span>
+            <p className="whitespace-pre-wrap">{message.content}</p>
           ) : (
-            // AI responses: render Markdown (bold, italic, lists, code, links)
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={markdownComponents}
@@ -134,10 +163,8 @@ export function ChatMessage({ message, userInitials }: ChatMessageProps) {
           )}
         </div>
 
-        {/* Meta */}
-        <div
-          className={`flex items-center gap-2 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}
-        >
+        {/* Meta row */}
+        <div className={`flex items-center gap-2 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
           <span className="text-xs text-slate-400">{timeAgo(message.createdAt)}</span>
           {!isUser && message.model && (
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-400 dark:bg-slate-800">
@@ -148,6 +175,9 @@ export function ChatMessage({ message, userInitials }: ChatMessageProps) {
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
               cached
             </span>
+          )}
+          {!isUser && (
+            <CopyButton text={message.content} />
           )}
         </div>
       </div>

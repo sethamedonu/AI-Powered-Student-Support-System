@@ -1,6 +1,6 @@
 {
   "name": "ai-powered-student-support-system-frontend",
-  "description": "AI-Powered Student Support System — Next.js frontend",
+  "description": "AI-Powered Student Support System — Next.js frontend with knowledge base seeding",
   "version": "0.1.0",
   "private": true,
   "scripts": {

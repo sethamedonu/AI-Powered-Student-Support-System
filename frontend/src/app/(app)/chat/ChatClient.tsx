@@ -39,7 +39,7 @@ export function ChatClient({
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | undefined>(
-    searchParams.get("id") ?? undefined,
+    searchParams?.get("id") ?? undefined,
   );
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -53,7 +53,7 @@ export function ChatClient({
   // Load conversation messages on mount if conversationId exists
   useEffect(() => {
     const loadConversation = async () => {
-      const id = searchParams.get("id");
+      const id = searchParams?.get("id");
       if (!id) return;
 
       setIsLoading(true);

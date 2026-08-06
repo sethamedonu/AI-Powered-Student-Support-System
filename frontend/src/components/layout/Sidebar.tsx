@@ -64,7 +64,7 @@ export function Sidebar({ user, isDark }: SidebarProps) {
   const isActive = (href: string) =>
     href === "/dashboard"
       ? pathname === "/dashboard" || pathname === "/dashboard/"
-      : pathname.startsWith(href);
+      : pathname?.startsWith(href) ?? false;
 
   const navLink = (item: NavItem) => {
     const active = isActive(item.href);

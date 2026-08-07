@@ -47,9 +47,18 @@ async function bundleFunction(fn) {
     logLevel: 'warning',
   });
 
-  // Zip the bundle
+  // Zip the bundle (Windows compatible)
   const zipPath = path.join(outDir, `${fn.name}.zip`);
-  execSync(`cd "${path.join(outDir, fn.name)}" && zip -r "${zipPath}" .`);
+  const funcDir = path.join(outDir, fn.name);
+  
+  try {
+    // Try Unix zip first
+    execSync(`cd "${funcDir}" && zip -r "${zipPath}" .`, { stdio: 'ignore' });
+  } catch {
+    // Fallback to PowerShell for Windows
+    const psCmd = `Compress-Archive -Path "${funcDir}\\*" -DestinationPath "${zipPath}" -Force`;
+    execSync(`powershell -Command "${psCmd}"`, { stdio: 'inherit' });
+  }
 
   console.log(`✅ Bundled: ${fn.name} → ${zipPath}`);
 }

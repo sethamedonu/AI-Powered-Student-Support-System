@@ -57,13 +57,13 @@ export class ChatService {
     
     // Bedrock requires the first message to be from 'user'
     // If history starts with 'assistant', remove messages until we find a 'user' message
-    while (conversationHistory.length > 0 && conversationHistory[0].role !== 'user') {
+    while (conversationHistory.length > 0 && conversationHistory[0]?.role !== 'user') {
       conversationHistory.shift();
     }
     
     logger.debug('Conversation history prepared', { 
       historyLength: conversationHistory.length,
-      firstRole: conversationHistory[0]?.role 
+      firstRole: conversationHistory[0]?.role ?? 'none'
     });
 
     // Process through AI orchestrator

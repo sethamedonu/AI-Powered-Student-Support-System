@@ -1,0 +1,17 @@
+{
+  "/page": "/",
+  "/_not-found/page": "/_not-found",
+  "/auth/register/page": "/auth/register",
+  "/auth/login/page": "/auth/login",
+  "/auth/forgot-password/page": "/auth/forgot-password",
+  "/auth/reset-password/page": "/auth/reset-password",
+  "/auth/verify/page": "/auth/verify",
+  "/(app)/admin/analytics/page": "/admin/analytics",
+  "/(app)/admin/page": "/admin",
+  "/(app)/conversations/page": "/conversations",
+  "/(app)/conversations/[conversationId]/page": "/conversations/[conversationId]",
+  "/(app)/dashboard/page": "/dashboard",
+  "/(app)/chat/page": "/chat",
+  "/(app)/profile/page": "/profile",
+  "/(app)/feedback/page": "/feedback"
+}

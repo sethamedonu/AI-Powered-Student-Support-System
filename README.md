@@ -47,6 +47,13 @@
 
 ## 🏗️ Architecture
 
+<p align="center">
+  <img
+    src="docs/architecture/AISSS-ARCHITECTURE.drawio.png"
+    alt="AI-Powered Student Support System Architecture"
+    width="1000"
+  />
+</p>
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                      Students / Admins                           │

@@ -33,10 +33,11 @@ export function AnalyticsClient() {
     setError("");
     try {
       setData(await adminApi.getAnalytics(p));
-    } catch (err: any) {
+    } catch (err) {
       console.error('Analytics API error:', err);
-      const msg = err.message || "Failed to load analytics data.";
-      setError(err.status === 401 ? "Unauthorized. Please log in as admin." : msg);
+      const msg = err instanceof Error ? err.message : "Failed to load analytics data.";
+      const status = err && typeof err === 'object' && 'status' in err ? (err as { status: number }).status : 0;
+      setError(status === 401 ? "Unauthorized. Please log in as admin." : msg);
     } finally {
       setLoading(false);
     }

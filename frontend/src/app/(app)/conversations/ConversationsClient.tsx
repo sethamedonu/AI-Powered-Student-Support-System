@@ -17,10 +17,11 @@ export function ConversationsClient() {
     conversationsApi
       .list(50)
       .then((r) => setConversations(r.items))
-      .catch((err: any) => {
+      .catch((err) => {
         console.error('Conversations API error:', err);
-        const msg = err.message || "Failed to load conversations.";
-        setError(err.status === 401 ? "Please log in to view conversations." : msg);
+        const msg = err instanceof Error ? err.message : "Failed to load conversations.";
+        const status = err && typeof err === 'object' && 'status' in err ? (err as { status: number }).status : 0;
+        setError(status === 401 ? "Please log in to view conversations." : msg);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -30,9 +31,10 @@ export function ConversationsClient() {
     try {
       await conversationsApi.delete(id);
       setConversations((prev) => prev.filter((c) => c.conversationId !== id));
-    } catch (err: any) {
+    } catch (err) {
       console.error('Delete conversation error:', err);
-      setError(err.message || "Failed to delete conversation.");
+      const msg = err instanceof Error ? err.message : "Failed to delete conversation.";
+      setError(msg);
     } finally {
       setDeletingId(null);
     }

@@ -78,3 +78,6 @@ docs/*.tmp
 ai_chat_*
 AiChat*
 .ai-chats/
+
+# Documentation archive
+docs-archive/

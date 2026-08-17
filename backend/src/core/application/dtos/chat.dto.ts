@@ -31,3 +31,5 @@ export interface SendMessageResponse {
   tokensUsed: number;
   latencyMs: number;
 }
+
+// Manual CI/CD pipeline test -- Testing all 4 pipelines (CI, Deploy, API Tests, E2E)

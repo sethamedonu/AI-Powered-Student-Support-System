@@ -32,7 +32,19 @@ jobs:
         run: npm install -g newman newman-reporter-htmlextra
 
       - name: Run API tests
+        env:
+          TEST_USER_EMAIL: ${{ secrets.E2E_TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
         run: |
+          # Inject secrets into environment file
+          jq --arg email "$TEST_USER_EMAIL" --arg password "$TEST_USER_PASSWORD" \
+            '.values |= map(
+              if .key == "TEST_EMAIL" then .value = $email
+              elif .key == "TEST_PASSWORD" then .value = $password
+              else . end
+            )' docs/api/environments/${{ github.event.inputs.environment || 'dev' }}.json > temp.json
+          mv temp.json docs/api/environments/${{ github.event.inputs.environment || 'dev' }}.json
+
           newman run docs/api/aisss-api-collection.json \
             --environment docs/api/environments/${{ github.event.inputs.environment || 'dev' }}.json \
             --reporters cli,htmlextra \

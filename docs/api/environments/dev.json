@@ -1,8 +1,8 @@
 {
   "name": "AISSS — Dev",
   "values": [
-    { "key": "BASE_URL", "value": "https://api-dev.yourdomain.com", "enabled": true },
-    { "key": "TEST_EMAIL", "value": "testuser@yourdomain.com", "enabled": true },
-    { "key": "TEST_PASSWORD", "value": "REPLACE_WITH_SECRET", "enabled": true }
+    { "key": "BASE_URL", "value": "https://3qealfb0oi.execute-api.us-east-1.amazonaws.com/dev", "enabled": true },
+    { "key": "TEST_EMAIL", "value": "INJECTED_FROM_SECRET", "enabled": true },
+    { "key": "TEST_PASSWORD", "value": "INJECTED_FROM_SECRET", "enabled": true }
   ]
 }
